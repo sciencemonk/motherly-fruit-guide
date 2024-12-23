@@ -1,22 +1,22 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PregnancyReportProps {
   dueDate: Date;
 }
 
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
-  // Calculate weeks based on due date
+  const [fruitImage, setFruitImage] = useState<string>("");
   const today = new Date();
   const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
   const weeksLeft = 40 - gestationalAge;
   const progressPercentage = (gestationalAge / 40) * 100;
 
-  // Determine trimester
   const trimester = gestationalAge <= 13 ? "First" : gestationalAge <= 26 ? "Second" : "Third";
   
-  // Map weeks to fruit sizes
   const getFruitSize = (weeks: number) => {
     const fruitSizes: { [key: number]: [string, string] } = {
       4: ["🫐", "blueberry"],
@@ -60,7 +60,6 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
     return fruitSizes[weeks] || ["🫘", "bean"];
   };
 
-  // Get development info based on weeks
   const getDevelopmentInfo = (weeks: number) => {
     const developments: { [key: number]: string } = {
       4: "Your baby's neural tube is developing into their brain and spinal cord.",
@@ -104,7 +103,6 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
     return developments[weeks] || "Your baby is developing new features every day!";
   };
 
-  // Get weekly tips based on trimester
   const getTrimesterTips = (trimester: string) => {
     const tips = {
       "First": [
@@ -129,6 +127,25 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
     return tips[trimester as keyof typeof tips] || [];
   };
 
+  useEffect(() => {
+    const generateFruitImage = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-fruit-image', {
+          body: { fruitName: getFruitSize(gestationalAge)[1] }
+        });
+
+        if (error) throw error;
+        if (data?.imageUrl) {
+          setFruitImage(data.imageUrl);
+        }
+      } catch (error) {
+        console.error('Error generating fruit image:', error);
+      }
+    };
+
+    generateFruitImage();
+  }, [gestationalAge]);
+
   const [fruitEmoji, fruitName] = getFruitSize(gestationalAge);
   const developmentInfo = getDevelopmentInfo(gestationalAge);
   const weeklyTips = getTrimesterTips(trimester);
@@ -145,7 +162,15 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <span className="text-6xl">{fruitEmoji}</span>
+            {fruitImage ? (
+              <img 
+                src={fruitImage} 
+                alt={`Baby size comparison to ${fruitName}`}
+                className="w-24 h-24 object-contain"
+              />
+            ) : (
+              <span className="text-6xl">{fruitEmoji}</span>
+            )}
             <div className="text-center">
               <p className="text-sage-700">Your baby is about the size of a</p>
               <p className="text-lg font-semibold text-sage-800">{fruitName}</p>
