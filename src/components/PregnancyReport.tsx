@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PregnancyReportProps {
   dueDate: Date;
@@ -30,19 +31,14 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   useEffect(() => {
     const fetchPregnancyInfo = async () => {
       try {
-        const response = await fetch("https://tjeukbooftbxulkgqljg.supabase.co/functions/v1/generate-pregnancy-report", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ gestationalAge }),
+        const { data, error } = await supabase.functions.invoke('generate-pregnancy-report', {
+          body: { gestationalAge }
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch pregnancy information");
+        if (error) {
+          throw error;
         }
 
-        const data = await response.json();
         setPregnancyInfo(data);
       } catch (error) {
         console.error("Error fetching pregnancy information:", error);
