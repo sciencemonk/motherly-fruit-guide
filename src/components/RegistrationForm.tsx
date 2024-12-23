@@ -17,10 +17,11 @@ export function RegistrationForm() {
 
   const sendWelcomeMessage = async (phoneNumber: string) => {
     try {
-      const response = await fetch("https://your-supabase-edge-function-url/send-welcome-sms", {
+      const response = await fetch("https://xyzcompany.supabase.co/functions/v1/send-welcome-sms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           to: phoneNumber,
