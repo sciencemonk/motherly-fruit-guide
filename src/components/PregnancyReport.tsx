@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
 import OpenAI from "openai";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PregnancyReportProps {
   dueDate: Date;
@@ -13,11 +14,6 @@ interface PregnancyInfo {
   development: string;
   tips: string[];
 }
-
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
 
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   const [pregnancyInfo, setPregnancyInfo] = useState<PregnancyInfo | null>(null);
@@ -36,6 +32,22 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   useEffect(() => {
     const fetchPregnancyInfo = async () => {
       try {
+        // Get OpenAI API key from Supabase
+        const { data: secretData, error: secretError } = await supabase
+          .from('secrets')
+          .select('value')
+          .eq('name', 'OPENAI_API_KEY')
+          .single();
+
+        if (secretError) {
+          throw new Error('Failed to retrieve OpenAI API key');
+        }
+
+        const openai = new OpenAI({
+          apiKey: secretData.value,
+          dangerouslyAllowBrowser: true
+        });
+
         const prompt = `You are a pregnancy expert assistant. Generate information about fetal development at week ${gestationalAge} of pregnancy. 
         Return the response in this exact JSON format:
         {
@@ -47,7 +59,7 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
 
         const completion = await openai.chat.completions.create({
           messages: [{ role: "user", content: prompt }],
-          model: "gpt-4-mini",
+          model: "gpt-4o-mini",
           response_format: { type: "json_object" }
         });
 
