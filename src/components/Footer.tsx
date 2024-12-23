@@ -43,7 +43,10 @@ const Footer = () => {
         <div className="text-center text-sm text-sage-600">
           <p>&copy; {new Date().getFullYear()} Mother Athena. All rights reserved.</p>
           <p className="mt-2">
-            Always consult with healthcare professionals for medical advice.
+            Mother Athena, powered by OpenAI, may generate information that is inaccurate or does not meet your needs. 
+            Mother Athena is not responsible for your use of any generated information, and such generated information will have no legal effect. 
+            The processing of your information is subject to Mother Athena's{" "}
+            <Link to="/privacy" className="text-sage-800 hover:underline">Privacy Notice</Link>.
           </p>
         </div>
       </div>
