@@ -75,47 +75,63 @@ export function RegistrationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 w-full">
+    <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md mx-auto">
       <div className="space-y-2">
-        <Label htmlFor="firstName">First Name</Label>
+        <Label htmlFor="firstName" className="text-sage-700 text-lg">First Name</Label>
         <Input
           id="firstName"
           placeholder="Enter your first name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          className="w-full bg-white/50 backdrop-blur-sm"
+          className="w-full bg-white/80 backdrop-blur-sm border-sage-200 focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
+        <Label htmlFor="phone" className="text-sage-700 text-lg">Phone Number</Label>
         <Input
           id="phone"
           type="tel"
           placeholder="(555) 555-5555"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full bg-white/50 backdrop-blur-sm"
+          className="w-full bg-white/80 backdrop-blur-sm border-sage-200 focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Due Date</Label>
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-3 flex justify-center">
-          <Calendar
-            mode="single"
-            selected={dueDate}
-            onSelect={setDueDate}
-            disabled={(date) => {
-              return date < today || date > maxDate;
-            }}
-            className="w-full max-w-[400px]"
-            initialFocus
-          />
+        <Label className="text-sage-700 text-lg">Due Date</Label>
+        <div className="flex justify-center">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-sage-200 w-full">
+            <Calendar
+              mode="single"
+              selected={dueDate}
+              onSelect={setDueDate}
+              disabled={(date) => date < today || date > maxDate}
+              className={cn(
+                "mx-auto",
+                "rounded-md",
+                "[&_.rdp-day_focus]:bg-sage-50",
+                "[&_.rdp-day_hover]:bg-sage-100",
+                "[&_.rdp-day_active]:bg-sage-500",
+                "[&_.rdp-day_active]:text-white",
+                "[&_.rdp-day_selected]:bg-sage-500",
+                "[&_.rdp-day_selected]:text-white",
+                "[&_.rdp-head_cell]:text-sage-600",
+                "[&_.rdp-caption_label]:text-sage-700",
+                "[&_.rdp-nav_button]:hover:bg-sage-100",
+                "[&_.rdp-nav_button]:active:bg-sage-200"
+              )}
+              initialFocus
+            />
+          </div>
         </div>
       </div>
 
-      <Button type="submit" className="w-full bg-sage-500 hover:bg-sage-600">
+      <Button 
+        type="submit" 
+        className="w-full bg-sage-500 hover:bg-sage-600 text-white font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+      >
         Start My Journey
       </Button>
     </form>
