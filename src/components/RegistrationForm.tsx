@@ -12,11 +12,13 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PregnancyReport } from "./PregnancyReport";
 
 export function RegistrationForm() {
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,7 +38,13 @@ export function RegistrationForm() {
       title: "Welcome to Mother Athens!",
       description: "We're excited to be part of your pregnancy journey.",
     });
+    
+    setIsSubmitted(true);
   };
+
+  if (isSubmitted && dueDate) {
+    return <PregnancyReport dueDate={dueDate} />;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
