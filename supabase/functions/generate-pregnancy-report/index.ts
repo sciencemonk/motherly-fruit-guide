@@ -63,14 +63,16 @@ serve(async (req) => {
     
     Keep the response concise and supportive. Use evidence-based information.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('Sending request to OpenAI with prompt:', prompt);
+
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4-mini',
         messages: [
           { role: 'system', content: 'You are a knowledgeable and caring pregnancy expert.' },
           { role: 'user', content: prompt }
@@ -78,7 +80,20 @@ serve(async (req) => {
       }),
     });
 
-    const data = await response.json();
+    if (!openAIResponse.ok) {
+      const errorData = await openAIResponse.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    }
+
+    const data = await openAIResponse.json();
+    console.log('OpenAI API response:', data);
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected OpenAI API response structure:', data);
+      throw new Error('Invalid response from OpenAI API');
+    }
+
     const report = data.choices[0].message.content;
     
     // Split the report into development and tips sections
@@ -90,23 +105,27 @@ serve(async (req) => {
           .map(tip => tip.trim())
       : [];
 
+    const response = {
+      development: development.trim(),
+      tips,
+      fruitSize: fruitSizes[gestationalAge] || "watermelon 🍉"
+    };
+
+    console.log('Sending response:', response);
+
+    return new Response(JSON.stringify(response), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('Error in generate-pregnancy-report function:', error);
     return new Response(
-      JSON.stringify({
-        development: development.trim(),
-        tips,
-        fruitSize: fruitSizes[gestationalAge] || "watermelon 🍉"
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
-  } catch (error) {
-    console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }
