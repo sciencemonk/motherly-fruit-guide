@@ -102,7 +102,7 @@ export function RegistrationForm() {
       <div className="space-y-2">
         <Label className="text-sage-700 text-lg">Due Date</Label>
         <div className="flex justify-center">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-sage-200 w-full">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-sage-200">
             <Calendar
               mode="single"
               selected={dueDate}
