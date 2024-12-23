@@ -8,7 +8,11 @@ const Navbar = () => {
       <div className="container flex h-16 items-center">
         <div className="mr-8 flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
-            <span role="img" aria-label="Mother Athens Logo" className="text-4xl">👶</span>
+            <img 
+              src="/lovable-uploads/6301462c-0c02-4ad5-b07a-13888e2f0268.png" 
+              alt="Mother Athens Logo" 
+              className="w-10 h-10 rounded-full object-cover"
+            />
             <span className="hidden font-bold sm:inline-block">Mother Athens</span>
           </Link>
         </div>
