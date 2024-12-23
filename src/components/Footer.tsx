@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-sage-800">Mother Athens</h3>
+            <h3 className="text-lg font-semibold mb-4 text-sage-800">Mother Athena</h3>
             <p className="text-sage-600 text-sm">
               Supporting mothers through their pregnancy journey with evidence-based guidance.
             </p>
@@ -35,13 +35,13 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-sage-800">Contact</h3>
             <p className="text-sage-600 text-sm">
-              Questions? Reach out to us at support@motherathens.com
+              Questions? Reach out to us at support@motherathena.com
             </p>
           </div>
         </div>
         <Separator className="my-8" />
         <div className="text-center text-sm text-sage-600">
-          <p>&copy; {new Date().getFullYear()} Mother Athens. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Mother Athena. All rights reserved.</p>
           <p className="mt-2">
             Always consult with healthcare professionals for medical advice.
           </p>

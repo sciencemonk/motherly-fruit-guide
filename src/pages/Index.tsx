@@ -27,10 +27,10 @@ const Index = () => {
             <div className="mt-16 space-y-8 text-left">
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
                 <h3 className="text-xl font-semibold text-sage-700 mb-4">
-                  How Mother Athens Works
+                  How Mother Athena Works
                 </h3>
                 <p className="text-sage-700 mb-4">
-                  Mother Athens brings you 24/7 support and guidance throughout your pregnancy journey through personalized text messages. 
+                  Mother Athena brings you 24/7 support and guidance throughout your pregnancy journey through personalized text messages. 
                   Our platform provides weekly updates about your baby's development, answers to your questions, and expert guidance 
                   right at your fingertips.
                 </p>
@@ -41,9 +41,9 @@ const Index = () => {
                   Our Story
                 </h3>
                 <p className="text-sage-700 mb-6">
-                  Mother Athens was born from a personal journey. Our founder, an engineer, and his wife were expecting 
+                  Mother Athena was born from a personal journey. Our founder, an engineer, and his wife were expecting 
                   their first child when they realized the need for better pregnancy support. Combining his technical expertise 
-                  with their firsthand experience of pregnancy, he created Mother Athens to ensure that all expecting parents 
+                  with their firsthand experience of pregnancy, he created Mother Athena to ensure that all expecting parents 
                   have access to reliable information and support whenever they need it.
                 </p>
               </div>
@@ -60,7 +60,7 @@ const Index = () => {
           
           <div className="mt-16 text-center text-sm text-sage-600">
             <p className="max-w-2xl mx-auto">
-              * Mother Athens is not a replacement for professional medical care.
+              * Mother Athena is not a replacement for professional medical care.
               Always consult with your healthcare provider for medical advice and
               emergency situations.
             </p>

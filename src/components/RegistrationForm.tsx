@@ -25,7 +25,7 @@ export function RegistrationForm() {
         },
         body: JSON.stringify({
           to: phoneNumber,
-          message: "Hello! I'm Mother Athens. Each week I'll text you an update about your current stage or pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!"
+          message: "Hello! I'm Mother Athena. Each week I'll text you an update about your current stage or pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!"
         }),
       });
 
@@ -58,7 +58,7 @@ export function RegistrationForm() {
     await sendWelcomeMessage(phone);
 
     toast({
-      title: "Welcome to Mother Athens!",
+      title: "Welcome to Mother Athena!",
       description: "We're excited to be part of your pregnancy journey.",
     });
     
