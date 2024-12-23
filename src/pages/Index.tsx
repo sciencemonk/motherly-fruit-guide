@@ -15,14 +15,10 @@ const Index = () => {
             </h1>
             <p className="text-lg text-sage-700 mb-8">
               Your trusted companion throughout your pregnancy journey. Get weekly updates,
-              expert guidance, and peace of mind.
+              expert guidance, and peace of mind. Free of charge.
             </p>
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
-              <h2 className="text-2xl font-semibold text-sage-700 mb-6">
-                Free Pregnancy Updates and 24/7 Answers to Your Pressing Questions
-              </h2>
-              <RegistrationForm />
-            </div>
+            
+            <RegistrationForm />
 
             <div className="mt-16 space-y-8 text-left">
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
