@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import OpenAI from "openai";
 
 interface PregnancyReportProps {
   dueDate: Date;
@@ -13,6 +13,11 @@ interface PregnancyInfo {
   development: string;
   tips: string[];
 }
+
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
+});
 
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   const [pregnancyInfo, setPregnancyInfo] = useState<PregnancyInfo | null>(null);
@@ -31,17 +36,23 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   useEffect(() => {
     const fetchPregnancyInfo = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('generate-pregnancy-report', {
-          body: { gestationalAge },
+        const prompt = `You are a pregnancy expert assistant. Generate information about fetal development at week ${gestationalAge} of pregnancy. 
+        Return the response in this exact JSON format:
+        {
+          "fruitSize": "name of a fruit that matches the size of the baby this week",
+          "development": "one sentence about key development this week",
+          "tips": ["3 health tips for this week"]
+        }
+        Keep the fruit size simple and commonly known. Keep development and tips concise and evidence-based.`;
+
+        const completion = await openai.chat.completions.create({
+          messages: [{ role: "user", content: prompt }],
+          model: "gpt-4-mini",
+          response_format: { type: "json_object" }
         });
 
-        if (error) {
-          console.error('Error fetching pregnancy info:', error);
-          setError('Failed to load pregnancy information');
-          return;
-        }
-
-        setPregnancyInfo(data);
+        const response = JSON.parse(completion.choices[0].message.content);
+        setPregnancyInfo(response);
       } catch (err) {
         console.error('Error:', err);
         setError('Failed to load pregnancy information');
