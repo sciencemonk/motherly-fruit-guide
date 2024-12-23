@@ -1,12 +1,23 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PregnancyReportProps {
   dueDate: Date;
 }
 
+interface PregnancyInfo {
+  development: string;
+  tips: string[];
+  fruitSize: string;
+}
+
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
+  const [pregnancyInfo, setPregnancyInfo] = useState<PregnancyInfo | null>(null);
+  const { toast } = useToast();
+  
   // Calculate weeks based on due date
   const today = new Date();
   const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
@@ -15,9 +26,52 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
 
   // Determine trimester
   const trimester = gestationalAge <= 13 ? "First" : gestationalAge <= 26 ? "Second" : "Third";
-  
-  // Simple fruit size comparison based on weeks
-  const fruitSize = "🍌";
+
+  useEffect(() => {
+    const fetchPregnancyInfo = async () => {
+      try {
+        const response = await fetch("https://tjeukbooftbxulkgqljg.supabase.co/functions/v1/generate-pregnancy-report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ gestationalAge }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch pregnancy information");
+        }
+
+        const data = await response.json();
+        setPregnancyInfo(data);
+      } catch (error) {
+        console.error("Error fetching pregnancy information:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load pregnancy information. Please try again later.",
+        });
+      }
+    };
+
+    fetchPregnancyInfo();
+  }, [gestationalAge, toast]);
+
+  if (!pregnancyInfo) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-white/80 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex justify-center items-center h-40">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const [fruitName, fruitEmoji] = pregnancyInfo.fruitSize.split(/(\s*[^\w\s]\s*)/).filter(Boolean);
 
   return (
     <div className="space-y-6">
@@ -31,10 +85,10 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <span className="text-6xl">{fruitSize}</span>
+            <span className="text-6xl">{fruitEmoji}</span>
             <div className="text-center">
               <p className="text-sage-700">Your baby is about the size of a</p>
-              <p className="text-lg font-semibold text-sage-800">banana</p>
+              <p className="text-lg font-semibold text-sage-800">{fruitName}</p>
               <p className="text-sage-600 text-sm">{weeksLeft} weeks until your due date</p>
             </div>
           </div>
@@ -57,7 +111,7 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sage-700">
-            Your baby's hearing is developing. They can now hear your voice and other sounds from the outside world.
+            {pregnancyInfo.development}
           </p>
         </CardContent>
       </Card>
@@ -71,15 +125,15 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-3 text-sage-700">
-            <li>• Monitor your blood pressure</li>
-            <li>• Do Kegel exercises</li>
-            <li>• Stay active but don't overexert</li>
+            {pregnancyInfo.tips.map((tip, index) => (
+              <li key={index}>• {tip}</li>
+            ))}
           </ul>
         </CardContent>
       </Card>
 
       <div className="text-center text-sage-600 p-4 bg-sage-50 rounded-lg">
-        <p>📱 Check your phone for a welcome message from Mother Athens!</p>
+        <p>📱 Check your phone for a welcome message from Mother Athena!</p>
       </div>
     </div>
   );
