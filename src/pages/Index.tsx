@@ -7,10 +7,10 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow bg-gradient-to-b from-cream to-sage-100">
-        <div className="container px-4 py-16 mx-auto">
+        <div className="container px-4 py-16 mx-auto flex items-center justify-center">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
-              Welcome to Mother Athens
+              Your Best Friend During Pregnancy
             </h1>
             <p className="text-lg text-sage-700 mb-8">
               Your trusted companion throughout your pregnancy journey. Get weekly updates,
