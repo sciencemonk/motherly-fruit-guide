@@ -5,7 +5,7 @@ import { ContactForm } from "@/components/ContactForm"
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-cream">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
       <main className="flex-grow pt-16">
         <div className="container px-4 py-16 mx-auto">
