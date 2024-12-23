@@ -1,12 +1,24 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PregnancyReportProps {
   dueDate: Date;
 }
 
+interface PregnancyInfo {
+  fruitSize: string;
+  development: string;
+  tips: string[];
+}
+
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
+  const [pregnancyInfo, setPregnancyInfo] = useState<PregnancyInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   // Calculate weeks based on due date
   const today = new Date();
   const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
@@ -15,9 +27,78 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
 
   // Determine trimester
   const trimester = gestationalAge <= 13 ? "First" : gestationalAge <= 26 ? "Second" : "Third";
-  
-  // Simple fruit size comparison based on weeks
-  const fruitSize = "🍌";
+
+  useEffect(() => {
+    const fetchPregnancyInfo = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-pregnancy-report', {
+          body: { gestationalAge },
+        });
+
+        if (error) {
+          console.error('Error fetching pregnancy info:', error);
+          setError('Failed to load pregnancy information');
+          return;
+        }
+
+        setPregnancyInfo(data);
+      } catch (err) {
+        console.error('Error:', err);
+        setError('Failed to load pregnancy information');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPregnancyInfo();
+  }, [gestationalAge]);
+
+  // Map fruit names to emoji
+  const fruitEmoji: { [key: string]: string } = {
+    poppy: "🌺",
+    sesame: "🌱",
+    blueberry: "🫐",
+    raspberry: "🫐",
+    strawberry: "🍓",
+    lime: "🍋",
+    lemon: "🍋",
+    orange: "🍊",
+    apple: "🍎",
+    avocado: "🥑",
+    mango: "🥭",
+    banana: "🍌",
+    papaya: "🍈",
+    coconut: "🥥",
+    pineapple: "🍍",
+    cantaloupe: "🍈",
+    lettuce: "🥬",
+    cauliflower: "🥦",
+    cabbage: "🥬",
+    squash: "🎃",
+    pumpkin: "🎃",
+    watermelon: "🍉",
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-sage-600">Loading your pregnancy report...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8 text-red-500">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  const getFruitEmoji = (fruitName: string) => {
+    const lowercaseFruit = fruitName.toLowerCase();
+    return fruitEmoji[lowercaseFruit] || "🍎"; // Default to apple if fruit not found
+  };
 
   return (
     <div className="space-y-6">
@@ -31,10 +112,10 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <span className="text-6xl">{fruitSize}</span>
+            <span className="text-6xl">{pregnancyInfo ? getFruitEmoji(pregnancyInfo.fruitSize) : "🍎"}</span>
             <div className="text-center">
               <p className="text-sage-700">Your baby is about the size of a</p>
-              <p className="text-lg font-semibold text-sage-800">banana</p>
+              <p className="text-lg font-semibold text-sage-800">{pregnancyInfo?.fruitSize || "apple"}</p>
               <p className="text-sage-600 text-sm">{weeksLeft} weeks until your due date</p>
             </div>
           </div>
@@ -57,7 +138,7 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sage-700">
-            Your baby's hearing is developing. They can now hear your voice and other sounds from the outside world.
+            {pregnancyInfo?.development || "Loading development information..."}
           </p>
         </CardContent>
       </Card>
@@ -71,15 +152,15 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-3 text-sage-700">
-            <li>• Monitor your blood pressure</li>
-            <li>• Do Kegel exercises</li>
-            <li>• Stay active but don't overexert</li>
+            {pregnancyInfo?.tips.map((tip, index) => (
+              <li key={index}>• {tip}</li>
+            ))}
           </ul>
         </CardContent>
       </Card>
 
       <div className="text-center text-sage-600 p-4 bg-sage-50 rounded-lg">
-        <p>📱 Check your phone for a welcome message from Mother Athens!</p>
+        <p>📱 Check your phone for a welcome message from Mother Athena!</p>
       </div>
     </div>
   );
