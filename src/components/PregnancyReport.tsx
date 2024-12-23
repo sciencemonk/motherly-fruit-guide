@@ -35,11 +35,11 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         // Get OpenAI API key from Supabase
         const { data: secretData, error: secretError } = await supabase
           .from('secrets')
-          .select('value')
+          .select('*')
           .eq('name', 'OPENAI_API_KEY')
           .single();
 
-        if (secretError) {
+        if (secretError || !secretData) {
           throw new Error('Failed to retrieve OpenAI API key');
         }
 
