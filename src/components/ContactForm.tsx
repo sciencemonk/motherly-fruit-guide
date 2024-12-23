@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export const ContactForm = () => {
   const [name, setName] = useState("")
@@ -14,6 +15,7 @@ export const ContactForm = () => {
     toast({
       title: "Message sent!",
       description: "We'll get back to you as soon as possible.",
+      duration: 5000,
     })
     setName("")
     setEmail("")
@@ -21,35 +23,35 @@ export const ContactForm = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-sage-700">
+        <label htmlFor="name" className="block text-sm font-medium text-sage-700 mb-2">
           Name
         </label>
-        <input
+        <Input
           type="text"
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1 block w-full rounded-md border-sage-300 shadow-sm focus:border-sage-500 focus:ring-sage-500"
+          className="w-full px-4 py-2 text-base"
           required
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-sage-700">
+        <label htmlFor="email" className="block text-sm font-medium text-sage-700 mb-2">
           Email
         </label>
-        <input
+        <Input
           type="email"
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-md border-sage-300 shadow-sm focus:border-sage-500 focus:ring-sage-500"
+          className="w-full px-4 py-2 text-base"
           required
         />
       </div>
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-sage-700">
+        <label htmlFor="message" className="block text-sm font-medium text-sage-700 mb-2">
           Message
         </label>
         <textarea
@@ -57,11 +59,11 @@ export const ContactForm = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
-          className="mt-1 block w-full rounded-md border-sage-300 shadow-sm focus:border-sage-500 focus:ring-sage-500"
+          className="w-full px-4 py-2 text-base rounded-md border border-input bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           required
         />
       </div>
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full bg-sage-600 hover:bg-sage-700 text-white font-medium py-3">
         Send Message
       </Button>
     </form>
