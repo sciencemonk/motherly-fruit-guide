@@ -5,9 +5,9 @@ import { ContactForm } from "@/components/ContactForm"
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-cream">
       <Navbar />
-      <main className="flex-grow bg-gradient-to-b from-cream to-sage-100">
+      <main className="flex-grow pt-16">
         <div className="container px-4 py-16 mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">

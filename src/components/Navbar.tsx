@@ -10,7 +10,7 @@ const Navbar = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
   return (
-    <div className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <div className="fixed top-0 left-0 right-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
@@ -26,6 +26,7 @@ const Navbar = () => {
         <Button
           variant="outline"
           onClick={() => setIsLoginModalOpen(true)}
+          className="hover:bg-sage-50"
         >
           Log In
         </Button>
