@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { format, addMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PregnancyReport } from "./PregnancyReport";
 
@@ -14,6 +14,11 @@ export function RegistrationForm() {
   const [dueDate, setDueDate] = useState<Date>();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+
+  // Calculate the date range for due date selection
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day
+  const maxDate = addMonths(today, 9);
 
   const sendWelcomeMessage = async (phoneNumber: string) => {
     try {
@@ -101,6 +106,9 @@ export function RegistrationForm() {
             mode="single"
             selected={dueDate}
             onSelect={setDueDate}
+            disabled={(date) => {
+              return date < today || date > maxDate;
+            }}
             className="w-full max-w-[400px]"
             initialFocus
           />
