@@ -1,12 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, Brain, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PregnancyReportProps {
   dueDate: Date;
 }
 
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
+  const [fruitImage, setFruitImage] = useState<string>("");
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
+
   // Calculate weeks based on due date
   const today = new Date();
   const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
@@ -133,6 +138,28 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   const developmentInfo = getDevelopmentInfo(gestationalAge);
   const weeklyTips = getTrimesterTips(trimester);
 
+  useEffect(() => {
+    const generateFruitImage = async () => {
+      try {
+        setIsLoadingImage(true);
+        const { data, error } = await supabase.functions.invoke('generate-fruit-image', {
+          body: { fruitName }
+        });
+
+        if (error) throw error;
+        if (data.imageURL) {
+          setFruitImage(data.imageURL);
+        }
+      } catch (error) {
+        console.error('Error generating fruit image:', error);
+      } finally {
+        setIsLoadingImage(false);
+      }
+    };
+
+    generateFruitImage();
+  }, [fruitName]);
+
   return (
     <div className="space-y-6">
       <Card className="bg-white/80 backdrop-blur-sm">
@@ -145,7 +172,13 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <span className="text-6xl">{fruitEmoji}</span>
+            {isLoadingImage ? (
+              <div className="w-24 h-24 animate-pulse bg-gray-200 rounded-full" />
+            ) : fruitImage ? (
+              <img src={fruitImage} alt={fruitName} className="w-24 h-24 object-contain" />
+            ) : (
+              <span className="text-6xl">{fruitEmoji}</span>
+            )}
             <div className="text-center">
               <p className="text-sage-700">Your baby is about the size of a</p>
               <p className="text-lg font-semibold text-sage-800">{fruitName}</p>
