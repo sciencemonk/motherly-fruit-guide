@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          first_name: string | null
+          id: string
+          is_premium: boolean | null
+          last_sign_in: string | null
+          phone_number: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          first_name?: string | null
+          id?: string
+          is_premium?: boolean | null
+          last_sign_in?: string | null
+          phone_number: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          first_name?: string | null
+          id?: string
+          is_premium?: boolean | null
+          last_sign_in?: string | null
+          phone_number?: string
+        }
+        Relationships: []
+      }
       secrets: {
         Row: {
           created_at: string
@@ -27,6 +57,33 @@ export type Database = {
           id?: string
           name?: string
           value?: string
+        }
+        Relationships: []
+      }
+      verification_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          phone_number: string
+          used: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone_number: string
+          used?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone_number?: string
+          used?: boolean | null
         }
         Relationships: []
       }

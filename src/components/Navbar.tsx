@@ -1,12 +1,13 @@
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Menu } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { LoginModal } from "./LoginModal"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { supabase } from "@/integrations/supabase/client"
 
 const Navbar = () => {
   const isMobile = useIsMobile()
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
   return (
     <div className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -22,63 +23,17 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {isMobile ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="p-2">
-              <Menu className="h-6 w-6" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Link to="/#mission" className="w-full" onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('mission')?.scrollIntoView({ behavior: 'smooth' });
-                }}>
-                  Our Mission
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link to="/#contact" className="w-full" onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                }}>
-                  Contact
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Our Mission</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-6 w-[400px]">
-                    <div className="grid gap-1">
-                      <h4 className="font-medium leading-none">Our Mission</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Supporting mothers through their pregnancy journey with evidence-based guidance.
-                      </p>
-                    </div>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link 
-                  to="/#contact" 
-                  className={cn(
-                    "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-                  )}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Contact
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        )}
+        <Button
+          variant="outline"
+          onClick={() => setIsLoginModalOpen(true)}
+        >
+          Log In
+        </Button>
+
+        <LoginModal
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+        />
       </div>
     </div>
   )
