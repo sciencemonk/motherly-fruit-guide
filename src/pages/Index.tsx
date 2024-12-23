@@ -41,7 +41,7 @@ const Index = () => {
                   Our Story
                 </h3>
                 <p className="text-sage-700 mb-6">
-                  Mother Athens was born from a personal journey. Our founder, a software engineer, and his wife were expecting 
+                  Mother Athens was born from a personal journey. Our founder, an engineer, and his wife were expecting 
                   their first child when they realized the need for better pregnancy support. Combining his technical expertise 
                   with their firsthand experience of pregnancy, he created Mother Athens to ensure that all expecting parents 
                   have access to reliable information and support whenever they need it.
