@@ -7,6 +7,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, addMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PregnancyReport } from "./PregnancyReport";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 export function RegistrationForm() {
   const [firstName, setFirstName] = useState("");
@@ -89,13 +91,12 @@ export function RegistrationForm() {
 
       <div className="space-y-2">
         <Label htmlFor="phone" className="text-sage-700 text-lg">Phone Number</Label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="(555) 555-5555"
+        <PhoneInput
+          international
+          defaultCountry="US"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full bg-white/80 backdrop-blur-sm border-sage-200 focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
+          onChange={setPhone as (value: string | undefined) => void}
+          className="w-full bg-white/80 backdrop-blur-sm border border-sage-200 rounded-md focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
         />
       </div>
 

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -18,9 +20,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   const handleSendCode = async () => {
     try {
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber}`
       const { error } = await supabase.functions.invoke('send-verification-code', {
-        body: { phone_number: formattedPhone }
+        body: { phone_number: phoneNumber }
       })
 
       if (error) throw error
@@ -41,10 +42,9 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   const handleVerifyCode = async () => {
     try {
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber}`
       const { data, error } = await supabase.functions.invoke('verify-code', {
         body: { 
-          phone_number: formattedPhone,
+          phone_number: phoneNumber,
           code: verificationCode
         }
       })
@@ -53,7 +53,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
       if (data?.token) {
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          phone: formattedPhone,
+          phone: phoneNumber,
           password: data.token
         })
 
@@ -84,10 +84,12 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           {!isVerifying ? (
             <>
               <div className="grid gap-2">
-                <Input
-                  placeholder="Phone number"
+                <PhoneInput
+                  international
+                  defaultCountry="US"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={setPhoneNumber as (value: string | undefined) => void}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <Button onClick={handleSendCode}>Send Code</Button>
               </div>
