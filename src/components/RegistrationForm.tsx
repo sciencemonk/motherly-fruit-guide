@@ -15,7 +15,33 @@ export function RegistrationForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const sendWelcomeMessage = async (phoneNumber: string) => {
+    try {
+      const response = await fetch("https://your-supabase-edge-function-url/send-welcome-sms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: phoneNumber,
+          message: "Hello! I'm Mother Athens. Each week I'll text you an update about your current stage or pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!"
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send welcome message");
+      }
+    } catch (error) {
+      console.error("Error sending welcome message:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to send welcome message",
+        description: "Don't worry, you're still registered! We'll try to reach you again soon.",
+      });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!firstName || !phone || !dueDate) {
@@ -27,7 +53,9 @@ export function RegistrationForm() {
       return;
     }
 
-    // Here we would handle the registration logic
+    // Send welcome message
+    await sendWelcomeMessage(phone);
+
     toast({
       title: "Welcome to Mother Athens!",
       description: "We're excited to be part of your pregnancy journey.",
