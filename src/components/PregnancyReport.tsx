@@ -15,6 +15,13 @@ interface PregnancyInfo {
   tips: string[];
 }
 
+interface Secret {
+  id: string;
+  name: string;
+  value: string;
+  created_at: string;
+}
+
 export function PregnancyReport({ dueDate }: PregnancyReportProps) {
   const [pregnancyInfo, setPregnancyInfo] = useState<PregnancyInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +51,7 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
         }
 
         const openai = new OpenAI({
-          apiKey: secretData.value,
+          apiKey: (secretData as Secret).value,
           dangerouslyAllowBrowser: true
         });
 
@@ -59,7 +66,7 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
 
         const completion = await openai.chat.completions.create({
           messages: [{ role: "user", content: prompt }],
-          model: "gpt-4o-mini",
+          model: "gpt-4",
           response_format: { type: "json_object" }
         });
 
