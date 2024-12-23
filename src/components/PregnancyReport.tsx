@@ -30,9 +30,9 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
           <CardTitle className="text-3xl text-sage-800">{trimester} Trimester</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl">{fruitSize}</span>
-            <div className="flex-1">
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-6xl">{fruitSize}</span>
+            <div className="text-center">
               <p className="text-sage-700">Your baby is about the size of a</p>
               <p className="text-lg font-semibold text-sage-800">banana</p>
               <p className="text-sage-600 text-sm">{weeksLeft} weeks until your due date</p>
