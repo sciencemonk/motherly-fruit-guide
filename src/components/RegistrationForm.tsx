@@ -47,7 +47,7 @@ export function RegistrationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full">
       <div className="space-y-2">
         <Label htmlFor="firstName">First Name</Label>
         <Input
@@ -55,7 +55,7 @@ export function RegistrationForm() {
           placeholder="Enter your first name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          className="bg-white/50 backdrop-blur-sm"
+          className="w-full bg-white/50 backdrop-blur-sm"
         />
       </div>
 
@@ -67,7 +67,7 @@ export function RegistrationForm() {
           placeholder="(555) 555-5555"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="bg-white/50 backdrop-blur-sm"
+          className="w-full bg-white/50 backdrop-blur-sm"
         />
       </div>
 
