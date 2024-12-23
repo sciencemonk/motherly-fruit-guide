@@ -19,7 +19,7 @@ const Index = () => {
             </p>
             <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg">
               <h2 className="text-2xl font-semibold text-sage-700 mb-6">
-                Get Free Pregnancy Updates and 24/7 Answers to Your Pressing Questions
+                Free Pregnancy Updates and 24/7 Answers to Your Pressing Questions
               </h2>
               <RegistrationForm />
             </div>
