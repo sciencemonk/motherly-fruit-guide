@@ -67,12 +67,12 @@ export function RegistrationForm() {
 
       <div className="space-y-2">
         <Label>Due Date</Label>
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-3">
+        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-3 flex justify-center">
           <Calendar
             mode="single"
             selected={dueDate}
             onSelect={setDueDate}
-            className="mx-auto"
+            className="w-full max-w-[400px]"
             initialFocus
           />
         </div>
