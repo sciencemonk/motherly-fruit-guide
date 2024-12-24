@@ -73,7 +73,7 @@ export function RegistrationForm() {
   };
 
   if (isSubmitted && dueDate) {
-    return <PregnancyReport dueDate={dueDate} />;
+    return <PregnancyReport dueDate={dueDate} firstName={firstName} />;
   }
 
   return (

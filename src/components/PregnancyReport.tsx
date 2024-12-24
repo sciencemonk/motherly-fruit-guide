@@ -1,17 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Brain, Heart } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { BabySizeCard } from "./pregnancy-report/BabySizeCard";
+import { DevelopmentCard } from "./pregnancy-report/DevelopmentCard";
+import { WeeklyTipsCard } from "./pregnancy-report/WeeklyTipsCard";
+import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 
 interface PregnancyReportProps {
   dueDate: Date;
+  firstName?: string;
 }
 
-export function PregnancyReport({ dueDate }: PregnancyReportProps) {
-  const [fruitImage, setFruitImage] = useState<string>("");
-  const [isLoadingImage, setIsLoadingImage] = useState(false);
-
+export function PregnancyReport({ dueDate, firstName = "" }: PregnancyReportProps) {
   // Calculate weeks based on due date
   const today = new Date();
   const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
@@ -20,50 +18,6 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
 
   // Determine trimester
   const trimester = gestationalAge <= 13 ? "First" : gestationalAge <= 26 ? "Second" : "Third";
-  
-  // Map weeks to fruit sizes
-  const getFruitSize = (weeks: number) => {
-    const fruitSizes: { [key: number]: [string, string] } = {
-      4: ["🫐", "blueberry"],
-      5: ["🫘", "bean"],
-      6: ["🫐", "large blueberry"],
-      7: ["🫒", "olive"],
-      8: ["🍇", "grape"],
-      9: ["🫐", "prune"],
-      10: ["🍊", "kumquat"],
-      11: ["🥝", "kiwi"],
-      12: ["🍊", "lime"],
-      13: ["🍋", "lemon"],
-      14: ["🍎", "apple"],
-      15: ["🥑", "avocado"],
-      16: ["🥝", "large avocado"],
-      17: ["🥭", "mango"],
-      18: ["🍐", "bell pepper"],
-      19: ["🥒", "cucumber"],
-      20: ["🍌", "banana"],
-      21: ["🥖", "carrot"],
-      22: ["🥕", "large carrot"],
-      23: ["🍆", "eggplant"],
-      24: ["🌽", "corn"],
-      25: ["🥦", "cauliflower"],
-      26: ["🥬", "lettuce"],
-      27: ["🥦", "large cauliflower"],
-      28: ["🍍", "pineapple"],
-      29: ["🎾", "butternut squash"],
-      30: ["🥥", "coconut"],
-      31: ["🍈", "honeydew melon"],
-      32: ["🎃", "squash"],
-      33: ["🍈", "cantaloupe"],
-      34: ["🍐", "large pineapple"],
-      35: ["🎃", "honeydew"],
-      36: ["🍈", "papaya"],
-      37: ["🎃", "winter melon"],
-      38: ["🍉", "small watermelon"],
-      39: ["🎃", "pumpkin"],
-      40: ["🍉", "watermelon"]
-    };
-    return fruitSizes[weeks] || ["🫘", "bean"];
-  };
 
   // Get development info based on weeks
   const getDevelopmentInfo = (weeks: number) => {
@@ -134,100 +88,23 @@ export function PregnancyReport({ dueDate }: PregnancyReportProps) {
     return tips[trimester as keyof typeof tips] || [];
   };
 
-  const [fruitEmoji, fruitName] = getFruitSize(gestationalAge);
   const developmentInfo = getDevelopmentInfo(gestationalAge);
   const weeklyTips = getTrimesterTips(trimester);
 
-  useEffect(() => {
-    const generateFruitImage = async () => {
-      try {
-        setIsLoadingImage(true);
-        const { data, error } = await supabase.functions.invoke('generate-fruit-image', {
-          body: { fruitName }
-        });
-
-        if (error) throw error;
-        if (data.imageURL) {
-          setFruitImage(data.imageURL);
-        }
-      } catch (error) {
-        console.error('Error generating fruit image:', error);
-      } finally {
-        setIsLoadingImage(false);
-      }
-    };
-
-    generateFruitImage();
-  }, [fruitName]);
-
   return (
     <div className="space-y-6">
-      <Card className="bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <div className="flex items-center gap-2 text-peach-500">
-            <CalendarDays className="h-5 w-5" />
-            <span className="text-sm font-medium">Week {gestationalAge}</span>
-          </div>
-          <CardTitle className="text-3xl text-sage-800">{trimester} Trimester</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col items-center gap-4">
-            {isLoadingImage ? (
-              <div className="w-24 h-24 animate-pulse bg-gray-200 rounded-full" />
-            ) : fruitImage ? (
-              <img src={fruitImage} alt={fruitName} className="w-24 h-24 object-contain" />
-            ) : (
-              <span className="text-6xl">{fruitEmoji}</span>
-            )}
-            <div className="text-center">
-              <p className="text-sage-700">Your baby is about the size of a</p>
-              <p className="text-lg font-semibold text-sage-800">{fruitName}</p>
-              <p className="text-sage-600 text-sm">{weeksLeft} weeks until your due date</p>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Progress value={progressPercentage} className="h-2" />
-            <p className="text-center text-sage-600 text-sm">
-              {Math.round(progressPercentage)}% of your pregnancy journey completed
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <WelcomeMessage firstName={firstName} />
+      
+      <BabySizeCard
+        gestationalAge={gestationalAge}
+        weeksLeft={weeksLeft}
+        progressPercentage={progressPercentage}
+        trimester={trimester}
+      />
 
-      <Card className="bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <div className="flex items-center gap-2 text-peach-500">
-            <Brain className="h-5 w-5" />
-            <CardTitle>Key Development</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sage-700">
-            {developmentInfo}
-          </p>
-        </CardContent>
-      </Card>
+      <DevelopmentCard developmentInfo={developmentInfo} />
 
-      <Card className="bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <div className="flex items-center gap-2 text-peach-500">
-            <Heart className="h-5 w-5" />
-            <CardTitle>Tips for This Week</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-3 text-sage-700">
-            {weeklyTips.map((tip, index) => (
-              <li key={index}>• {tip}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      <div className="text-center text-sage-600 p-4 bg-sage-50 rounded-lg">
-        <p>📱 Check your phone for a welcome message from Mother Athena!</p>
-      </div>
+      <WeeklyTipsCard weeklyTips={weeklyTips} />
     </div>
   );
 }
