@@ -9,7 +9,7 @@ export function WeeklyTipsCard({ weeklyTips }: WeeklyTipsCardProps) {
   return (
     <Card className="bg-white/80 backdrop-blur-sm">
       <CardHeader>
-        <div className="flex items-center gap-2 text-peach-500">
+        <div className="flex items-center justify-center gap-2 text-peach-500">
           <Heart className="h-5 w-5" />
           <CardTitle>Tips for This Week</CardTitle>
         </div>
