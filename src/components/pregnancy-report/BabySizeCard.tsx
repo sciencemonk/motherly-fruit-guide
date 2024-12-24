@@ -94,11 +94,11 @@ export function BabySizeCard({ gestationalAge, weeksLeft, progressPercentage, tr
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center gap-4">
           {isLoadingImage ? (
-            <div className="w-32 h-32 animate-pulse bg-gray-200 rounded-full" />
+            <div className="w-96 h-96 animate-pulse bg-gray-200 rounded-full" />
           ) : fruitImage ? (
-            <img src={fruitImage} alt={fruitName} className="w-32 h-32 object-contain" />
+            <img src={fruitImage} alt={fruitName} className="w-96 h-96 object-contain" />
           ) : (
-            <span className="text-7xl">{fruitEmoji}</span>
+            <span className="text-[9rem]">{fruitEmoji}</span>
           )}
           <div className="text-center">
             <p className="text-sage-700">Your baby is about the size of a</p>
