@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { PregnancyReport } from "./PregnancyReport";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { supabase } from "@/integrations/supabase/client";
 
 export function RegistrationForm() {
   const [firstName, setFirstName] = useState("");
@@ -24,21 +25,18 @@ export function RegistrationForm() {
 
   const sendWelcomeMessage = async (phoneNumber: string) => {
     try {
-      const response = await fetch("https://xyzcompany.supabase.co/functions/v1/send-welcome-sms", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
+        body: {
           to: phoneNumber,
           message: "Hello! I'm Mother Athena. Each week I'll text you an update about your current stage or pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!"
-        }),
+        }
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to send welcome message");
+      if (error) {
+        throw error;
       }
+
+      console.log('Welcome message sent successfully:', data);
     } catch (error) {
       console.error("Error sending welcome message:", error);
       toast({
@@ -137,4 +135,3 @@ export function RegistrationForm() {
       </Button>
     </form>
   );
-}

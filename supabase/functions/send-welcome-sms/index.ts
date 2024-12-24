@@ -15,19 +15,25 @@ serve(async (req) => {
   try {
     const { to, message } = await req.json()
 
-    // Initialize Twilio client with environment variables
-    const client = new Twilio(
-      Deno.env.get('TWILIO_ACCOUNT_SID'),
-      Deno.env.get('TWILIO_AUTH_TOKEN')
-    )
+    console.log('Attempting to send SMS to:', to)
 
-    console.log(`Attempting to send SMS to ${to}`)
+    // Initialize Twilio client with environment variables
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+
+    if (!accountSid || !authToken || !fromNumber) {
+      console.error('Missing Twilio credentials')
+      throw new Error('Missing Twilio credentials')
+    }
+
+    const client = new Twilio(accountSid, authToken)
 
     // Send the message
     const twilioMessage = await client.messages.create({
       body: message,
       to: to,
-      from: Deno.env.get('TWILIO_PHONE_NUMBER'),
+      from: fromNumber,
     })
 
     console.log(`Message sent successfully. SID: ${twilioMessage.sid}`)
