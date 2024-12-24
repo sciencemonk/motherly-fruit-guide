@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
+import { Link } from "react-router-dom"
 
 interface LoginModalProps {
   isOpen: boolean
@@ -79,6 +80,9 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Log in to Mother Athena</DialogTitle>
+          <p className="text-sm text-sage-600 mt-2">
+            Don't have an account? <Link to="/" onClick={onClose} className="text-sage-800 hover:underline">Click here</Link> to get started.
+          </p>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {!isVerifying ? (
