@@ -135,3 +135,4 @@ export function RegistrationForm() {
       </Button>
     </form>
   );
+}
