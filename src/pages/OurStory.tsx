@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { Heart, Baby, Flower, LeafGreen } from "lucide-react"
+import { Heart, Baby, Flower, LeafyGreen } from "lucide-react"
 
 const OurStory = () => {
   return (
@@ -35,7 +35,7 @@ const OurStory = () => {
               </div>
 
               <div className="flex flex-col items-center text-center p-6 bg-cream/50 rounded-lg">
-                <LeafGreen className="w-12 h-12 text-sage-500 mb-4" />
+                <LeafyGreen className="w-12 h-12 text-sage-500 mb-4" />
                 <p className="text-sage-700 max-w-2xl">
                   Today, Mother Athena continues to grow and evolve, guided by feedback from our community of parents 
                   and healthcare professionals. We're committed to providing evidence-based guidance and emotional support 
