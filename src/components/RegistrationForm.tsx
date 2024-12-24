@@ -131,7 +131,7 @@ export function RegistrationForm() {
 
       <Button 
         type="submit" 
-        className="w-full bg-sage-200 hover:bg-sage-300 text-sage-800 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+        className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
       >
         Start My Journey
       </Button>
