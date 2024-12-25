@@ -5,16 +5,28 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      status: 204, 
+      headers: corsHeaders 
+    });
   }
 
   try {
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed');
+    }
+
     const { to, message } = await req.json()
+
+    if (!to || !message) {
+      throw new Error('Missing required fields: to and message');
+    }
 
     console.log('Attempting to send welcome SMS to:', to)
 
@@ -41,10 +53,16 @@ serve(async (req) => {
     console.log(`Welcome message sent successfully. SID: ${twilioMessage.sid}`)
 
     return new Response(
-      JSON.stringify({ success: true, messageId: twilioMessage.sid }),
+      JSON.stringify({ 
+        success: true, 
+        messageId: twilioMessage.sid 
+      }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
+        status: 200,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
       }
     )
 
@@ -52,10 +70,16 @@ serve(async (req) => {
     console.error('Error sending welcome SMS:', error)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Internal server error',
+        details: error.toString()
+      }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: error.status || 500,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
       }
     )
   }
