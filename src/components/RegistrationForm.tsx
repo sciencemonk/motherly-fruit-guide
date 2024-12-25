@@ -63,16 +63,42 @@ export function RegistrationForm() {
     }
 
     try {
-      // Store user data in profiles table
-      const { error: profileError } = await supabase
+      // First check if profile exists
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
-        .insert([
-          {
-            phone_number: phone,
+        .select('phone_number')
+        .eq('phone_number', phone)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 means no rows returned
+        console.error('Error checking existing profile:', fetchError);
+        throw fetchError;
+      }
+
+      let profileError;
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
             first_name: firstName,
             due_date: dueDate.toISOString().split('T')[0],
-          }
-        ]);
+          })
+          .eq('phone_number', phone);
+        profileError = updateError;
+      } else {
+        // Insert new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              phone_number: phone,
+              first_name: firstName,
+              due_date: dueDate.toISOString().split('T')[0],
+            }
+          ]);
+        profileError = insertError;
+      }
 
       if (profileError) {
         console.error('Error storing profile:', profileError);
