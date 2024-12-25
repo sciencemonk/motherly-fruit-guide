@@ -68,7 +68,7 @@ export function RegistrationForm() {
         .from('profiles')
         .select('phone_number')
         .eq('phone_number', phone)
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
+        .maybeSingle();
 
       if (fetchError) {
         console.error('Error checking existing profile:', fetchError);
