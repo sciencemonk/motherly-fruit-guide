@@ -16,6 +16,7 @@ export function RegistrationForm() {
   const [phone, setPhone] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   // Calculate the date range for due date selection
@@ -40,13 +41,10 @@ export function RegistrationForm() {
       }
 
       console.log('Welcome message response:', data);
+      return data;
     } catch (error) {
       console.error("Error sending welcome message:", error);
-      toast({
-        variant: "destructive",
-        title: "Failed to send welcome message",
-        description: "Don't worry, you're still registered! We'll try to reach you again soon.",
-      });
+      throw error;
     }
   };
 
@@ -61,6 +59,8 @@ export function RegistrationForm() {
       });
       return;
     }
+
+    setIsLoading(true);
 
     try {
       // First check if profile exists
@@ -121,6 +121,8 @@ export function RegistrationForm() {
         title: "Registration error",
         description: "There was a problem with your registration. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -138,6 +140,7 @@ export function RegistrationForm() {
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           className="w-full bg-white/80 backdrop-blur-sm border-sage-200 focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
+          disabled={isLoading}
         />
       </div>
 
@@ -149,6 +152,7 @@ export function RegistrationForm() {
           value={phone}
           onChange={setPhone as (value: string | undefined) => void}
           className="flex h-10 w-full rounded-md border border-sage-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-sage-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isLoading}
         />
       </div>
 
@@ -160,7 +164,7 @@ export function RegistrationForm() {
               mode="single"
               selected={dueDate}
               onSelect={setDueDate}
-              disabled={(date) => date < today || date > maxDate}
+              disabled={(date) => date < today || date > maxDate || isLoading}
               className={cn(
                 "mx-auto",
                 "rounded-md",
@@ -184,8 +188,9 @@ export function RegistrationForm() {
       <Button 
         type="submit" 
         className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+        disabled={isLoading}
       >
-        Start My Journey
+        {isLoading ? "Processing..." : "Start My Journey"}
       </Button>
     </form>
   );
