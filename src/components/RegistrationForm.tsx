@@ -68,9 +68,9 @@ export function RegistrationForm() {
         .from('profiles')
         .select('phone_number')
         .eq('phone_number', phone)
-        .single();
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
-      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 means no rows returned
+      if (fetchError) {
         console.error('Error checking existing profile:', fetchError);
         throw fetchError;
       }
