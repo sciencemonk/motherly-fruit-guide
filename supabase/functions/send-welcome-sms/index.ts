@@ -16,7 +16,7 @@ serve(async (req) => {
   try {
     const { to, message } = await req.json()
 
-    console.log('Attempting to send SMS to:', to)
+    console.log('Attempting to send welcome SMS to:', to)
 
     // Initialize Twilio client with environment variables
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
@@ -31,13 +31,14 @@ serve(async (req) => {
     const client = new Twilio(accountSid, authToken)
 
     // Send the message
+    console.log('Sending welcome message...')
     const twilioMessage = await client.messages.create({
       body: message,
       to: to,
       from: fromNumber,
     })
 
-    console.log(`Message sent successfully. SID: ${twilioMessage.sid}`)
+    console.log(`Welcome message sent successfully. SID: ${twilioMessage.sid}`)
 
     return new Response(
       JSON.stringify({ success: true, messageId: twilioMessage.sid }),
@@ -48,7 +49,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error sending SMS:', error)
+    console.error('Error sending welcome SMS:', error)
     
     return new Response(
       JSON.stringify({ error: error.message }),

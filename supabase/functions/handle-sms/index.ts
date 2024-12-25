@@ -19,10 +19,12 @@ serve(async (req) => {
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAIApiKey) {
+      console.error('OpenAI API key not found in environment variables')
       throw new Error('Missing OpenAI API key')
     }
 
     // Get AI response
+    console.log('Fetching response from OpenAI...')
     const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -30,7 +32,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
@@ -48,7 +50,14 @@ serve(async (req) => {
       }),
     })
 
+    if (!aiResponse.ok) {
+      const errorData = await aiResponse.json()
+      console.error('OpenAI API error:', errorData)
+      throw new Error('Failed to get AI response')
+    }
+
     const aiData = await aiResponse.json()
+    console.log('Received OpenAI response')
     const responseMessage = aiData.choices[0].message.content
 
     // Send response via Twilio
@@ -57,11 +66,13 @@ serve(async (req) => {
     const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
 
     if (!accountSid || !authToken || !fromNumber) {
+      console.error('Missing Twilio credentials')
       throw new Error('Missing Twilio credentials')
     }
 
     const client = new Twilio(accountSid, authToken)
     
+    console.log('Sending Twilio message...')
     const twilioMessage = await client.messages.create({
       body: responseMessage,
       to: From,
