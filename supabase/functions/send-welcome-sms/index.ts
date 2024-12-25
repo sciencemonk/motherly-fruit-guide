@@ -62,7 +62,6 @@ serve(async (req) => {
         messageId: twilioMessage.sid 
       }),
       { 
-        status: 200,
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json' 
