@@ -63,6 +63,17 @@ export function RegistrationForm() {
     }
 
     try {
+      // First sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        phone,
+        password: crypto.randomUUID() // Generate a random password since we're using phone auth
+      });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+
       // Store user data in profiles table
       const { error: profileError } = await supabase
         .from('profiles')
