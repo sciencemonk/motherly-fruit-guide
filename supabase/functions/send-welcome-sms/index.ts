@@ -28,29 +28,33 @@ serve(async (req) => {
       throw new Error('Missing required fields: to and message');
     }
 
-    console.log('Attempting to send welcome SMS to:', to)
+    console.log('Attempting to send welcome SMS to:', to);
 
     // Initialize Twilio client with environment variables
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
     if (!accountSid || !authToken || !fromNumber) {
-      console.error('Missing Twilio credentials')
-      throw new Error('Missing Twilio credentials')
+      console.error('Missing Twilio credentials');
+      throw new Error('Missing Twilio credentials');
     }
 
-    const client = new Twilio(accountSid, authToken)
+    const client = new Twilio(accountSid, authToken);
+
+    // Ensure the phone number is in E.164 format
+    const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`;
+    console.log('Formatted phone number:', formattedPhone);
 
     // Send the message
-    console.log('Sending welcome message...')
+    console.log('Sending welcome message...');
     const twilioMessage = await client.messages.create({
       body: message,
-      to: to,
+      to: formattedPhone,
       from: fromNumber,
-    })
+    });
 
-    console.log(`Welcome message sent successfully. SID: ${twilioMessage.sid}`)
+    console.log(`Welcome message sent successfully. SID: ${twilioMessage.sid}`);
 
     return new Response(
       JSON.stringify({ 
@@ -64,10 +68,10 @@ serve(async (req) => {
           'Content-Type': 'application/json' 
         } 
       }
-    )
+    );
 
   } catch (error) {
-    console.error('Error sending welcome SMS:', error)
+    console.error('Error sending welcome SMS:', error);
     
     return new Response(
       JSON.stringify({ 
@@ -81,6 +85,6 @@ serve(async (req) => {
           'Content-Type': 'application/json' 
         } 
       }
-    )
+    );
   }
-})
+});

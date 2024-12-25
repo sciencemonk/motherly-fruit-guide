@@ -25,18 +25,21 @@ export function RegistrationForm() {
 
   const sendWelcomeMessage = async (phoneNumber: string) => {
     try {
+      console.log('Sending welcome message to:', phoneNumber);
+      
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
           to: phoneNumber,
-          message: "Hello! I'm Mother Athena. Each week I'll text you an update about your current stage or pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!"
+          message: `Hello ${firstName}! I'm Mother Athena. Each week I'll text you an update about your current stage of pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!`
         }
       });
 
       if (error) {
+        console.error('Supabase function error:', error);
         throw error;
       }
 
-      console.log('Welcome message sent successfully:', data);
+      console.log('Welcome message response:', data);
     } catch (error) {
       console.error("Error sending welcome message:", error);
       toast({
@@ -59,15 +62,40 @@ export function RegistrationForm() {
       return;
     }
 
-    // Send welcome message
-    await sendWelcomeMessage(phone);
+    try {
+      // Store user data in profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            phone_number: phone,
+            first_name: firstName,
+            due_date: dueDate.toISOString().split('T')[0],
+          }
+        ]);
 
-    toast({
-      title: "Welcome to Mother Athena!",
-      description: "We're excited to be part of your pregnancy journey.",
-    });
-    
-    setIsSubmitted(true);
+      if (profileError) {
+        console.error('Error storing profile:', profileError);
+        throw profileError;
+      }
+
+      // Send welcome message
+      await sendWelcomeMessage(phone);
+
+      toast({
+        title: "Welcome to Mother Athena!",
+        description: "We're excited to be part of your pregnancy journey.",
+      });
+      
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        variant: "destructive",
+        title: "Registration error",
+        description: "There was a problem with your registration. Please try again.",
+      });
+    }
   };
 
   if (isSubmitted && dueDate) {
