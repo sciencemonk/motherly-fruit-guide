@@ -43,10 +43,11 @@ serve(async (req) => {
     // Initialize Twilio client
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
     
-    if (!accountSid || !authToken) {
-      console.error('Missing Twilio credentials')
-      throw new Error('Twilio configuration error')
+    if (!accountSid || !authToken || !twilioNumber) {
+      console.error('Missing Twilio configuration')
+      throw new Error('Twilio configuration incomplete')
     }
 
     const twilioClient = new Twilio(accountSid, authToken)
@@ -68,23 +69,23 @@ serve(async (req) => {
     console.log('Stored verification code, sending SMS...')
 
     // Send SMS
-    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
-    if (!twilioNumber) {
-      throw new Error('Twilio phone number not configured')
+    try {
+      await twilioClient.messages.create({
+        body: `Your Mother Athena verification code is: ${code}`,
+        to: phone_number,
+        from: twilioNumber,
+      })
+
+      console.log('SMS sent successfully')
+
+      return new Response(
+        JSON.stringify({ message: 'Verification code sent' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (twilioError) {
+      console.error('Twilio error:', twilioError)
+      throw new Error(`Failed to send SMS: ${twilioError.message}`)
     }
-
-    await twilioClient.messages.create({
-      body: `Your Mother Athena verification code is: ${code}`,
-      to: phone_number,
-      from: twilioNumber,
-    })
-
-    console.log('SMS sent successfully')
-
-    return new Response(
-      JSON.stringify({ message: 'Verification code sent' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
   } catch (error) {
     console.error('Error in send-verification-code:', error)
     
