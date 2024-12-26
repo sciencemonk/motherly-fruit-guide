@@ -10,6 +10,7 @@ import { PregnancyReport } from "./PregnancyReport";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function RegistrationForm() {
   const [firstName, setFirstName] = useState("");
@@ -17,6 +18,7 @@ export function RegistrationForm() {
   const [dueDate, setDueDate] = useState<Date>();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const { toast } = useToast();
 
   // Calculate the date range for due date selection
@@ -56,6 +58,15 @@ export function RegistrationForm() {
         variant: "destructive",
         title: "Please fill in all fields",
         description: "We need this information to support you during your pregnancy journey.",
+      });
+      return;
+    }
+
+    if (!smsConsent) {
+      toast({
+        variant: "destructive",
+        title: "SMS Consent Required",
+        description: "Please agree to receive text messages to continue.",
       });
       return;
     }
@@ -183,6 +194,21 @@ export function RegistrationForm() {
             />
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="sms-consent" 
+          checked={smsConsent}
+          onCheckedChange={(checked) => setSmsConsent(checked as boolean)}
+          disabled={isLoading}
+        />
+        <label
+          htmlFor="sms-consent"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sage-700"
+        >
+          I agree to receive text messages from Mother Athena to answer my pregnancy questions!
+        </label>
       </div>
 
       <Button 
