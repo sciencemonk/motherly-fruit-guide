@@ -9,31 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          phone_number: string
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          phone_number: string
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          phone_number?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_profile"
+            columns: ["phone_number"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["phone_number"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          chat_credits: number
           created_at: string
           due_date: string | null
           first_name: string | null
           id: string
           is_premium: boolean | null
+          last_credits_reset: string | null
           last_sign_in: string | null
           phone_number: string
         }
         Insert: {
+          chat_credits?: number
           created_at?: string
           due_date?: string | null
           first_name?: string | null
           id?: string
           is_premium?: boolean | null
+          last_credits_reset?: string | null
           last_sign_in?: string | null
           phone_number: string
         }
         Update: {
+          chat_credits?: number
           created_at?: string
           due_date?: string | null
           first_name?: string | null
           id?: string
           is_premium?: boolean | null
+          last_credits_reset?: string | null
           last_sign_in?: string | null
           phone_number?: string
         }
@@ -92,7 +130,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reset_monthly_credits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
