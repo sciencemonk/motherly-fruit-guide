@@ -21,8 +21,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-sage-600 hover:text-sage-800 text-sm">
-                  About Us
+                <Link to="/privacy" className="text-sage-600 hover:text-sage-800 text-sm">
+                  Privacy Notice
                 </Link>
               </li>
               <li>
