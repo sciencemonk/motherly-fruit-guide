@@ -70,7 +70,7 @@ export function RegistrationForm() {
     setIsLoading(true);
 
     try {
-      // First check if profile exists using maybeSingle() instead of single()
+      // First check if profile exists
       const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('phone_number')
@@ -86,13 +86,13 @@ export function RegistrationForm() {
         toast({
           variant: "destructive",
           title: "Phone number already registered",
-          description: "This phone number is already registered. Please reach out to support if you need assistance.",
+          description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
         });
         setIsLoading(false);
         return;
       }
 
-      // Insert new profile
+      // Insert new profile if phone number doesn't exist
       const { error: insertError } = await supabase
         .from('profiles')
         .insert([
@@ -104,6 +104,16 @@ export function RegistrationForm() {
         ]);
 
       if (insertError) {
+        // Double-check for race condition where profile might have been created between our check and insert
+        if (insertError.code === '23505') { // Unique constraint violation
+          toast({
+            variant: "destructive",
+            title: "Phone number already registered",
+            description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
+          });
+          setIsLoading(false);
+          return;
+        }
         console.error('Error storing profile:', insertError);
         throw insertError;
       }
