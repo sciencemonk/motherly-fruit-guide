@@ -41,10 +41,15 @@ serve(async (req) => {
     console.log('Generating code for:', phone_number)
 
     // Initialize Twilio client
-    const twilioClient = new Twilio(
-      Deno.env.get('TWILIO_ACCOUNT_SID'),
-      Deno.env.get('TWILIO_AUTH_TOKEN')
-    )
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+    
+    if (!accountSid || !authToken) {
+      console.error('Missing Twilio credentials')
+      throw new Error('Twilio configuration error')
+    }
+
+    const twilioClient = new Twilio(accountSid, authToken)
 
     // Store the verification code
     const { error: dbError } = await supabaseClient
@@ -63,10 +68,15 @@ serve(async (req) => {
     console.log('Stored verification code, sending SMS...')
 
     // Send SMS
+    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+    if (!twilioNumber) {
+      throw new Error('Twilio phone number not configured')
+    }
+
     await twilioClient.messages.create({
       body: `Your Mother Athena verification code is: ${code}`,
       to: phone_number,
-      from: Deno.env.get('TWILIO_PHONE_NUMBER'),
+      from: twilioNumber,
     })
 
     console.log('SMS sent successfully')
@@ -79,9 +89,12 @@ serve(async (req) => {
     console.error('Error in send-verification-code:', error)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Failed to send verification code. Please try again.' 
+      }),
       { 
-        status: 400, 
+        status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
