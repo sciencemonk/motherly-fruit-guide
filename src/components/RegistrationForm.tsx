@@ -1,16 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar } from "@/components/ui/calendar";
-import { format, addMonths } from "date-fns";
-import { cn } from "@/lib/utils";
+import { addMonths } from "date-fns";
 import { PregnancyReport } from "./PregnancyReport";
-import PhoneInput from 'react-phone-number-input';
-import 'react-phone-number-input/style.css';
 import { supabase } from "@/integrations/supabase/client";
-import { Checkbox } from "@/components/ui/checkbox";
+import { FormFields } from "./registration/FormFields";
+import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 
 export function RegistrationForm() {
   const [firstName, setFirstName] = useState("");
@@ -20,6 +15,7 @@ export function RegistrationForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
   const { toast } = useToast();
+  const reportRef = useRef<HTMLDivElement>(null);
 
   // Calculate the date range for due date selection
   const today = new Date();
@@ -125,6 +121,11 @@ export function RegistrationForm() {
       });
       
       setIsSubmitted(true);
+      
+      // Scroll to the report section after a short delay to ensure it's rendered
+      setTimeout(() => {
+        reportRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -137,87 +138,41 @@ export function RegistrationForm() {
     }
   };
 
-  if (isSubmitted && dueDate) {
-    return <PregnancyReport dueDate={dueDate} firstName={firstName} />;
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md mx-auto">
-      <div className="space-y-2">
-        <Label htmlFor="firstName" className="text-sage-700 text-lg">First Name</Label>
-        <Input
-          id="firstName"
-          placeholder="Enter your first name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          className="w-full bg-white/80 backdrop-blur-sm border-sage-200 focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
-          disabled={isLoading}
+    <div>
+      <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md mx-auto">
+        <FormFields
+          firstName={firstName}
+          setFirstName={setFirstName}
+          phone={phone}
+          setPhone={setPhone}
+          dueDate={dueDate}
+          setDueDate={setDueDate}
+          today={today}
+          maxDate={maxDate}
+          isLoading={isLoading}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone" className="text-sage-700 text-lg">Phone Number</Label>
-        <PhoneInput
-          international
-          defaultCountry="US"
-          value={phone}
-          onChange={setPhone as (value: string | undefined) => void}
-          className="flex h-10 w-full rounded-md border border-sage-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-sage-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={isLoading}
+        <ConsentCheckbox
+          smsConsent={smsConsent}
+          setSmsConsent={setSmsConsent}
+          isLoading={isLoading}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label className="text-sage-700 text-lg">Due Date</Label>
-        <div className="flex justify-center">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-sage-200">
-            <Calendar
-              mode="single"
-              selected={dueDate}
-              onSelect={setDueDate}
-              disabled={(date) => date < today || date > maxDate || isLoading}
-              className={cn(
-                "mx-auto",
-                "rounded-md",
-                "[&_.rdp-day_focus]:bg-sage-50",
-                "[&_.rdp-day_hover]:bg-sage-100",
-                "[&_.rdp-day_active]:bg-sage-500",
-                "[&_.rdp-day_active]:text-white",
-                "[&_.rdp-day_selected]:bg-sage-500",
-                "[&_.rdp-day_selected]:text-white",
-                "[&_.rdp-head_cell]:text-sage-600",
-                "[&_.rdp-caption_label]:text-sage-700",
-                "[&_.rdp-nav_button]:hover:bg-sage-100",
-                "[&_.rdp-nav_button]:active:bg-sage-200"
-              )}
-              initialFocus
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="sms-consent" 
-          checked={smsConsent}
-          onCheckedChange={(checked) => setSmsConsent(checked as boolean)}
+        <Button 
+          type="submit" 
+          className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
           disabled={isLoading}
-        />
-        <label
-          htmlFor="sms-consent"
-          className="text-xs whitespace-nowrap peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sage-700"
         >
-          I agree to receive text messages from Mother Athena to answer my pregnancy questions!
-        </label>
-      </div>
+          {isLoading ? "Processing..." : "Start My Journey"}
+        </Button>
+      </form>
 
-      <Button 
-        type="submit" 
-        className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
-        disabled={isLoading}
-      >
-        {isLoading ? "Processing..." : "Start My Journey"}
-      </Button>
-    </form>
+      {isSubmitted && dueDate && (
+        <div ref={reportRef}>
+          <PregnancyReport dueDate={dueDate} firstName={firstName} />
+        </div>
+      )}
+    </div>
   );
 }
