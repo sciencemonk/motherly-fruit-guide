@@ -8,7 +8,7 @@ interface ConsentCheckboxProps {
 
 export function ConsentCheckbox({ smsConsent, setSmsConsent, isLoading }: ConsentCheckboxProps) {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center justify-center space-x-2">
       <Checkbox 
         id="sms-consent" 
         checked={smsConsent}
