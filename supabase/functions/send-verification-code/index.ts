@@ -17,6 +17,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting verification code process')
+    
     // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -27,18 +29,22 @@ serve(async (req) => {
     const { phone_number } = await req.json()
     
     if (!phone_number) {
+      console.error('No phone number provided')
       return new Response(
         JSON.stringify({ error: 'Phone number is required' }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
+
+    console.log('Generating verification code for:', phone_number)
 
     // Generate verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString()
     const expiresAt = new Date()
     expiresAt.setMinutes(expiresAt.getMinutes() + 10)
-
-    console.log('Generating code for:', phone_number)
 
     // Initialize Twilio client
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
@@ -47,52 +53,79 @@ serve(async (req) => {
     
     if (!accountSid || !authToken || !twilioNumber) {
       console.error('Missing Twilio configuration')
-      throw new Error('Twilio configuration incomplete')
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    const twilioClient = new Twilio(accountSid, authToken)
-
-    // Store the verification code
-    const { error: dbError } = await supabaseClient
-      .from('verification_codes')
-      .insert({
-        phone_number,
-        code,
-        expires_at: expiresAt.toISOString(),
-      })
-
-    if (dbError) {
-      console.error('Database error:', dbError)
-      throw dbError
-    }
-
-    console.log('Stored verification code, sending SMS...')
-
-    // Send SMS
+    // Store the verification code first
     try {
+      const { error: dbError } = await supabaseClient
+        .from('verification_codes')
+        .insert({
+          phone_number,
+          code,
+          expires_at: expiresAt.toISOString(),
+        })
+
+      if (dbError) {
+        console.error('Database error:', dbError)
+        throw dbError
+      }
+      
+      console.log('Verification code stored successfully')
+    } catch (dbError) {
+      console.error('Error storing verification code:', dbError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to store verification code' }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    // Send SMS using Twilio
+    try {
+      const twilioClient = new Twilio(accountSid, authToken)
       await twilioClient.messages.create({
         body: `Your Mother Athena verification code is: ${code}`,
         to: phone_number,
         from: twilioNumber,
       })
-
+      
       console.log('SMS sent successfully')
 
       return new Response(
-        JSON.stringify({ message: 'Verification code sent' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ message: 'Verification code sent successfully' }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     } catch (twilioError) {
       console.error('Twilio error:', twilioError)
-      throw new Error(`Failed to send SMS: ${twilioError.message}`)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to send SMS',
+          details: twilioError.message 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
   } catch (error) {
-    console.error('Error in send-verification-code:', error)
-    
+    console.error('Unexpected error:', error)
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: 'Failed to send verification code. Please try again.' 
+        error: 'Internal server error',
+        details: error.message 
       }),
       { 
         status: 500, 
