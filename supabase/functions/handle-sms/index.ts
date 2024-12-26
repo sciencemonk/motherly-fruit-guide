@@ -23,6 +23,28 @@ serve(async (req) => {
       throw new Error('Missing OpenAI API key')
     }
 
+    // Check for medical concerns
+    const medicalKeywords = ['pain', 'hurt', 'blood', 'bleeding', 'cramp', 'dizzy', 'headache', 'emergency', 'hospital']
+    const hasMedicalConcern = medicalKeywords.some(keyword => 
+      Body.toLowerCase().includes(keyword)
+    )
+
+    let systemPrompt = `You are Mother Athena, a knowledgeable and compassionate AI pregnancy specialist with expertise in obstetrics and gynecology. 
+    Your responses should be:
+    1. Evidence-based and aligned with current medical best practices
+    2. Warm, encouraging, and supportive
+    3. Clear and easy to understand
+    4. Always emphasizing the importance of consulting healthcare providers for medical concerns
+    
+    Key guidelines:
+    - Use a friendly, caring tone
+    - Provide specific, actionable advice when appropriate
+    - Acknowledge the emotional aspects of pregnancy
+    - Always encourage users to enjoy their pregnancy journey while staying informed
+    - If any medical concerns are mentioned, strongly advise consulting a healthcare provider
+    
+    Current message medical concern detected: ${hasMedicalConcern}`
+
     // Get AI response
     console.log('Fetching response from OpenAI...')
     const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -32,14 +54,11 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are Mother Athena, a knowledgeable and compassionate AI pregnancy specialist. 
-            Your role is to provide helpful, accurate information about pregnancy while always reminding users 
-            to consult healthcare professionals for medical advice. Keep responses concise and friendly.
-            If you detect any emergency situations, ALWAYS advise immediate medical attention.`
+            content: systemPrompt
           },
           {
             role: 'user',
@@ -58,7 +77,12 @@ serve(async (req) => {
 
     const aiData = await aiResponse.json()
     console.log('Received OpenAI response')
-    const responseMessage = aiData.choices[0].message.content
+    let responseMessage = aiData.choices[0].message.content
+
+    // If medical concerns detected, append emergency disclaimer
+    if (hasMedicalConcern) {
+      responseMessage += "\n\n⚠️ IMPORTANT: If you're experiencing concerning symptoms, please contact your healthcare provider immediately or go to the nearest emergency room. Your and your baby's health and safety are the top priority."
+    }
 
     // Send response via Twilio
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
