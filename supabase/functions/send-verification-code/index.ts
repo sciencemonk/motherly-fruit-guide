@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import { Twilio } from "https://esm.sh/twilio@4.19.0"
+import twilio from "npm:twilio"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -91,8 +91,8 @@ serve(async (req) => {
 
     // Send SMS using Twilio
     try {
-      const twilioClient = new Twilio(accountSid, authToken)
-      await twilioClient.messages.create({
+      const client = twilio(accountSid, authToken)
+      await client.messages.create({
         body: `Your Mother Athena verification code is: ${code}`,
         to: phone_number,
         from: twilioNumber,
