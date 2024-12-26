@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { addMonths } from "date-fns";
@@ -138,39 +138,44 @@ export function RegistrationForm() {
     }
   };
 
+  // Add effect to scroll to top on page load/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div>
-      <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md mx-auto">
-        <FormFields
-          firstName={firstName}
-          setFirstName={setFirstName}
-          phone={phone}
-          setPhone={setPhone}
-          dueDate={dueDate}
-          setDueDate={setDueDate}
-          today={today}
-          maxDate={maxDate}
-          isLoading={isLoading}
-        />
+      {!isSubmitted ? (
+        <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md mx-auto">
+          <FormFields
+            firstName={firstName}
+            setFirstName={setFirstName}
+            phone={phone}
+            setPhone={setPhone}
+            dueDate={dueDate}
+            setDueDate={setDueDate}
+            today={today}
+            maxDate={maxDate}
+            isLoading={isLoading}
+          />
 
-        <ConsentCheckbox
-          smsConsent={smsConsent}
-          setSmsConsent={setSmsConsent}
-          isLoading={isLoading}
-        />
+          <ConsentCheckbox
+            smsConsent={smsConsent}
+            setSmsConsent={setSmsConsent}
+            isLoading={isLoading}
+          />
 
-        <Button 
-          type="submit" 
-          className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
-          disabled={isLoading}
-        >
-          {isLoading ? "Processing..." : "Start My Journey"}
-        </Button>
-      </form>
-
-      {isSubmitted && dueDate && (
+          <Button 
+            type="submit" 
+            className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+            disabled={isLoading}
+          >
+            {isLoading ? "Processing..." : "Start My Journey"}
+          </Button>
+        </form>
+      ) : (
         <div ref={reportRef}>
-          <PregnancyReport dueDate={dueDate} firstName={firstName} />
+          <PregnancyReport dueDate={dueDate!} firstName={firstName} />
         </div>
       )}
     </div>
