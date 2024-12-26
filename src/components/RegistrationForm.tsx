@@ -70,46 +70,24 @@ export function RegistrationForm() {
     setIsLoading(true);
 
     try {
-      // First check if profile exists
-      const { data: existingProfile, error: fetchError } = await supabase
+      // Use upsert operation with phone_number as the unique key
+      const { error: upsertError } = await supabase
         .from('profiles')
-        .select('phone_number')
-        .eq('phone_number', phone)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Error checking existing profile:', fetchError);
-        throw fetchError;
-      }
-
-      let profileError;
-      if (existingProfile) {
-        // Update existing profile
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
+        .upsert(
+          {
+            phone_number: phone,
             first_name: firstName,
             due_date: dueDate.toISOString().split('T')[0],
-          })
-          .eq('phone_number', phone);
-        profileError = updateError;
-      } else {
-        // Insert new profile
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              phone_number: phone,
-              first_name: firstName,
-              due_date: dueDate.toISOString().split('T')[0],
-            }
-          ]);
-        profileError = insertError;
-      }
+          },
+          {
+            onConflict: 'phone_number',
+            ignoreDuplicates: false,
+          }
+        );
 
-      if (profileError) {
-        console.error('Error storing profile:', profileError);
-        throw profileError;
+      if (upsertError) {
+        console.error('Error storing profile:', upsertError);
+        throw upsertError;
       }
 
       // Send welcome message
