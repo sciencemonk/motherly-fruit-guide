@@ -19,7 +19,7 @@ export function ConsentCheckbox({ smsConsent, setSmsConsent, isLoading }: Consen
         htmlFor="sms-consent"
         className="text-xs whitespace-nowrap peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sage-700"
       >
-        I agree to receive text messages from Mother Athena to answer my pregnancy questions!
+        I agree to the terms of service, privacy notice, and to receive text messages from Mother Athena to answer my pregnancy questions!
       </label>
     </div>
   );
