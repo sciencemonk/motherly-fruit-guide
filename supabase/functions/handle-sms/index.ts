@@ -7,13 +7,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+console.log('Edge Function loaded and running')
+
 serve(async (req) => {
   // Log every incoming request immediately
   console.log('----------------------------------------')
+  console.log('Edge Function triggered at:', new Date().toISOString())
   console.log('Incoming request to handle-sms function')
   console.log('Request URL:', req.url)
   console.log('Request method:', req.method)
   console.log('Request headers:', Object.fromEntries(req.headers.entries()))
+  
+  // Log the raw URL and search params for debugging
+  const url = new URL(req.url)
+  console.log('URL pathname:', url.pathname)
+  console.log('URL search params:', Object.fromEntries(url.searchParams.entries()))
   
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request')
@@ -26,6 +34,8 @@ serve(async (req) => {
     
     // Try to parse the body as URL-encoded form data (Twilio's format)
     const formData = new URLSearchParams(body)
+    console.log('Parsed form data entries:', Object.fromEntries(formData.entries()))
+    
     const Body = formData.get('Body')
     const From = formData.get('From')
     
@@ -138,7 +148,11 @@ serve(async (req) => {
     console.error('Error handling SMS:', error)
     console.error('Error stack:', error.stack)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        timestamp: new Date().toISOString(),
+        errorDetails: error.toString()
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
