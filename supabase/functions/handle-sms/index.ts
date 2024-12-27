@@ -25,10 +25,21 @@ serve(async (req) => {
   
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request')
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      }
+    })
   }
 
   try {
+    // Verify this is a POST request
+    if (req.method !== 'POST') {
+      console.error('Invalid request method:', req.method)
+      throw new Error('Only POST requests are allowed')
+    }
+
     const body = await req.text()
     console.log('Raw request body:', body)
     
@@ -141,7 +152,13 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, messageId: twilioMessage.sid }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 200,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+        } 
+      }
     )
 
   } catch (error) {
@@ -155,7 +172,7 @@ serve(async (req) => {
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status: 200  // Important: Return 200 even for errors to prevent Twilio from retrying
       }
     )
   }
