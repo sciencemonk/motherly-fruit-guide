@@ -1,0 +1,4 @@
+project_id = "tjeukbooftbxulkgqljg"
+
+[handle-sms]
+verify_jwt = false

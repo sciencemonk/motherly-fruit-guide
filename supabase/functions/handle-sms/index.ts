@@ -32,7 +32,7 @@ serve(async (req) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Headers': '*',
         'Content-Type': 'text/plain'
       }
     });
@@ -84,7 +84,12 @@ serve(async (req) => {
 
     return new Response(twimlResponse, {
       status: 200,
-      headers: { 'Content-Type': 'text/xml' }
+      headers: { 
+        'Content-Type': 'text/xml',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': '*'
+      }
     });
 
   } catch (error) {
@@ -95,7 +100,12 @@ serve(async (req) => {
       createTwiMLResponse('An error occurred processing your message. Please try again later.'),
       {
         status: 200,
-        headers: { 'Content-Type': 'text/xml' }
+        headers: { 
+          'Content-Type': 'text/xml',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': '*'
+        }
       }
     );
   }
