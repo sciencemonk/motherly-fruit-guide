@@ -2,10 +2,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { corsHeaders } from './constants.ts'
 import { createHmac } from "https://deno.land/std@0.182.0/crypto/mod.ts"
+import { getAIResponse } from './openai.ts'
+import { medicalKeywords, systemPromptTemplate } from './constants.ts'
 
 console.log('Edge Function loaded and running')
 
-function validateTwilioSignature(url: string, params: Record<string, string>, twilioSignature: string, authToken: string): boolean {
+function validateTwilioSignature(requestUrl: string, params: Record<string, string>, twilioSignature: string, authToken: string): boolean {
   // Sort the params
   const sortedParams = Object.keys(params)
     .sort()
@@ -14,8 +16,10 @@ function validateTwilioSignature(url: string, params: Record<string, string>, tw
       return acc;
     }, {});
 
-  // Create the string to sign
-  const stringToSign = url + Object.keys(sortedParams)
+  // Create the string to sign (including query parameters if any)
+  const url = new URL(requestUrl);
+  const baseUrl = `${url.protocol}//${url.host}${url.pathname}`;
+  const stringToSign = baseUrl + Object.keys(sortedParams)
     .map(key => key + sortedParams[key])
     .join('');
 
@@ -24,105 +28,142 @@ function validateTwilioSignature(url: string, params: Record<string, string>, tw
   hmac.update(stringToSign);
   const expectedSignature = hmac.digest("base64");
 
-  console.log('Expected signature:', expectedSignature);
-  console.log('Received signature:', twilioSignature);
+  console.log('Validation details:', {
+    baseUrl,
+    stringToSign,
+    expectedSignature,
+    receivedSignature: twilioSignature
+  });
 
   return expectedSignature === twilioSignature;
 }
 
+function createTwiMLResponse(message: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>${message}</Message>
+</Response>`;
+}
+
+function containsMedicalKeywords(message: string): boolean {
+  return medicalKeywords.some(keyword => 
+    message.toLowerCase().includes(keyword.toLowerCase())
+  );
+}
+
 serve(async (req) => {
-  // Log absolutely everything about the request and environment
-  console.log('========== NEW REQUEST ==========')
-  console.log('Timestamp:', new Date().toISOString())
-  console.log('Request URL:', req.url)
-  console.log('Request method:', req.method)
-  console.log('Request headers:', Object.fromEntries(req.headers.entries()))
-  
-  // Verify secrets are accessible (without logging their values)
-  console.log('Checking Twilio secrets availability:')
-  console.log('Has TWILIO_A2P_ACCOUNT_SID:', !!Deno.env.get('TWILIO_A2P_ACCOUNT_SID'))
-  console.log('Has TWILIO_AUTH_TOKEN:', !!Deno.env.get('TWILIO_AUTH_TOKEN'))
-  console.log('Has TWILIO_PHONE_NUMBER:', !!Deno.env.get('TWILIO_PHONE_NUMBER'))
-  
+  // Log request details
+  console.log('New request:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request')
+    console.log('Handling CORS preflight request');
     return new Response('ok', { 
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Content-Type': 'text/plain',
+        'Content-Type': 'text/plain'
       }
-    })
+    });
   }
 
   try {
-    // Log raw request body
-    const rawBody = await req.text()
-    console.log('Raw request body:', rawBody)
+    // Parse the raw body
+    const rawBody = await req.text();
+    console.log('Raw request body:', rawBody);
     
     // Parse form data
-    const formData = new URLSearchParams(rawBody)
-    const params = Object.fromEntries(formData.entries())
-    console.log('Parsed form data:', params)
+    const formData = new URLSearchParams(rawBody);
+    const params = Object.fromEntries(formData.entries());
+    console.log('Parsed form data:', params);
 
-    // Get Twilio signature from headers
-    const twilioSignature = req.headers.get('X-Twilio-Signature')
-    console.log('Twilio signature:', twilioSignature)
+    // Extract message content and sender
+    const messageBody = params.Body || '';
+    const from = params.From || '';
+    
+    console.log('Message details:', { body: messageBody, from });
 
-    if (!twilioSignature) {
-      console.error('No Twilio signature found in request headers')
-      return new Response('Unauthorized', { status: 401 })
-    }
+    // Verify Twilio signature
+    const twilioSignature = req.headers.get('X-Twilio-Signature');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
 
-    // Get auth token from environment
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    if (!authToken) {
-      console.error('TWILIO_AUTH_TOKEN not found in environment')
-      return new Response('Server configuration error', { status: 500 })
-    }
-
-    // Validate the signature
-    const isValid = validateTwilioSignature(
-      req.url,
-      params,
-      twilioSignature,
-      authToken
-    )
-
-    if (!isValid) {
-      console.error('Invalid Twilio signature')
-      return new Response('Unauthorized', { status: 403 })
-    }
-
-    console.log('Twilio signature validated successfully')
-
-    // Always return a 200 response for now
-    return new Response(
-      'Message received',
-      { 
-        status: 200,
+    if (!twilioSignature || !authToken) {
+      console.error('Missing signature or auth token:', { 
+        hasSignature: !!twilioSignature, 
+        hasAuthToken: !!authToken 
+      });
+      return new Response(createTwiMLResponse('Unauthorized request'), { 
+        status: 401,
         headers: {
           ...corsHeaders,
-          'Content-Type': 'text/plain'
+          'Content-Type': 'text/xml'
         }
+      });
+    }
+
+    const isValid = validateTwilioSignature(req.url, params, twilioSignature, authToken);
+    if (!isValid) {
+      console.error('Invalid Twilio signature');
+      return new Response(createTwiMLResponse('Invalid signature'), { 
+        status: 403,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/xml'
+        }
+      });
+    }
+
+    console.log('Signature validated successfully');
+
+    // Get OpenAI API key
+    const openAiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAiKey) {
+      console.error('OpenAI API key not found');
+      return new Response(createTwiMLResponse('Service configuration error'), { 
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/xml'
+        }
+      });
+    }
+
+    // Check for medical keywords
+    const hasMedicalConcern = containsMedicalKeywords(messageBody);
+    
+    // Get AI response
+    const systemPrompt = systemPromptTemplate(hasMedicalConcern);
+    const aiResponse = await getAIResponse(messageBody, systemPrompt, openAiKey);
+    
+    console.log('AI response generated:', aiResponse);
+
+    // Return TwiML response
+    return new Response(createTwiMLResponse(aiResponse), { 
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/xml'
       }
-    )
+    });
 
   } catch (error) {
-    console.error('Error processing request:', error)
-    console.error('Error stack:', error.stack)
+    console.error('Error processing request:', error);
+    console.error('Error stack:', error.stack);
     
-    // Still return 200 for Twilio
+    // Return error response in TwiML format
     return new Response(
-      'Error processing message',
+      createTwiMLResponse('An error occurred processing your message. Please try again later.'),
       { 
-        status: 200,
+        status: 200, // Still return 200 for Twilio
         headers: {
           ...corsHeaders,
-          'Content-Type': 'text/plain'
+          'Content-Type': 'text/xml'
         }
       }
-    )
+    );
   }
-})
+});
