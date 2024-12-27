@@ -31,9 +31,9 @@ serve(async (req) => {
     // Get Twilio credentials
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+    const messagingServiceSid = 'CM5b9e6d84c33b15ba1c1356e299163c82'; // A2P Campaign SID
 
-    if (!accountSid || !authToken || !fromNumber) {
+    if (!accountSid || !authToken) {
       console.error('Missing Twilio credentials');
       throw new Error('Missing Twilio credentials');
     }
@@ -45,12 +45,12 @@ serve(async (req) => {
     const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`;
     console.log('Formatted phone number:', formattedPhone);
 
-    // Send the message
+    // Send the message using the messaging service
     console.log('Attempting to send SMS...');
     const twilioMessage = await client.messages.create({
       body: message,
       to: formattedPhone,
-      from: fromNumber,
+      messagingServiceSid: messagingServiceSid, // Use the A2P Campaign SID
       statusCallback: null // Remove any status callback to simplify the request
     });
 
