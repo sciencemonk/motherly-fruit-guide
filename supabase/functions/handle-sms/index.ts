@@ -8,7 +8,12 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Log every incoming request immediately
+  console.log('----------------------------------------')
   console.log('Incoming request to handle-sms function')
+  console.log('Request URL:', req.url)
+  console.log('Request method:', req.method)
+  console.log('Request headers:', Object.fromEntries(req.headers.entries()))
   
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request')
@@ -16,10 +21,6 @@ serve(async (req) => {
   }
 
   try {
-    // Log the entire request for debugging
-    console.log('Request method:', req.method)
-    console.log('Request headers:', Object.fromEntries(req.headers.entries()))
-    
     const body = await req.text()
     console.log('Raw request body:', body)
     
@@ -108,13 +109,18 @@ serve(async (req) => {
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
 
     if (!accountSid || !authToken || !messagingServiceSid) {
-      console.error('Missing Twilio credentials')
+      console.error('Missing Twilio credentials:', {
+        hasAccountSid: !!accountSid,
+        hasAuthToken: !!authToken,
+        hasMessagingServiceSid: !!messagingServiceSid
+      })
       throw new Error('Missing Twilio credentials')
     }
 
+    console.log('Initializing Twilio client...')
     const client = new Twilio(accountSid, authToken)
     
-    console.log('Sending Twilio message...')
+    console.log('Sending Twilio message to:', From)
     const twilioMessage = await client.messages.create({
       body: responseMessage,
       to: From,
@@ -130,6 +136,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error handling SMS:', error)
+    console.error('Error stack:', error.stack)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
