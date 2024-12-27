@@ -31,7 +31,7 @@ serve(async (req) => {
     // Get A2P-specific Twilio credentials
     const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID');
     const authToken = Deno.env.get('TWILIO_A2P_AUTH_TOKEN');
-    const messagingServiceSid = 'CM5b9e6d84c33b15ba1c1356e299163c82'; // Your A2P Campaign SID
+    const messagingServiceSid = 'MG1fa945c66e3013f6a9b3ad77bf8a05e4'; // Your A2P Messaging Service SID
 
     // Add detailed logging for debugging
     console.log('Checking A2P Twilio credentials...');
@@ -56,7 +56,7 @@ serve(async (req) => {
     const twilioMessage = await client.messages.create({
       body: message,
       to: formattedPhone,
-      messagingServiceSid: messagingServiceSid // Use the A2P Campaign SID
+      messagingServiceSid: messagingServiceSid // Use the A2P Messaging Service SID
     });
 
     console.log('SMS sent successfully:', twilioMessage.sid);
