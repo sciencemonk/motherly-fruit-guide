@@ -33,12 +33,18 @@ serve(async (req) => {
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
     const messagingServiceSid = 'CM5b9e6d84c33b15ba1c1356e299163c82'; // A2P Campaign SID
 
+    // Add detailed logging for debugging
+    console.log('Checking Twilio credentials...');
+    console.log('Account SID exists:', !!accountSid);
+    console.log('Auth Token exists:', !!authToken);
+    console.log('Messaging Service SID:', messagingServiceSid);
+
     if (!accountSid || !authToken) {
       console.error('Missing Twilio credentials');
       throw new Error('Missing Twilio credentials');
     }
 
-    console.log('Initializing Twilio client with account:', accountSid);
+    console.log('Initializing Twilio client...');
     const client = twilio(accountSid, authToken);
 
     // Ensure the phone number is in E.164 format
@@ -50,8 +56,7 @@ serve(async (req) => {
     const twilioMessage = await client.messages.create({
       body: message,
       to: formattedPhone,
-      messagingServiceSid: messagingServiceSid, // Use the A2P Campaign SID
-      statusCallback: null // Remove any status callback to simplify the request
+      messagingServiceSid: messagingServiceSid
     });
 
     console.log('SMS sent successfully:', twilioMessage.sid);
@@ -73,12 +78,18 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in send-welcome-sms function:', error);
     
+    // Add more detailed error information
+    const errorResponse = {
+      error: error.message || 'Internal server error',
+      code: error.code,
+      status: error.status,
+      moreInfo: error.moreInfo,
+      details: error.toString(),
+      timestamp: new Date().toISOString()
+    };
+    
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        details: error.toString(),
-        timestamp: new Date().toISOString()
-      }),
+      JSON.stringify(errorResponse),
       { 
         status: error.status || 500,
         headers: { 
