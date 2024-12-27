@@ -38,7 +38,7 @@ serve(async (req) => {
       throw new Error('Missing Twilio credentials');
     }
 
-    console.log('Initializing Twilio client...');
+    console.log('Initializing Twilio client with account:', accountSid);
     const client = twilio(accountSid, authToken);
 
     // Ensure the phone number is in E.164 format
@@ -51,6 +51,7 @@ serve(async (req) => {
       body: message,
       to: formattedPhone,
       from: fromNumber,
+      statusCallback: null // Remove any status callback to simplify the request
     });
 
     console.log('SMS sent successfully:', twilioMessage.sid);
