@@ -42,12 +42,7 @@ export function RegistrationForm() {
       return data;
     } catch (error) {
       console.error("Error sending welcome message:", error);
-      // Instead of throwing the error, we'll just show a default toast with warning styling
-      toast({
-        variant: "default",
-        title: "Welcome message delayed",
-        description: "You're registered, but there was a delay sending your welcome message. You'll receive it shortly.",
-      });
+      throw error;
     }
   };
 
@@ -123,7 +118,7 @@ export function RegistrationForm() {
         throw insertError;
       }
 
-      // Try to send welcome message, but don't let failure prevent registration completion
+      // Send welcome message
       await sendWelcomeMessage(phone);
 
       toast({
