@@ -1,5 +1,3 @@
-import { AIResponse } from './types.ts';
-
 export async function getAIResponse(message: string, systemPrompt: string, apiKey: string): Promise<string> {
   console.log('Fetching response from OpenAI...');
   
@@ -10,7 +8,7 @@ export async function getAIResponse(message: string, systemPrompt: string, apiKe
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
@@ -25,7 +23,7 @@ export async function getAIResponse(message: string, systemPrompt: string, apiKe
     throw new Error('Failed to get AI response');
   }
 
-  const data = await response.json() as AIResponse;
+  const data = await response.json();
   console.log('Received OpenAI response:', data);
   return data.choices[0].message.content;
 }

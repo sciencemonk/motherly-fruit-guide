@@ -1,9 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
-import { corsHeaders } from './constants.ts'
 import { getAIResponse } from './openai.ts'
 import { medicalKeywords, systemPromptTemplate } from './constants.ts'
-import { TwilioMessage } from './types.ts'
 
 console.log('Edge Function loaded and running')
 
@@ -22,7 +20,7 @@ function containsMedicalKeywords(message: string): boolean {
 
 serve(async (req) => {
   // Log request details
-  console.log('New request:', {
+  console.log('New request received:', {
     method: req.method,
     url: req.url,
     headers: Object.fromEntries(req.headers.entries())
@@ -30,47 +28,45 @@ serve(async (req) => {
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
     return new Response('ok', { 
       headers: {
-        ...corsHeaders,
+        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
         'Content-Type': 'text/plain'
       }
     });
   }
 
   try {
-    // Parse the raw body
-    const rawBody = await req.text();
-    console.log('Raw request body:', rawBody);
+    // Parse the incoming form data from Twilio
+    const formData = await req.formData();
+    const messageBody = formData.get('Body')?.toString() || '';
+    const from = formData.get('From')?.toString() || '';
     
-    // Parse form data
-    const formData = new URLSearchParams(rawBody);
-    const params = Object.fromEntries(formData.entries());
-    console.log('Parsed form data:', params);
+    console.log('Received SMS:', { body: messageBody, from });
 
-    // Extract message content and sender
-    const messageBody = params.Body || '';
-    const from = params.From || '';
-    
-    console.log('Message details:', { body: messageBody, from });
+    if (!messageBody) {
+      console.error('No message body received');
+      return new Response(createTwiMLResponse('Error: No message received'), {
+        status: 200,
+        headers: { 'Content-Type': 'text/xml' }
+      });
+    }
 
     // Get OpenAI API key
     const openAiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAiKey) {
       console.error('OpenAI API key not found');
-      return new Response(createTwiMLResponse('Service configuration error'), { 
+      return new Response(createTwiMLResponse('Service configuration error'), {
         status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/xml'
-        }
+        headers: { 'Content-Type': 'text/xml' }
       });
     }
 
     // Check for medical keywords
     const hasMedicalConcern = containsMedicalKeywords(messageBody);
+    console.log('Medical concern detected:', hasMedicalConcern);
     
     // Get AI response
     const systemPrompt = systemPromptTemplate(hasMedicalConcern);
@@ -79,27 +75,20 @@ serve(async (req) => {
     console.log('AI response generated:', aiResponse);
 
     // Return TwiML response
-    return new Response(createTwiMLResponse(aiResponse), { 
+    return new Response(createTwiMLResponse(aiResponse), {
       status: 200,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/xml'
-      }
+      headers: { 'Content-Type': 'text/xml' }
     });
 
   } catch (error) {
     console.error('Error processing request:', error);
     console.error('Error stack:', error.stack);
     
-    // Return error response in TwiML format
     return new Response(
       createTwiMLResponse('An error occurred processing your message. Please try again later.'),
-      { 
+      {
         status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/xml'
-        }
+        headers: { 'Content-Type': 'text/xml' }
       }
     );
   }
