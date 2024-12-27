@@ -54,7 +54,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4-mini',
         messages: [
           {
             role: 'system',
@@ -76,7 +76,7 @@ serve(async (req) => {
     }
 
     const aiData = await aiResponse.json()
-    console.log('Received OpenAI response')
+    console.log('Received OpenAI response:', aiData)
     let responseMessage = aiData.choices[0].message.content
 
     // If medical concerns detected, append emergency disclaimer
@@ -87,9 +87,9 @@ serve(async (req) => {
     // Send response via Twilio
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID') || 'MG1fa945c66e3013f6a9b3ad77bf8a05e4'
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
 
-    if (!accountSid || !authToken) {
+    if (!accountSid || !authToken || !messagingServiceSid) {
       console.error('Missing Twilio credentials')
       throw new Error('Missing Twilio credentials')
     }
