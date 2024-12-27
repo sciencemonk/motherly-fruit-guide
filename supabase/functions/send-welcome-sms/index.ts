@@ -17,43 +17,49 @@ serve(async (req) => {
   }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error('Method not allowed')
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing Authorization header');
     }
 
-    const { to, message } = await req.json()
-    console.log('Received request to send SMS to:', to)
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed');
+    }
+
+    const { to, message } = await req.json();
+    console.log('Received request to send SMS to:', to);
 
     if (!to || !message) {
-      throw new Error('Missing required fields: to and message')
+      throw new Error('Missing required fields: to and message');
     }
 
     // Get Twilio credentials
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
     if (!accountSid || !authToken || !fromNumber) {
-      console.error('Missing Twilio credentials')
-      throw new Error('Missing Twilio credentials')
+      console.error('Missing Twilio credentials');
+      throw new Error('Missing Twilio credentials');
     }
 
-    console.log('Initializing Twilio client...')
-    const client = twilio(accountSid, authToken)
+    console.log('Initializing Twilio client...');
+    const client = twilio(accountSid, authToken);
 
     // Ensure the phone number is in E.164 format
-    const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`
-    console.log('Formatted phone number:', formattedPhone)
+    const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`;
+    console.log('Formatted phone number:', formattedPhone);
 
     // Send the message
-    console.log('Attempting to send SMS...')
+    console.log('Attempting to send SMS...');
     const twilioMessage = await client.messages.create({
       body: message,
       to: formattedPhone,
       from: fromNumber,
-    })
+    });
 
-    console.log('SMS sent successfully:', twilioMessage.sid)
+    console.log('SMS sent successfully:', twilioMessage.sid);
 
     return new Response(
       JSON.stringify({ 
@@ -67,10 +73,10 @@ serve(async (req) => {
         },
         status: 200
       }
-    )
+    );
 
   } catch (error) {
-    console.error('Error in send-welcome-sms function:', error)
+    console.error('Error in send-welcome-sms function:', error);
     
     return new Response(
       JSON.stringify({ 
@@ -85,6 +91,6 @@ serve(async (req) => {
           'Content-Type': 'application/json' 
         } 
       }
-    )
+    );
   }
 })
