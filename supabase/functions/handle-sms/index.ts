@@ -87,9 +87,9 @@ serve(async (req) => {
     // Send response via Twilio
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID') || 'MG1fa945c66e3013f6a9b3ad77bf8a05e4'
 
-    if (!accountSid || !authToken || !fromNumber) {
+    if (!accountSid || !authToken) {
       console.error('Missing Twilio credentials')
       throw new Error('Missing Twilio credentials')
     }
@@ -100,7 +100,7 @@ serve(async (req) => {
     const twilioMessage = await client.messages.create({
       body: responseMessage,
       to: From,
-      from: fromNumber,
+      messagingServiceSid: messagingServiceSid,
     })
 
     console.log('Response sent successfully:', twilioMessage.sid)
