@@ -26,16 +26,10 @@ export function RegistrationForm() {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
-      // Get the current session
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
           to: phoneNumber,
           message: `Hello ${firstName}! I'm Mother Athena. Each week I'll text you an update about your current stage of pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!`
-        },
-        headers: {
-          Authorization: `Bearer ${session?.access_token || ''}`
         }
       });
 

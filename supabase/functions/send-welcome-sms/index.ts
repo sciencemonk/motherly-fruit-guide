@@ -17,12 +17,6 @@ serve(async (req) => {
   }
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing Authorization header');
-    }
-
     if (req.method !== 'POST') {
       throw new Error('Method not allowed');
     }
