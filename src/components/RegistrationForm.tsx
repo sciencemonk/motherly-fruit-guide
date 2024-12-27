@@ -42,9 +42,9 @@ export function RegistrationForm() {
       return data;
     } catch (error) {
       console.error("Error sending welcome message:", error);
-      // Instead of throwing the error, we'll just show a warning toast
+      // Instead of throwing the error, we'll just show a default toast with warning styling
       toast({
-        variant: "warning",
+        variant: "default",
         title: "Welcome message delayed",
         description: "You're registered, but there was a delay sending your welcome message. You'll receive it shortly.",
       });
