@@ -1,17 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
-import { corsHeaders, medicalKeywords, systemPromptTemplate } from './constants.ts'
-import { TwilioMessage } from './types.ts'
-import { getAIResponse } from './openai.ts'
-import { sendTwilioResponse } from './twilio.ts'
+import { corsHeaders } from './constants.ts'
 
 console.log('Edge Function loaded and running')
 
-// Remove JWT verification to allow public access
 serve(async (req) => {
-  // Immediate logging of every request
-  console.log('----------------------------------------')
-  console.log('New request received:', new Date().toISOString())
+  // Log absolutely everything about the request
+  console.log('========== NEW REQUEST ==========')
+  console.log('Timestamp:', new Date().toISOString())
+  console.log('Request URL:', req.url)
   console.log('Request method:', req.method)
   console.log('Request headers:', Object.fromEntries(req.headers.entries()))
   
@@ -28,11 +25,20 @@ serve(async (req) => {
   }
 
   try {
-    // Log raw request
+    // Log raw request body
     const rawBody = await req.text()
     console.log('Raw request body:', rawBody)
     
-    // For debugging: Always return a success response to test if Twilio can reach the endpoint
+    // Parse form data if it exists
+    try {
+      const formData = new URLSearchParams(rawBody)
+      console.log('Parsed form data:', Object.fromEntries(formData.entries()))
+    } catch (e) {
+      console.log('Could not parse as form data:', e)
+    }
+
+    // Always return a 200 response for now
+    console.log('Sending 200 response')
     return new Response(
       'Message received',
       { 
