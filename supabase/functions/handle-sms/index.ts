@@ -19,7 +19,7 @@ function containsMedicalKeywords(message: string): boolean {
 }
 
 serve(async (req) => {
-  // Log request details
+  // Log complete request details for debugging
   console.log('New request received:', {
     method: req.method,
     url: req.url,
@@ -39,12 +39,16 @@ serve(async (req) => {
   }
 
   try {
-    // Parse the incoming form data from Twilio
-    const formData = await req.formData();
-    const messageBody = formData.get('Body')?.toString() || '';
-    const from = formData.get('From')?.toString() || '';
+    // Log the raw request body
+    const rawBody = await req.text();
+    console.log('Raw request body:', rawBody);
+
+    // Parse the form data manually since Twilio sends as application/x-www-form-urlencoded
+    const formData = new URLSearchParams(rawBody);
+    const messageBody = formData.get('Body') || '';
+    const from = formData.get('From') || '';
     
-    console.log('Received SMS:', { body: messageBody, from });
+    console.log('Parsed SMS details:', { body: messageBody, from });
 
     if (!messageBody) {
       console.error('No message body received');
@@ -74,8 +78,11 @@ serve(async (req) => {
     
     console.log('AI response generated:', aiResponse);
 
-    // Return TwiML response
-    return new Response(createTwiMLResponse(aiResponse), {
+    // Create and return TwiML response
+    const twimlResponse = createTwiMLResponse(aiResponse);
+    console.log('Sending TwiML response:', twimlResponse);
+
+    return new Response(twimlResponse, {
       status: 200,
       headers: { 'Content-Type': 'text/xml' }
     });
