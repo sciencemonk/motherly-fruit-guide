@@ -28,36 +28,35 @@ serve(async (req) => {
       throw new Error('Missing required fields: to and message');
     }
 
-    // Get Twilio credentials
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID') || 'CM5b9e6d84c33b15ba1c1356e299163c82';
+    // Get A2P-specific Twilio credentials
+    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_A2P_AUTH_TOKEN');
+    const messagingServiceSid = 'CM5b9e6d84c33b15ba1c1356e299163c82'; // Your A2P Campaign SID
 
     // Add detailed logging for debugging
-    console.log('Checking Twilio credentials...');
-    console.log('Account SID exists:', !!accountSid);
-    console.log('Auth Token exists:', !!authToken);
-    console.log('Messaging Service SID:', messagingServiceSid);
+    console.log('Checking A2P Twilio credentials...');
+    console.log('A2P Account SID exists:', !!accountSid);
+    console.log('A2P Auth Token exists:', !!authToken);
+    console.log('A2P Messaging Service SID:', messagingServiceSid);
 
     if (!accountSid || !authToken) {
-      console.error('Missing Twilio credentials');
-      throw new Error('Missing Twilio credentials');
+      console.error('Missing A2P Twilio credentials');
+      throw new Error('Missing A2P Twilio credentials');
     }
 
-    console.log('Initializing Twilio client...');
+    console.log('Initializing Twilio client with A2P credentials...');
     const client = new Twilio(accountSid, authToken);
 
     // Ensure the phone number is in E.164 format
     const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`;
     console.log('Formatted phone number:', formattedPhone);
 
-    // Send the message using the messaging service
-    console.log('Attempting to send SMS...');
+    // Send the message using the A2P messaging service
+    console.log('Attempting to send SMS via A2P campaign...');
     const twilioMessage = await client.messages.create({
       body: message,
       to: formattedPhone,
-      from: Deno.env.get('TWILIO_PHONE_NUMBER'), // Use the Twilio phone number instead of messaging service
-      statusCallback: undefined // Remove status callback
+      messagingServiceSid: messagingServiceSid // Use the A2P Campaign SID
     });
 
     console.log('SMS sent successfully:', twilioMessage.sid);
