@@ -103,7 +103,7 @@ serve(async (req) => {
     }
 
     // Send response via Twilio
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
 
