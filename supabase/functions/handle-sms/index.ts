@@ -5,12 +5,18 @@ import { corsHeaders } from './constants.ts'
 console.log('Edge Function loaded and running')
 
 serve(async (req) => {
-  // Log absolutely everything about the request
+  // Log absolutely everything about the request and environment
   console.log('========== NEW REQUEST ==========')
   console.log('Timestamp:', new Date().toISOString())
   console.log('Request URL:', req.url)
   console.log('Request method:', req.method)
   console.log('Request headers:', Object.fromEntries(req.headers.entries()))
+  
+  // Verify secrets are accessible (without logging their values)
+  console.log('Checking Twilio secrets availability:')
+  console.log('Has TWILIO_A2P_ACCOUNT_SID:', !!Deno.env.get('TWILIO_A2P_ACCOUNT_SID'))
+  console.log('Has TWILIO_AUTH_TOKEN:', !!Deno.env.get('TWILIO_AUTH_TOKEN'))
+  console.log('Has TWILIO_PHONE_NUMBER:', !!Deno.env.get('TWILIO_PHONE_NUMBER'))
   
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
