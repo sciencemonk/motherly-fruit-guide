@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import twilio from 'npm:twilio'
+import { Twilio } from 'npm:twilio'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,7 +31,7 @@ serve(async (req) => {
     // Get Twilio credentials
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const messagingServiceSid = 'CM5b9e6d84c33b15ba1c1356e299163c82'; // A2P Campaign SID
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID') || 'CM5b9e6d84c33b15ba1c1356e299163c82';
 
     // Add detailed logging for debugging
     console.log('Checking Twilio credentials...');
@@ -45,7 +45,7 @@ serve(async (req) => {
     }
 
     console.log('Initializing Twilio client...');
-    const client = twilio(accountSid, authToken);
+    const client = new Twilio(accountSid, authToken);
 
     // Ensure the phone number is in E.164 format
     const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`;
@@ -56,7 +56,8 @@ serve(async (req) => {
     const twilioMessage = await client.messages.create({
       body: message,
       to: formattedPhone,
-      messagingServiceSid: messagingServiceSid
+      from: Deno.env.get('TWILIO_PHONE_NUMBER'), // Use the Twilio phone number instead of messaging service
+      statusCallback: undefined // Remove status callback
     });
 
     console.log('SMS sent successfully:', twilioMessage.sid);
