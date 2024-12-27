@@ -190,7 +190,7 @@ export function RegistrationForm() {
           <div ref={welcomeRef}>
             <WelcomeMessage firstName={firstName} />
           </div>
-          <div ref={reportRef}>
+          <div ref={reportRef} className="mt-8">
             <PregnancyReport dueDate={dueDate!} firstName={firstName} />
           </div>
         </div>
