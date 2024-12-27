@@ -1,11 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { Twilio } from 'npm:twilio'
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders, medicalKeywords, systemPromptTemplate } from './constants.ts'
+import { TwilioMessage } from './types.ts'
+import { getAIResponse } from './openai.ts'
+import { sendTwilioResponse } from './twilio.ts'
 
 console.log('Edge Function loaded and running')
 
@@ -17,17 +15,12 @@ serve(async (req) => {
   console.log('Request URL:', req.url)
   console.log('Request method:', req.method)
   console.log('Request headers:', Object.fromEntries(req.headers.entries()))
-  
-  // Log the raw URL and search params for debugging
-  const url = new URL(req.url)
-  console.log('URL pathname:', url.pathname)
-  console.log('URL search params:', Object.fromEntries(url.searchParams.entries()))
-  
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request')
-    return new Response(null, { 
-      status: 202,
+    return new Response('', { 
+      status: 200,
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -36,13 +29,13 @@ serve(async (req) => {
     })
   }
 
-  // Immediately acknowledge receipt of webhook
+  // Only accept POST requests
   if (req.method !== 'POST') {
-    console.log('Non-POST request received, returning 202')
+    console.log('Non-POST request received')
     return new Response(
-      JSON.stringify({ message: 'Accepted' }),
+      JSON.stringify({ message: 'Method not allowed' }),
       { 
-        status: 202,
+        status: 405,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
@@ -52,25 +45,25 @@ serve(async (req) => {
   }
 
   try {
-    // Start processing the webhook asynchronously
+    // Parse the incoming webhook
     const body = await req.text()
     console.log('Raw request body:', body)
     
-    // Try to parse the body as URL-encoded form data (Twilio's format)
     const formData = new URLSearchParams(body)
-    console.log('Parsed form data entries:', Object.fromEntries(formData.entries()))
+    const messageData: TwilioMessage = {
+      Body: formData.get('Body') || '',
+      From: formData.get('From') || ''
+    }
     
-    const Body = formData.get('Body')
-    const From = formData.get('From')
-    
-    console.log('Parsed message:', { Body, From })
+    console.log('Parsed message:', messageData)
 
-    if (!Body || !From) {
+    // Validate required fields
+    if (!messageData.Body || !messageData.From) {
       console.error('Missing required fields in request')
       return new Response(
-        JSON.stringify({ message: 'Accepted' }),
+        JSON.stringify({ message: 'Missing required fields' }),
         { 
-          status: 202,
+          status: 200,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json'
@@ -78,14 +71,15 @@ serve(async (req) => {
         }
       )
     }
-    
+
+    // Check OpenAI API key
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found in environment variables')
+      console.error('OpenAI API key not found')
       return new Response(
-        JSON.stringify({ message: 'Accepted' }),
+        JSON.stringify({ message: 'Configuration error' }),
         { 
-          status: 202,
+          status: 200,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json'
@@ -95,35 +89,18 @@ serve(async (req) => {
     }
 
     // Check for medical concerns
-    const medicalKeywords = ['pain', 'hurt', 'blood', 'bleeding', 'cramp', 'dizzy', 'headache', 'emergency', 'hospital']
     const hasMedicalConcern = medicalKeywords.some(keyword => 
-      Body.toLowerCase().includes(keyword)
+      messageData.Body.toLowerCase().includes(keyword)
     )
 
-    let systemPrompt = `You are Mother Athena, a knowledgeable and compassionate AI pregnancy specialist with expertise in obstetrics and gynecology. 
-    Your responses should be:
-    1. Evidence-based and aligned with current medical best practices
-    2. Warm, encouraging, and supportive
-    3. Clear and easy to understand
-    4. Always emphasizing the importance of consulting healthcare providers for medical concerns
-    
-    Key guidelines:
-    - Use a friendly, caring tone
-    - Provide specific, actionable advice when appropriate
-    - Acknowledge the emotional aspects of pregnancy
-    - Always encourage users to enjoy their pregnancy journey while staying informed
-    - If any medical concerns are mentioned, strongly advise consulting a healthcare provider
-    
-    Current message medical concern detected: ${hasMedicalConcern}`
+    // Process message asynchronously
+    processMessage(messageData, hasMedicalConcern, openAIApiKey)
 
-    // Process the webhook asynchronously
-    processWebhook(Body, From, systemPrompt, hasMedicalConcern, openAIApiKey)
-
-    // Return immediate acknowledgment
+    // Return immediate success response for Twilio
     return new Response(
-      JSON.stringify({ message: 'Accepted' }),
+      JSON.stringify({ message: 'Message received' }),
       { 
-        status: 202,
+        status: 200,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
@@ -132,15 +109,11 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error handling SMS:', error)
-    console.error('Error stack:', error.stack)
+    console.error('Error processing webhook:', error)
     return new Response(
-      JSON.stringify({ 
-        message: 'Accepted',
-        timestamp: new Date().toISOString()
-      }),
+      JSON.stringify({ message: 'Internal server error' }),
       { 
-        status: 202,
+        status: 200, // Still return 200 for Twilio
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
@@ -150,77 +123,29 @@ serve(async (req) => {
   }
 })
 
-// Asynchronous webhook processing function
-async function processWebhook(Body: string, From: string, systemPrompt: string, hasMedicalConcern: boolean, openAIApiKey: string) {
+async function processMessage(
+  message: TwilioMessage,
+  hasMedicalConcern: boolean,
+  openAIApiKey: string
+) {
   try {
-    console.log('Processing webhook asynchronously for:', From)
-    
     // Get AI response
-    console.log('Fetching response from OpenAI...')
-    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: Body
-          }
-        ],
-        max_tokens: 300,
-      }),
-    })
+    let response = await getAIResponse(
+      message.Body,
+      systemPromptTemplate(hasMedicalConcern),
+      openAIApiKey
+    )
 
-    if (!aiResponse.ok) {
-      const errorData = await aiResponse.json()
-      console.error('OpenAI API error:', errorData)
-      throw new Error('Failed to get AI response')
-    }
-
-    const aiData = await aiResponse.json()
-    console.log('Received OpenAI response:', aiData)
-    let responseMessage = aiData.choices[0].message.content
-
-    // If medical concerns detected, append emergency disclaimer
+    // Add medical disclaimer if needed
     if (hasMedicalConcern) {
-      responseMessage += "\n\n⚠️ IMPORTANT: If you're experiencing concerning symptoms, please contact your healthcare provider immediately or go to the nearest emergency room. Your and your baby's health and safety are the top priority."
+      response += "\n\n⚠️ IMPORTANT: If you're experiencing concerning symptoms, please contact your healthcare provider immediately or go to the nearest emergency room. Your and your baby's health and safety are the top priority."
     }
 
     // Send response via Twilio
-    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
-
-    if (!accountSid || !authToken || !messagingServiceSid) {
-      console.error('Missing Twilio credentials:', {
-        hasAccountSid: !!accountSid,
-        hasAuthToken: !!authToken,
-        hasMessagingServiceSid: !!messagingServiceSid
-      })
-      throw new Error('Missing Twilio credentials')
-    }
-
-    console.log('Initializing Twilio client...')
-    const client = new Twilio(accountSid, authToken)
+    await sendTwilioResponse(response, message.From)
     
-    console.log('Sending Twilio message to:', From)
-    const twilioMessage = await client.messages.create({
-      body: responseMessage,
-      to: From,
-      messagingServiceSid: messagingServiceSid,
-    })
-
-    console.log('Response sent successfully:', twilioMessage.sid)
   } catch (error) {
-    console.error('Error in async webhook processing:', error)
+    console.error('Error in async message processing:', error)
     console.error('Error stack:', error.stack)
   }
 }
