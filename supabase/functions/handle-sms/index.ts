@@ -23,23 +23,36 @@ serve(async (req) => {
   console.log('URL pathname:', url.pathname)
   console.log('URL search params:', Object.fromEntries(url.searchParams.entries()))
   
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request')
     return new Response(null, { 
+      status: 202,
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Content-Type': 'application/json',
       }
     })
   }
 
-  try {
-    // Verify this is a POST request
-    if (req.method !== 'POST') {
-      console.error('Invalid request method:', req.method)
-      throw new Error('Only POST requests are allowed')
-    }
+  // Immediately acknowledge receipt of webhook
+  if (req.method !== 'POST') {
+    console.log('Non-POST request received, returning 202')
+    return new Response(
+      JSON.stringify({ message: 'Accepted' }),
+      { 
+        status: 202,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+  }
 
+  try {
+    // Start processing the webhook asynchronously
     const body = await req.text()
     console.log('Raw request body:', body)
     
@@ -54,13 +67,31 @@ serve(async (req) => {
 
     if (!Body || !From) {
       console.error('Missing required fields in request')
-      throw new Error('Missing Body or From field in request')
+      return new Response(
+        JSON.stringify({ message: 'Accepted' }),
+        { 
+          status: 202,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
     }
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAIApiKey) {
       console.error('OpenAI API key not found in environment variables')
-      throw new Error('Missing OpenAI API key')
+      return new Response(
+        JSON.stringify({ message: 'Accepted' }),
+        { 
+          status: 202,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
     }
 
     // Check for medical concerns
@@ -85,6 +116,45 @@ serve(async (req) => {
     
     Current message medical concern detected: ${hasMedicalConcern}`
 
+    // Process the webhook asynchronously
+    processWebhook(Body, From, systemPrompt, hasMedicalConcern, openAIApiKey)
+
+    // Return immediate acknowledgment
+    return new Response(
+      JSON.stringify({ message: 'Accepted' }),
+      { 
+        status: 202,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+  } catch (error) {
+    console.error('Error handling SMS:', error)
+    console.error('Error stack:', error.stack)
+    return new Response(
+      JSON.stringify({ 
+        message: 'Accepted',
+        timestamp: new Date().toISOString()
+      }),
+      { 
+        status: 202,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+  }
+})
+
+// Asynchronous webhook processing function
+async function processWebhook(Body: string, From: string, systemPrompt: string, hasMedicalConcern: boolean, openAIApiKey: string) {
+  try {
+    console.log('Processing webhook asynchronously for:', From)
+    
     // Get AI response
     console.log('Fetching response from OpenAI...')
     const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -149,31 +219,8 @@ serve(async (req) => {
     })
 
     console.log('Response sent successfully:', twilioMessage.sid)
-
-    return new Response(
-      JSON.stringify({ success: true, messageId: twilioMessage.sid }),
-      { 
-        status: 200,
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json',
-        } 
-      }
-    )
-
   } catch (error) {
-    console.error('Error handling SMS:', error)
+    console.error('Error in async webhook processing:', error)
     console.error('Error stack:', error.stack)
-    return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        timestamp: new Date().toISOString(),
-        errorDetails: error.toString()
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200  // Important: Return 200 even for errors to prevent Twilio from retrying
-      }
-    )
   }
-})
+}
