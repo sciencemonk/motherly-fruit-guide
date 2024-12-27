@@ -1,153 +1,57 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { addMonths } from "date-fns";
 import { PregnancyReport } from "./PregnancyReport";
-import { supabase } from "@/integrations/supabase/client";
 import { FormFields } from "./registration/FormFields";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
+import { useRegistrationState } from "./registration/RegistrationState";
+import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
+import { addMonths } from "date-fns";
 
 export function RegistrationForm() {
-  const [firstName, setFirstName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [dueDate, setDueDate] = useState<Date>();
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [smsConsent, setSmsConsent] = useState(false);
-  const { toast } = useToast();
-  const reportRef = useRef<HTMLDivElement>(null);
-  const welcomeRef = useRef<HTMLDivElement>(null);
+  const {
+    firstName,
+    setFirstName,
+    phone,
+    setPhone,
+    dueDate,
+    setDueDate,
+    isSubmitted,
+    setIsSubmitted,
+    isLoading,
+    setIsLoading,
+    smsConsent,
+    setSmsConsent,
+    reportRef,
+    welcomeRef
+  } = useRegistrationState();
+
+  const { handleSubmit } = useRegistrationSubmit();
 
   // Calculate the date range for due date selection
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time to start of day
   const maxDate = addMonths(today, 9);
 
-  const sendWelcomeMessage = async (phoneNumber: string) => {
-    try {
-      console.log('Sending welcome message to:', phoneNumber);
-      
-      const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
-        body: {
-          to: phoneNumber,
-          message: `Hello ${firstName}! I'm Mother Athena. Each week I'll text you an update about your current stage of pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!`
-        }
-      });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
-      }
-
-      console.log('Welcome message response:', data);
-      return data;
-    } catch (error) {
-      console.error("Error sending welcome message:", error);
-      throw error;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!firstName || !phone || !dueDate) {
-      toast({
-        variant: "destructive",
-        title: "Please fill in all fields",
-        description: "We need this information to support you during your pregnancy journey.",
-      });
-      return;
-    }
+    await handleSubmit({
+      firstName,
+      phone,
+      dueDate: dueDate!,
+      smsConsent,
+      setIsLoading,
+      setIsSubmitted
+    });
 
-    if (!smsConsent) {
-      toast({
-        variant: "destructive",
-        title: "SMS Consent Required",
-        description: "Please agree to receive text messages to continue.",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // First check if profile exists
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('phone_number')
-        .eq('phone_number', phone)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Error checking existing profile:', fetchError);
-        throw fetchError;
-      }
-
-      if (existingProfile) {
-        toast({
-          variant: "destructive",
-          title: "Phone number already registered",
-          description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Insert new profile if phone number doesn't exist
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            phone_number: phone,
-            first_name: firstName,
-            due_date: dueDate.toISOString().split('T')[0],
-          }
-        ]);
-
-      if (insertError) {
-        // Double-check for race condition where profile might have been created between our check and insert
-        if (insertError.code === '23505') { // Unique constraint violation
-          toast({
-            variant: "destructive",
-            title: "Phone number already registered",
-            description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
-          });
-          setIsLoading(false);
-          return;
-        }
-        console.error('Error storing profile:', insertError);
-        throw insertError;
-      }
-
-      // Send welcome message
-      await sendWelcomeMessage(phone);
-
-      toast({
-        title: "Welcome to Mother Athena!",
-        description: "We're excited to be part of your pregnancy journey.",
-      });
-      
-      setIsSubmitted(true);
-      
-      // Scroll to the welcome message after a short delay to ensure it's rendered
+    // Scroll to the welcome message after a short delay to ensure it's rendered
+    setTimeout(() => {
+      welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // After showing the welcome message, scroll to the report
       setTimeout(() => {
-        welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
-        // After showing the welcome message, scroll to the report
-        setTimeout(() => {
-          reportRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 2000); // Wait 2 seconds before scrolling to the report
-      }, 100);
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        variant: "destructive",
-        title: "Registration error",
-        description: "There was a problem with your registration. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+        reportRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 2000);
+    }, 100);
   };
 
   // Add effect to scroll to top on page load/refresh
@@ -158,7 +62,7 @@ export function RegistrationForm() {
   return (
     <div>
       {!isSubmitted ? (
-        <form onSubmit={handleSubmit} className="space-y-8 w-full max-w-md mx-auto">
+        <form onSubmit={onSubmit} className="space-y-8 w-full max-w-md mx-auto">
           <FormFields
             firstName={firstName}
             setFirstName={setFirstName}

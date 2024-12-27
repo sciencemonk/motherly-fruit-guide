@@ -3,7 +3,10 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { getAIResponse } from './openai.ts'
 import { medicalKeywords, systemPromptTemplate } from './constants.ts'
 
-console.log('Edge Function loaded and running')
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 function createTwiMLResponse(message: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -29,10 +32,9 @@ serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { 
+      status: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': '*',
+        ...corsHeaders,
         'Content-Type': 'text/plain'
       }
     });
@@ -54,7 +56,10 @@ serve(async (req) => {
       console.error('No message body received');
       return new Response(createTwiMLResponse('Error: No message received'), {
         status: 200,
-        headers: { 'Content-Type': 'text/xml' }
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'text/xml'
+        }
       });
     }
 
@@ -64,7 +69,10 @@ serve(async (req) => {
       console.error('OpenAI API key not found');
       return new Response(createTwiMLResponse('Service configuration error'), {
         status: 200,
-        headers: { 'Content-Type': 'text/xml' }
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'text/xml'
+        }
       });
     }
 
@@ -85,10 +93,8 @@ serve(async (req) => {
     return new Response(twimlResponse, {
       status: 200,
       headers: { 
-        'Content-Type': 'text/xml',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': '*'
+        ...corsHeaders,
+        'Content-Type': 'text/xml'
       }
     });
 
@@ -101,10 +107,8 @@ serve(async (req) => {
       {
         status: 200,
         headers: { 
-          'Content-Type': 'text/xml',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': '*'
+          ...corsHeaders,
+          'Content-Type': 'text/xml'
         }
       }
     );
