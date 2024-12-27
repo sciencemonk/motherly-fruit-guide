@@ -19,12 +19,12 @@ serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request')
-    return new Response('', { 
+    return new Response('ok', { 
       status: 200,
       headers: {
         ...corsHeaders,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain',
       }
     })
   }
@@ -33,12 +33,12 @@ serve(async (req) => {
   if (req.method !== 'POST') {
     console.log('Non-POST request received')
     return new Response(
-      JSON.stringify({ message: 'Method not allowed' }),
+      'Method not allowed',
       { 
-        status: 405,
+        status: 200, // Return 200 for Twilio
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain'
         }
       }
     )
@@ -61,12 +61,12 @@ serve(async (req) => {
     if (!messageData.Body || !messageData.From) {
       console.error('Missing required fields in request')
       return new Response(
-        JSON.stringify({ message: 'Missing required fields' }),
+        'Missing required fields',
         { 
-          status: 200,
+          status: 200, // Return 200 for Twilio
           headers: {
             ...corsHeaders,
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain'
           }
         }
       )
@@ -77,12 +77,12 @@ serve(async (req) => {
     if (!openAIApiKey) {
       console.error('OpenAI API key not found')
       return new Response(
-        JSON.stringify({ message: 'Configuration error' }),
+        'Configuration error',
         { 
-          status: 200,
+          status: 200, // Return 200 for Twilio
           headers: {
             ...corsHeaders,
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain'
           }
         }
       )
@@ -98,25 +98,26 @@ serve(async (req) => {
 
     // Return immediate success response for Twilio
     return new Response(
-      JSON.stringify({ message: 'Message received' }),
+      'Message received',
       { 
         status: 200,
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain'
         }
       }
     )
 
   } catch (error) {
     console.error('Error processing webhook:', error)
+    console.error('Error stack:', error.stack)
     return new Response(
-      JSON.stringify({ message: 'Internal server error' }),
+      'Internal server error',
       { 
         status: 200, // Still return 200 for Twilio
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain'
         }
       }
     )
@@ -129,12 +130,16 @@ async function processMessage(
   openAIApiKey: string
 ) {
   try {
+    console.log('Processing message:', message)
+    
     // Get AI response
     let response = await getAIResponse(
       message.Body,
       systemPromptTemplate(hasMedicalConcern),
       openAIApiKey
     )
+
+    console.log('AI response received:', response)
 
     // Add medical disclaimer if needed
     if (hasMedicalConcern) {
@@ -143,6 +148,7 @@ async function processMessage(
 
     // Send response via Twilio
     await sendTwilioResponse(response, message.From)
+    console.log('Response sent successfully to:', message.From)
     
   } catch (error) {
     console.error('Error in async message processing:', error)
