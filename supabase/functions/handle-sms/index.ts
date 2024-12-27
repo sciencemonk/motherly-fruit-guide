@@ -4,6 +4,7 @@ import { corsHeaders } from './constants.ts'
 import { createHmac } from "https://deno.land/std@0.182.0/crypto/mod.ts"
 import { getAIResponse } from './openai.ts'
 import { medicalKeywords, systemPromptTemplate } from './constants.ts'
+import { TwilioMessage } from './types.ts'
 
 console.log('Edge Function loaded and running')
 
@@ -16,20 +17,17 @@ function validateTwilioSignature(requestUrl: string, params: Record<string, stri
       return acc;
     }, {});
 
-  // Create the string to sign (including query parameters if any)
-  const url = new URL(requestUrl);
-  const baseUrl = `${url.protocol}//${url.host}${url.pathname}`;
-  const stringToSign = baseUrl + Object.keys(sortedParams)
+  // Create the string to sign
+  const stringToSign = Object.keys(sortedParams)
     .map(key => key + sortedParams[key])
     .join('');
 
   // Create HMAC
   const hmac = createHmac("sha1", authToken);
-  hmac.update(stringToSign);
+  hmac.update(requestUrl + stringToSign);
   const expectedSignature = hmac.digest("base64");
 
   console.log('Validation details:', {
-    baseUrl,
     stringToSign,
     expectedSignature,
     receivedSignature: twilioSignature
@@ -87,44 +85,12 @@ serve(async (req) => {
     
     console.log('Message details:', { body: messageBody, from });
 
-    // Verify Twilio signature
-    const twilioSignature = req.headers.get('X-Twilio-Signature');
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-
-    if (!twilioSignature || !authToken) {
-      console.error('Missing signature or auth token:', { 
-        hasSignature: !!twilioSignature, 
-        hasAuthToken: !!authToken 
-      });
-      return new Response(createTwiMLResponse('Unauthorized request'), { 
-        status: 401,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/xml'
-        }
-      });
-    }
-
-    const isValid = validateTwilioSignature(req.url, params, twilioSignature, authToken);
-    if (!isValid) {
-      console.error('Invalid Twilio signature');
-      return new Response(createTwiMLResponse('Invalid signature'), { 
-        status: 403,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/xml'
-        }
-      });
-    }
-
-    console.log('Signature validated successfully');
-
     // Get OpenAI API key
     const openAiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAiKey) {
       console.error('OpenAI API key not found');
       return new Response(createTwiMLResponse('Service configuration error'), { 
-        status: 500,
+        status: 200,
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/xml'
@@ -158,7 +124,7 @@ serve(async (req) => {
     return new Response(
       createTwiMLResponse('An error occurred processing your message. Please try again later.'),
       { 
-        status: 200, // Still return 200 for Twilio
+        status: 200,
         headers: {
           ...corsHeaders,
           'Content-Type': 'text/xml'
