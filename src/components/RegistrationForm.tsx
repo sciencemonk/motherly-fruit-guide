@@ -16,6 +16,7 @@ export function RegistrationForm() {
   const [smsConsent, setSmsConsent] = useState(false);
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
+  const welcomeRef = useRef<HTMLDivElement>(null);
 
   // Calculate the date range for due date selection
   const today = new Date();
@@ -128,9 +129,13 @@ export function RegistrationForm() {
       
       setIsSubmitted(true);
       
-      // Scroll to the report section after a short delay to ensure it's rendered
+      // Scroll to the welcome message after a short delay to ensure it's rendered
       setTimeout(() => {
-        reportRef.current?.scrollIntoView({ behavior: 'smooth' });
+        welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // After showing the welcome message, scroll to the report
+        setTimeout(() => {
+          reportRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 2000); // Wait 2 seconds before scrolling to the report
       }, 100);
     } catch (error) {
       console.error('Registration error:', error);
@@ -180,8 +185,13 @@ export function RegistrationForm() {
           </Button>
         </form>
       ) : (
-        <div ref={reportRef}>
-          <PregnancyReport dueDate={dueDate!} firstName={firstName} />
+        <div>
+          <div ref={welcomeRef}>
+            <WelcomeMessage firstName={firstName} />
+          </div>
+          <div ref={reportRef}>
+            <PregnancyReport dueDate={dueDate!} firstName={firstName} />
+          </div>
         </div>
       )}
     </div>
