@@ -8,15 +8,33 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log('Incoming request to handle-sms function')
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request')
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { Body, From } = await req.json()
+    // Log the entire request for debugging
+    console.log('Request method:', req.method)
+    console.log('Request headers:', Object.fromEntries(req.headers.entries()))
     
-    console.log('Received message:', Body, 'from:', From)
+    const body = await req.text()
+    console.log('Raw request body:', body)
+    
+    // Try to parse the body as URL-encoded form data (Twilio's format)
+    const formData = new URLSearchParams(body)
+    const Body = formData.get('Body')
+    const From = formData.get('From')
+    
+    console.log('Parsed message:', { Body, From })
 
+    if (!Body || !From) {
+      console.error('Missing required fields in request')
+      throw new Error('Missing Body or From field in request')
+    }
+    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAIApiKey) {
       console.error('OpenAI API key not found in environment variables')
@@ -54,7 +72,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4-mini',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
