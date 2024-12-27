@@ -6,6 +6,7 @@ import { PregnancyReport } from "./PregnancyReport";
 import { supabase } from "@/integrations/supabase/client";
 import { FormFields } from "./registration/FormFields";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
+import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 
 export function RegistrationForm() {
   const [firstName, setFirstName] = useState("");
