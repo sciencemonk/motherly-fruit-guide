@@ -1,40 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { corsHeaders } from './constants.ts'
-import { createHmac } from "https://deno.land/std@0.182.0/crypto/mod.ts"
 import { getAIResponse } from './openai.ts'
 import { medicalKeywords, systemPromptTemplate } from './constants.ts'
 import { TwilioMessage } from './types.ts'
 
 console.log('Edge Function loaded and running')
-
-function validateTwilioSignature(requestUrl: string, params: Record<string, string>, twilioSignature: string, authToken: string): boolean {
-  // Sort the params
-  const sortedParams = Object.keys(params)
-    .sort()
-    .reduce((acc: Record<string, string>, key) => {
-      acc[key] = params[key];
-      return acc;
-    }, {});
-
-  // Create the string to sign
-  const stringToSign = Object.keys(sortedParams)
-    .map(key => key + sortedParams[key])
-    .join('');
-
-  // Create HMAC
-  const hmac = createHmac("sha1", authToken);
-  hmac.update(requestUrl + stringToSign);
-  const expectedSignature = hmac.digest("base64");
-
-  console.log('Validation details:', {
-    stringToSign,
-    expectedSignature,
-    receivedSignature: twilioSignature
-  });
-
-  return expectedSignature === twilioSignature;
-}
 
 function createTwiMLResponse(message: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
