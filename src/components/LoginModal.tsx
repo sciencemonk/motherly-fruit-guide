@@ -29,37 +29,22 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true)
     try {
-      // First check if the code exists and is valid
-      const { data: codes, error } = await supabase
-        .from('verification_codes')
-        .select('phone_number, expires_at')
-        .eq('code', verificationCode)
-        .eq('used', false)
+      // Check if the code exists in profiles table
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('phone_number')
+        .eq('login_code', verificationCode)
         .maybeSingle()
 
       if (error) throw error
 
-      // If no code found or code is expired
-      if (!codes) {
-        throw new Error('Code not found')
+      if (!profile) {
+        throw new Error('Invalid code')
       }
-
-      // Check if code is expired
-      if (new Date(codes.expires_at) < new Date()) {
-        throw new Error('Code has expired')
-      }
-
-      // Mark code as used
-      const { error: updateError } = await supabase
-        .from('verification_codes')
-        .update({ used: true })
-        .eq('code', verificationCode)
-
-      if (updateError) throw updateError
 
       const { data, error: verifyError } = await supabase.functions.invoke('verify-code', {
         body: { 
-          phone_number: codes.phone_number,
+          phone_number: profile.phone_number,
           code: verificationCode
         }
       })
@@ -68,7 +53,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
       if (data?.token) {
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          phone: codes.phone_number,
+          phone: profile.phone_number,
           password: data.token
         })
 
@@ -86,14 +71,10 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       }
     } catch (error) {
       console.error('Error verifying code:', error)
-      let errorMessage = "Invalid verification code. Please try again."
+      let errorMessage = "Invalid verification code. Please check and try again."
       
-      if (error instanceof Error) {
-        if (error.message === 'Code not found') {
-          errorMessage = "Code not found. Please check and try again."
-        } else if (error.message === 'Code has expired') {
-          errorMessage = "This code has expired. Please request a new one."
-        }
+      if (error instanceof Error && error.message === 'Invalid code') {
+        errorMessage = "Invalid code. Please check and try again."
       }
       
       toast({
