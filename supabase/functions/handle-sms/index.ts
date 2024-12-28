@@ -26,14 +26,10 @@ serve(async (req) => {
 
   try {
     const rawBody = await req.text();
-    console.log('Raw request body:', rawBody);
-
     const formData = new URLSearchParams(rawBody);
     const messageBody = formData.get('Body') || '';
     const from = formData.get('From') || '';
     
-    console.log('Parsed SMS details:', { body: messageBody, from });
-
     if (!messageBody) {
       console.error('No message body received');
       return new Response(createTwiMLResponse('Error: No message received'), {
@@ -45,19 +41,38 @@ serve(async (req) => {
       });
     }
 
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check and deduct chat credit
     const { hasCredits, verificationCode } = await deductChatCredit(supabase, from);
     if (!hasCredits) {
-      const loginMessage = verificationCode 
-        ? `You've run out of chat credits. Visit motherathena.com/sign-in to log in and manage your account. Your verification code is: ${verificationCode}. This code will expire in 15 minutes.`
-        : "I'm sorry, you've run out of chat credits. Please visit motherathena.com to manage your account.";
+      // Create a Stripe checkout session
+      const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseServiceKey}`
+        },
+        body: JSON.stringify({ phone_number: from })
+      });
 
-      return new Response(createTwiMLResponse(loginMessage), {
+      const { url: checkoutUrl, error } = await response.json();
+      
+      if (error) {
+        console.error('Error creating checkout session:', error);
+        return new Response(createTwiMLResponse("I'm sorry, there was an error creating your checkout session. Please try again later."), {
+          status: 200,
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'text/xml'
+          }
+        });
+      }
+
+      const upgradeMessage = `You've run out of chat credits. Upgrade to premium for unlimited chats: ${checkoutUrl}`;
+      
+      return new Response(createTwiMLResponse(upgradeMessage), {
         status: 200,
         headers: { 
           ...corsHeaders,
@@ -109,7 +124,6 @@ serve(async (req) => {
         'Content-Type': 'text/xml'
       }
     });
-
   } catch (error) {
     console.error('Error processing request:', error);
     return new Response(

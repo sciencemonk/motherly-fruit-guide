@@ -5,3 +5,6 @@ verify_jwt = false
 
 [send-verification-code]
 verify_jwt = false
+
+[create-checkout]
+verify_jwt = false
