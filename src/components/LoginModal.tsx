@@ -98,7 +98,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             Don't have an account? <Link to="/" onClick={handleClose} className="text-sage-800 hover:underline">Click here</Link> to get started.
           </p>
           <p className="text-sm text-sage-600 mt-2">
-            Text any message to Mother Athena to receive your 6-digit login code.
+            Ask Mother Athena for your login code via text msg.
           </p>
         </DialogHeader>
         <div className="grid gap-4 py-4">
