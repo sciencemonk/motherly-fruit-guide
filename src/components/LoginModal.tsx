@@ -32,7 +32,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       // First, find the profile with this login code
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('phone_number')
+        .select('*')  // Select all fields to get complete profile
         .eq('login_code', verificationCode.toUpperCase())
         .maybeSingle()
 
@@ -45,35 +45,26 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
         throw new Error('Invalid code')
       }
 
-      // Generate a token for authentication
-      const { data, error: verifyError } = await supabase.functions.invoke('verify-code', {
-        body: { 
-          phone_number: profile.phone_number,
-          code: verificationCode
-        }
+      // Sign in directly with phone number and login code
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        phone: profile.phone_number,
+        password: verificationCode.toUpperCase()  // Use the login code as the password
       })
 
-      if (verifyError) throw verifyError
-
-      if (data?.token) {
-        // Sign in with the generated token
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          phone: profile.phone_number,
-          password: data.token
-        })
-
-        if (signInError) throw signInError
-
-        toast({
-          title: "Success",
-          description: "You have been logged in successfully"
-        })
-        
-        // First navigate to dashboard
-        navigate('/dashboard')
-        // Then close the modal
-        onClose()
+      if (signInError) {
+        console.error('Sign in error:', signInError)
+        throw signInError
       }
+
+      toast({
+        title: "Success",
+        description: "You have been logged in successfully"
+      })
+      
+      // First navigate to dashboard
+      navigate('/dashboard')
+      // Then close the modal
+      onClose()
     } catch (error) {
       console.error('Error verifying code:', error)
       let errorMessage = "Invalid verification code. Please check and try again."
