@@ -32,6 +32,52 @@ function calculateGestationalAge(dueDate: string): number | undefined {
   return 40 - diffWeeks;
 }
 
+async function deductChatCredit(supabase: any, phoneNumber: string): Promise<boolean> {
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('chat_credits')
+    .eq('phone_number', phoneNumber)
+    .single();
+
+  if (profileError) {
+    console.error('Error fetching profile:', profileError);
+    return false;
+  }
+
+  if (!profile || profile.chat_credits <= 0) {
+    console.log('User has no chat credits remaining');
+    return false;
+  }
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ chat_credits: profile.chat_credits - 1 })
+    .eq('phone_number', phoneNumber);
+
+  if (updateError) {
+    console.error('Error updating chat credits:', updateError);
+    return false;
+  }
+
+  // Log the credit transaction
+  const { error: transactionError } = await supabase
+    .from('credit_transactions')
+    .insert([
+      {
+        phone_number: phoneNumber,
+        amount: -1,
+        transaction_type: 'message_sent'
+      }
+    ]);
+
+  if (transactionError) {
+    console.error('Error logging credit transaction:', transactionError);
+    // Continue anyway as the credit was already deducted
+  }
+
+  return true;
+}
+
 serve(async (req) => {
   console.log('New request received:', {
     method: req.method,
@@ -40,7 +86,7 @@ serve(async (req) => {
   });
 
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
+    return new Response(null, { 
       status: 200,
       headers: {
         ...corsHeaders,
@@ -74,6 +120,20 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check and deduct chat credit
+    const hasCredits = await deductChatCredit(supabase, from);
+    if (!hasCredits) {
+      return new Response(createTwiMLResponse(
+        "I'm sorry, you've run out of chat credits. You'll receive 10 new credits at the start of next month, or you can upgrade to our premium plan for unlimited chats."
+      ), {
+        status: 200,
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'text/xml'
+        }
+      });
+    }
 
     // Fetch user profile
     const { data: profile, error: profileError } = await supabase
