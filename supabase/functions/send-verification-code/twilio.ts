@@ -1,4 +1,4 @@
-import { Twilio } from 'npm:twilio';
+import twilio from 'npm:twilio';
 
 export async function sendTwilioResponse(message: string, to: string): Promise<string> {
   const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID');
@@ -15,7 +15,7 @@ export async function sendTwilioResponse(message: string, to: string): Promise<s
   }
 
   console.log('Initializing Twilio client...');
-  const client = new Twilio(accountSid, authToken);
+  const client = twilio(accountSid, authToken);
   
   console.log('Sending Twilio message to:', to);
   const twilioMessage = await client.messages.create({
