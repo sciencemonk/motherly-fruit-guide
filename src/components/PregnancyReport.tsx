@@ -2,7 +2,6 @@ import { useState } from "react";
 import { BabySizeCard } from "./pregnancy-report/BabySizeCard";
 import { DevelopmentCard } from "./pregnancy-report/DevelopmentCard";
 import { WeeklyTipsCard } from "./pregnancy-report/WeeklyTipsCard";
-import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 
 interface PregnancyReportProps {
   dueDate: Date;
@@ -93,8 +92,6 @@ export function PregnancyReport({ dueDate, firstName = "" }: PregnancyReportProp
 
   return (
     <div className="space-y-6">
-      <WelcomeMessage firstName={firstName} />
-      
       <BabySizeCard
         gestationalAge={gestationalAge}
         weeksLeft={weeksLeft}
