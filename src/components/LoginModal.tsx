@@ -29,14 +29,16 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true)
     try {
-      const { data: codes } = await supabase
+      const { data: codes, error } = await supabase
         .from('verification_codes')
         .select('phone_number')
         .eq('code', verificationCode)
         .eq('used', false)
         .gt('expires_at', new Date().toISOString())
-        .single()
+        .maybeSingle()
 
+      if (error) throw error
+      
       if (!codes?.phone_number) {
         throw new Error('Invalid or expired code')
       }
@@ -48,14 +50,14 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
       if (updateError) throw updateError
 
-      const { data, error } = await supabase.functions.invoke('verify-code', {
+      const { data, error: verifyError } = await supabase.functions.invoke('verify-code', {
         body: { 
           phone_number: codes.phone_number,
           code: verificationCode
         }
       })
 
-      if (error) throw error
+      if (verifyError) throw verifyError
 
       if (data?.token) {
         const { error: signInError } = await supabase.auth.signInWithPassword({
