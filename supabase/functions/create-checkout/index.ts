@@ -12,23 +12,35 @@ serve(async (req) => {
   }
 
   try {
-    const { phone_number } = await req.json()
+    const { phone_number, price_option } = await req.json()
     
     if (!phone_number) {
       throw new Error('Phone number is required')
+    }
+
+    if (!price_option || (price_option !== '1' && price_option !== '2')) {
+      throw new Error('Valid price option (1 or 2) is required')
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     })
 
-    console.log('Creating checkout session for phone:', phone_number)
+    console.log('Creating checkout session for phone:', phone_number, 'with price option:', price_option)
     
+    const priceId = price_option === '1' 
+      ? Deno.env.get('STRIPE_PRICE_ID')
+      : Deno.env.get('STRIPE_PRICE_ID_2')
+
+    if (!priceId) {
+      throw new Error('Price ID not configured')
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: Deno.env.get('STRIPE_PRICE_ID'),
+          price: priceId,
           quantity: 1,
         },
       ],

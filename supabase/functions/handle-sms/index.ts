@@ -45,23 +45,37 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { hasCredits, verificationCode } = await deductChatCredit(supabase, from);
+    const { hasCredits } = await deductChatCredit(supabase, from);
     if (!hasCredits) {
-      // Create a Stripe checkout session
-      const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseServiceKey}`
-        },
-        body: JSON.stringify({ phone_number: from })
-      });
+      // Check if the message is a subscription choice
+      if (messageBody.trim() === '1' || messageBody.trim() === '2') {
+        // Create a Stripe checkout session with the chosen option
+        const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseServiceKey}`
+          },
+          body: JSON.stringify({ 
+            phone_number: from,
+            price_option: messageBody.trim()
+          })
+        });
 
-      const { url: checkoutUrl, error } = await response.json();
-      
-      if (error) {
-        console.error('Error creating checkout session:', error);
-        return new Response(createTwiMLResponse("I'm sorry, there was an error creating your checkout session. Please try again later."), {
+        const { url: checkoutUrl, error } = await response.json();
+        
+        if (error) {
+          console.error('Error creating checkout session:', error);
+          return new Response(createTwiMLResponse("I'm sorry, there was an error creating your checkout session. Please try again later."), {
+            status: 200,
+            headers: { 
+              ...corsHeaders,
+              'Content-Type': 'text/xml'
+            }
+          });
+        }
+
+        return new Response(createTwiMLResponse(`Great choice! Click here to complete your subscription: ${checkoutUrl}`), {
           status: 200,
           headers: { 
             ...corsHeaders,
@@ -70,7 +84,8 @@ serve(async (req) => {
         });
       }
 
-      const upgradeMessage = `You've run out of chat credits. Upgrade to premium for unlimited chats: ${checkoutUrl}`;
+      // If not a subscription choice, present the options
+      const upgradeMessage = `You've run out of chat credits. Reply with:\n1️⃣ for Monthly Premium ($29/month)\n2️⃣ for Annual Premium ($290/year, save 17%)`;
       
       return new Response(createTwiMLResponse(upgradeMessage), {
         status: 200,
