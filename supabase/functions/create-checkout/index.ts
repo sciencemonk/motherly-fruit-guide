@@ -43,7 +43,7 @@ serve(async (req) => {
     }
 
     // Set a default origin if none is provided
-    const origin = 'https://mother-athena.com'
+    const origin = 'https://motherathena.com'
     console.log('Using origin URL:', origin);
 
     const session = await stripe.checkout.sessions.create({
