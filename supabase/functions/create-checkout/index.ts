@@ -28,6 +28,7 @@ serve(async (req) => {
 
     console.log('Creating checkout session for phone:', phone_number, 'with price option:', price_option)
     
+    // Get the correct price ID based on the selected option
     const priceId = price_option === '1' 
       ? Deno.env.get('STRIPE_PRICE_ID')
       : Deno.env.get('STRIPE_PRICE_ID_2')
