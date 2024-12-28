@@ -49,6 +49,8 @@ serve(async (req) => {
     if (!hasCredits) {
       // Check if the message is a subscription choice
       if (messageBody.trim() === '1' || messageBody.trim() === '2') {
+        console.log('Creating checkout session for subscription choice:', messageBody.trim());
+        
         // Create a Stripe checkout session with the chosen option
         const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
           method: 'POST',
@@ -85,7 +87,7 @@ serve(async (req) => {
       }
 
       // If not a subscription choice, present the options
-      const upgradeMessage = `You've run out of chat credits. Reply with:\n1️⃣ for Monthly Premium ($29/month)\n2️⃣ for Annual Premium ($290/year, save 17%)`;
+      const upgradeMessage = `You've run out of chat credits. Reply with:\n1️⃣ for 50 Chat Credits ($49/month)\n2️⃣ for Unlimited Chats ($79/month)`;
       
       return new Response(createTwiMLResponse(upgradeMessage), {
         status: 200,
