@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-export async function getConversationHistory(supabase: any, phoneNumber: string, limit: number = 3) {
+export async function getConversationHistory(supabase: any, phoneNumber: string, limit: number = 4) { // Increased from 3 to 4 messages
   const { data, error } = await supabase
     .from('chat_history')
     .select('*')
