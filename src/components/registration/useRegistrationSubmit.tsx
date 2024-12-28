@@ -37,6 +37,19 @@ export function useRegistrationSubmit() {
     }
   };
 
+  const generateLoginCode = async (): Promise<string> => {
+    const { data, error } = await supabase.rpc('generate_alphanumeric_code', {
+      length: 6
+    });
+
+    if (error) {
+      console.error('Error generating login code:', error);
+      throw error;
+    }
+
+    return data;
+  };
+
   const handleSubmit = async ({
     firstName,
     phone,
@@ -87,6 +100,9 @@ export function useRegistrationSubmit() {
         return;
       }
 
+      // Generate a unique login code
+      const loginCode = await generateLoginCode();
+
       const { error: insertError } = await supabase
         .from('profiles')
         .insert([
@@ -94,21 +110,33 @@ export function useRegistrationSubmit() {
             phone_number: phone,
             first_name: firstName,
             due_date: dueDate.toISOString().split('T')[0],
+            login_code: loginCode
           }
         ]);
 
       if (insertError) {
         if (insertError.code === '23505') {
-          toast({
-            variant: "destructive",
-            title: "Phone number already registered",
-            description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
-          });
-          setIsLoading(false);
-          return;
+          // In the rare case of a duplicate login code, try again
+          const newLoginCode = await generateLoginCode();
+          const { error: retryError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                phone_number: phone,
+                first_name: firstName,
+                due_date: dueDate.toISOString().split('T')[0],
+                login_code: newLoginCode
+              }
+            ]);
+
+          if (retryError) {
+            console.error('Error storing profile:', retryError);
+            throw retryError;
+          }
+        } else {
+          console.error('Error storing profile:', insertError);
+          throw insertError;
         }
-        console.error('Error storing profile:', insertError);
-        throw insertError;
       }
 
       await sendWelcomeMessage(phone, firstName);

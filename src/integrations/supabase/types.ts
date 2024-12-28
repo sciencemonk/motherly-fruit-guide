@@ -83,6 +83,7 @@ export type Database = {
           is_premium: boolean | null
           last_credits_reset: string | null
           last_sign_in: string | null
+          login_code: string
           phone_number: string
         }
         Insert: {
@@ -94,6 +95,7 @@ export type Database = {
           is_premium?: boolean | null
           last_credits_reset?: string | null
           last_sign_in?: string | null
+          login_code: string
           phone_number: string
         }
         Update: {
@@ -105,6 +107,7 @@ export type Database = {
           is_premium?: boolean | null
           last_credits_reset?: string | null
           last_sign_in?: string | null
+          login_code?: string
           phone_number?: string
         }
         Relationships: []
@@ -162,6 +165,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_alphanumeric_code: {
+        Args: {
+          length: number
+        }
+        Returns: string
+      }
       reset_monthly_credits: {
         Args: Record<PropertyKey, never>
         Returns: undefined
