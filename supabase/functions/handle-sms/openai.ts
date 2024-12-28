@@ -10,7 +10,7 @@ export async function getAIResponse(message: string, systemPrompt: string, apiKe
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4o',  // Changed to use the correct model name
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
