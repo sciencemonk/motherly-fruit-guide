@@ -4,7 +4,7 @@ import { createTwiMLResponse } from './utils.ts';
 export async function deductChatCredit(supabase: any, phoneNumber: string): Promise<{ hasCredits: boolean; verificationCode?: string }> {
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('chat_credits')
+    .select('chat_credits, subscription_status, subscription_type')
     .eq('phone_number', phoneNumber)
     .single();
 
@@ -13,33 +13,19 @@ export async function deductChatCredit(supabase: any, phoneNumber: string): Prom
     return { hasCredits: false };
   }
 
+  // If user has unlimited subscription, they always have credits
+  if (profile.subscription_status === 'active' && profile.subscription_type === 'unlimited') {
+    return { hasCredits: true };
+  }
+
   if (!profile || profile.chat_credits <= 0) {
     console.log('User has no chat credits remaining');
     
-    // Generate a verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // Code expires in 15 minutes
-
-    // Store the verification code
-    const { error: codeError } = await supabase
-      .from('verification_codes')
-      .insert([
-        {
-          phone_number: phoneNumber,
-          code: code,
-          expires_at: expiresAt.toISOString(),
-        }
-      ]);
-
-    if (codeError) {
-      console.error('Error storing verification code:', codeError);
-      return { hasCredits: false };
-    }
-
+    const upgradeMessage = `You've run out of chat credits. Reply with:\n1️⃣ for 50 Chat Credits ($49/month)\n2️⃣ for Unlimited Chats ($79/month)`;
+    
     return { 
       hasCredits: false,
-      verificationCode: code
+      verificationCode: upgradeMessage
     };
   }
 

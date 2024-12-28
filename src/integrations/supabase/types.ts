@@ -84,7 +84,11 @@ export type Database = {
           last_credits_reset: string | null
           last_sign_in: string | null
           login_code: string
+          next_billing_date: string | null
           phone_number: string
+          subscription_id: string | null
+          subscription_status: string | null
+          subscription_type: string | null
         }
         Insert: {
           chat_credits?: number
@@ -96,7 +100,11 @@ export type Database = {
           last_credits_reset?: string | null
           last_sign_in?: string | null
           login_code: string
+          next_billing_date?: string | null
           phone_number: string
+          subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_type?: string | null
         }
         Update: {
           chat_credits?: number
@@ -108,7 +116,11 @@ export type Database = {
           last_credits_reset?: string | null
           last_sign_in?: string | null
           login_code?: string
+          next_billing_date?: string | null
           phone_number?: string
+          subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_type?: string | null
         }
         Relationships: []
       }
