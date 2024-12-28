@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chat_history: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          phone_number: string
+          role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          phone_number: string
+          role: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          phone_number?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_profile"
+            columns: ["phone_number"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["phone_number"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number

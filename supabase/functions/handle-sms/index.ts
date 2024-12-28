@@ -1,114 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { getAIResponse } from './openai.ts'
-import { medicalKeywords, systemPromptTemplate } from './constants.ts'
+import { medicalKeywords, systemPromptTemplate, corsHeaders } from './constants.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-function createTwiMLResponse(message: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-    <Message>${message}</Message>
-</Response>`;
-}
-
-function containsMedicalKeywords(message: string): boolean {
-  return medicalKeywords.some(keyword => 
-    message.toLowerCase().includes(keyword.toLowerCase())
-  );
-}
-
-function calculateGestationalAge(dueDate: string): number | undefined {
-  if (!dueDate) return undefined;
-  
-  const today = new Date();
-  const dueDateObj = new Date(dueDate);
-  const diffTime = dueDateObj.getTime() - today.getTime();
-  const diffWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
-  return 40 - diffWeeks;
-}
-
-async function deductChatCredit(supabase: any, phoneNumber: string): Promise<boolean> {
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('chat_credits')
-    .eq('phone_number', phoneNumber)
-    .single();
-
-  if (profileError) {
-    console.error('Error fetching profile:', profileError);
-    return false;
-  }
-
-  if (!profile || profile.chat_credits <= 0) {
-    console.log('User has no chat credits remaining');
-    return false;
-  }
-
-  const { error: updateError } = await supabase
-    .from('profiles')
-    .update({ chat_credits: profile.chat_credits - 1 })
-    .eq('phone_number', phoneNumber);
-
-  if (updateError) {
-    console.error('Error updating chat credits:', updateError);
-    return false;
-  }
-
-  // Log the credit transaction
-  const { error: transactionError } = await supabase
-    .from('credit_transactions')
-    .insert([
-      {
-        phone_number: phoneNumber,
-        amount: -1,
-        transaction_type: 'message_sent'
-      }
-    ]);
-
-  if (transactionError) {
-    console.error('Error logging credit transaction:', transactionError);
-    // Continue anyway as the credit was already deducted
-  }
-
-  return true;
-}
-
-async function getConversationHistory(supabase: any, phoneNumber: string, limit: number = 3) {
-  const { data, error } = await supabase
-    .from('chat_history')
-    .select('*')
-    .eq('phone_number', phoneNumber)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('Error fetching chat history:', error);
-    return [];
-  }
-
-  return data || [];
-}
-
-async function saveMessage(supabase: any, phoneNumber: string, role: 'user' | 'assistant', content: string) {
-  const { error } = await supabase
-    .from('chat_history')
-    .insert([
-      {
-        phone_number: phoneNumber,
-        role,
-        content
-      }
-    ]);
-
-  if (error) {
-    console.error('Error saving message to chat history:', error);
-  }
-}
+import { getConversationHistory, saveMessage } from './chat-history.ts'
+import { deductChatCredit } from './credit-system.ts'
+import { createTwiMLResponse, calculateGestationalAge } from './utils.ts'
 
 serve(async (req) => {
   console.log('New request received:', {
@@ -168,7 +65,7 @@ serve(async (req) => {
     }
 
     // Fetch user profile and conversation history
-    const [{ data: profile, error: profileError }, previousMessages] = await Promise.all([
+    const [{ data: profile }, previousMessages] = await Promise.all([
       supabase
         .from('profiles')
         .select('first_name, due_date')
@@ -177,13 +74,6 @@ serve(async (req) => {
       getConversationHistory(supabase, from)
     ]);
 
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError);
-    }
-
-    console.log('User profile:', profile);
-    console.log('Previous messages:', previousMessages);
-
     // Save user message
     await saveMessage(supabase, from, 'user', messageBody);
 
@@ -191,8 +81,9 @@ serve(async (req) => {
     const gestationalAge = profile?.due_date ? calculateGestationalAge(profile.due_date) : undefined;
 
     // Check for medical keywords
-    const hasMedicalConcern = containsMedicalKeywords(messageBody);
-    console.log('Medical concern detected:', hasMedicalConcern);
+    const hasMedicalConcern = medicalKeywords.some(keyword => 
+      messageBody.toLowerCase().includes(keyword.toLowerCase())
+    );
     
     // Get AI response with user context and conversation history
     const systemPrompt = systemPromptTemplate(
@@ -202,16 +93,6 @@ serve(async (req) => {
       gestationalAge
     );
 
-    // Create messages array with history
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...previousMessages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      })),
-      { role: 'user', content: messageBody }
-    ];
-
     const aiResponse = await getAIResponse(messageBody, systemPrompt, Deno.env.get('OPENAI_API_KEY')!);
     
     // Save assistant response
@@ -219,10 +100,7 @@ serve(async (req) => {
     
     console.log('AI response generated:', aiResponse);
 
-    const twimlResponse = createTwiMLResponse(aiResponse);
-    console.log('Sending TwiML response:', twimlResponse);
-
-    return new Response(twimlResponse, {
+    return new Response(createTwiMLResponse(aiResponse), {
       status: 200,
       headers: { 
         ...corsHeaders,

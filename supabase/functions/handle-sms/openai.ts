@@ -3,7 +3,6 @@ export async function getAIResponse(message: string, systemPrompt: string, apiKe
   console.log('System prompt:', systemPrompt);
   
   try {
-    // Get conversation history from Supabase
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
