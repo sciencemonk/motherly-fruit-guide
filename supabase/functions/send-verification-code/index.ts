@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import twilio from "npm:twilio"
+import "https://deno.land/x/xhr@0.1.0/mod.ts"
+import { sendTwilioResponse } from './twilio.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -46,30 +47,6 @@ serve(async (req) => {
     const expiresAt = new Date()
     expiresAt.setMinutes(expiresAt.getMinutes() + 10)
 
-    // Initialize Twilio client
-    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
-    
-    if (!accountSid || !authToken || !messagingServiceSid) {
-      const missingVars = []
-      if (!accountSid) missingVars.push('TWILIO_A2P_ACCOUNT_SID')
-      if (!authToken) missingVars.push('TWILIO_AUTH_TOKEN')
-      if (!messagingServiceSid) missingVars.push('TWILIO_MESSAGING_SERVICE_SID')
-      
-      console.error('Missing Twilio configuration:', missingVars.join(', '))
-      return new Response(
-        JSON.stringify({ 
-          error: 'Server configuration error',
-          details: `Missing required Twilio configuration: ${missingVars.join(', ')}` 
-        }), 
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
     // Store the verification code first
     try {
       const { error: dbError } = await supabaseClient
@@ -99,23 +76,13 @@ serve(async (req) => {
 
     // Send SMS using Twilio
     try {
-      console.log('Initializing Twilio client with:', {
-        accountSid,
-        messagingServiceSid,
-        toNumber: phone_number
-      })
-
-      const client = twilio(accountSid, authToken)
-      await client.messages.create({
-        body: `Your Mother Athena verification code is: ${code}`,
-        to: phone_number,
-        messagingServiceSid: messagingServiceSid,
-      })
+      const message = `Your Mother Athena verification code is: ${code}`
+      const messageSid = await sendTwilioResponse(message, phone_number)
       
       console.log('SMS sent successfully')
 
       return new Response(
-        JSON.stringify({ message: 'Verification code sent successfully' }),
+        JSON.stringify({ message: 'Verification code sent successfully', messageSid }),
         { 
           status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
