@@ -29,20 +29,27 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true)
     try {
+      // First check if the code exists and is valid
       const { data: codes, error } = await supabase
         .from('verification_codes')
-        .select('phone_number')
+        .select('phone_number, expires_at')
         .eq('code', verificationCode)
         .eq('used', false)
-        .gt('expires_at', new Date().toISOString())
         .maybeSingle()
 
       if (error) throw error
-      
-      if (!codes?.phone_number) {
-        throw new Error('Invalid or expired code')
+
+      // If no code found or code is expired
+      if (!codes) {
+        throw new Error('Code not found')
       }
 
+      // Check if code is expired
+      if (new Date(codes.expires_at) < new Date()) {
+        throw new Error('Code has expired')
+      }
+
+      // Mark code as used
       const { error: updateError } = await supabase
         .from('verification_codes')
         .update({ used: true })
@@ -79,9 +86,19 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       }
     } catch (error) {
       console.error('Error verifying code:', error)
+      let errorMessage = "Invalid verification code. Please try again."
+      
+      if (error instanceof Error) {
+        if (error.message === 'Code not found') {
+          errorMessage = "Code not found. Please check and try again."
+        } else if (error.message === 'Code has expired') {
+          errorMessage = "This code has expired. Please request a new one."
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Invalid verification code. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       })
     } finally {
