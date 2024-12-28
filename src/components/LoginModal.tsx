@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 interface LoginModalProps {
   isOpen: boolean
@@ -19,6 +19,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const handleSendCode = async () => {
     if (!phoneNumber) {
@@ -88,6 +89,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           title: "Success",
           description: "You have been logged in successfully"
         })
+        navigate('/dashboard')
         onClose()
       }
     } catch (error) {
