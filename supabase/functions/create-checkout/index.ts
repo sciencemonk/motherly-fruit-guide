@@ -30,12 +30,19 @@ serve(async (req) => {
     
     // Get the correct price ID based on the selected option
     const priceId = price_option === '1' 
-      ? Deno.env.get('STRIPE_PRICE_ID')
-      : Deno.env.get('STRIPE_PRICE_ID_2')
+      ? Deno.env.get('STRIPE_PRICE_ID')  // 50 credits for $49/month
+      : Deno.env.get('STRIPE_PRICE_ID_2') // Unlimited for $79/month
 
     if (!priceId) {
+      console.error('Price ID not configured:', { 
+        option: price_option, 
+        priceId1: Deno.env.get('STRIPE_PRICE_ID'),
+        priceId2: Deno.env.get('STRIPE_PRICE_ID_2')
+      });
       throw new Error('Price ID not configured')
     }
+
+    console.log('Using price ID:', priceId);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
