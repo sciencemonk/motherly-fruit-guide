@@ -78,6 +78,38 @@ async function deductChatCredit(supabase: any, phoneNumber: string): Promise<boo
   return true;
 }
 
+async function getConversationHistory(supabase: any, phoneNumber: string, limit: number = 3) {
+  const { data, error } = await supabase
+    .from('chat_history')
+    .select('*')
+    .eq('phone_number', phoneNumber)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching chat history:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function saveMessage(supabase: any, phoneNumber: string, role: 'user' | 'assistant', content: string) {
+  const { error } = await supabase
+    .from('chat_history')
+    .insert([
+      {
+        phone_number: phoneNumber,
+        role,
+        content
+      }
+    ]);
+
+  if (error) {
+    console.error('Error saving message to chat history:', error);
+  }
+}
+
 serve(async (req) => {
   console.log('New request received:', {
     method: req.method,
@@ -135,18 +167,25 @@ serve(async (req) => {
       });
     }
 
-    // Fetch user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('first_name, due_date')
-      .eq('phone_number', from)
-      .single();
+    // Fetch user profile and conversation history
+    const [{ data: profile, error: profileError }, previousMessages] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('first_name, due_date')
+        .eq('phone_number', from)
+        .single(),
+      getConversationHistory(supabase, from)
+    ]);
 
     if (profileError) {
       console.error('Error fetching user profile:', profileError);
     }
 
     console.log('User profile:', profile);
+    console.log('Previous messages:', previousMessages);
+
+    // Save user message
+    await saveMessage(supabase, from, 'user', messageBody);
 
     // Calculate gestational age if due date exists
     const gestationalAge = profile?.due_date ? calculateGestationalAge(profile.due_date) : undefined;
@@ -155,14 +194,28 @@ serve(async (req) => {
     const hasMedicalConcern = containsMedicalKeywords(messageBody);
     console.log('Medical concern detected:', hasMedicalConcern);
     
-    // Get AI response with user context
+    // Get AI response with user context and conversation history
     const systemPrompt = systemPromptTemplate(
       hasMedicalConcern,
       profile?.first_name,
       profile?.due_date,
       gestationalAge
     );
+
+    // Create messages array with history
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...previousMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      { role: 'user', content: messageBody }
+    ];
+
     const aiResponse = await getAIResponse(messageBody, systemPrompt, Deno.env.get('OPENAI_API_KEY')!);
+    
+    // Save assistant response
+    await saveMessage(supabase, from, 'assistant', aiResponse);
     
     console.log('AI response generated:', aiResponse);
 
