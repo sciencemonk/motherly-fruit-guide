@@ -64,10 +64,10 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           description: "You have been logged in successfully"
         })
         
-        // Close the modal first
-        onClose()
-        // Then navigate to dashboard
+        // First navigate to dashboard
         navigate('/dashboard')
+        // Then close the modal
+        onClose()
       }
     } catch (error) {
       console.error('Error verifying code:', error)
