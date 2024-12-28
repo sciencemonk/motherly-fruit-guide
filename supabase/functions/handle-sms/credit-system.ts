@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createTwiMLResponse } from './utils.ts';
 
-export async function deductChatCredit(supabase: any, phoneNumber: string): Promise<boolean> {
+export async function deductChatCredit(supabase: any, phoneNumber: string): Promise<{ hasCredits: boolean; verificationCode?: string }> {
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('chat_credits')
@@ -9,12 +10,37 @@ export async function deductChatCredit(supabase: any, phoneNumber: string): Prom
 
   if (profileError) {
     console.error('Error fetching profile:', profileError);
-    return false;
+    return { hasCredits: false };
   }
 
   if (!profile || profile.chat_credits <= 0) {
     console.log('User has no chat credits remaining');
-    return false;
+    
+    // Generate a verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // Code expires in 15 minutes
+
+    // Store the verification code
+    const { error: codeError } = await supabase
+      .from('verification_codes')
+      .insert([
+        {
+          phone_number: phoneNumber,
+          code: code,
+          expires_at: expiresAt.toISOString(),
+        }
+      ]);
+
+    if (codeError) {
+      console.error('Error storing verification code:', codeError);
+      return { hasCredits: false };
+    }
+
+    return { 
+      hasCredits: false,
+      verificationCode: code
+    };
   }
 
   const { error: updateError } = await supabase
@@ -24,7 +50,7 @@ export async function deductChatCredit(supabase: any, phoneNumber: string): Prom
 
   if (updateError) {
     console.error('Error updating chat credits:', updateError);
-    return false;
+    return { hasCredits: false };
   }
 
   // Log the credit transaction
@@ -42,5 +68,5 @@ export async function deductChatCredit(supabase: any, phoneNumber: string): Prom
     console.error('Error logging credit transaction:', transactionError);
   }
 
-  return true;
+  return { hasCredits: true };
 }

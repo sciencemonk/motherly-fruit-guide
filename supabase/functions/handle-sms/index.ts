@@ -51,11 +51,13 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check and deduct chat credit
-    const hasCredits = await deductChatCredit(supabase, from);
+    const { hasCredits, verificationCode } = await deductChatCredit(supabase, from);
     if (!hasCredits) {
-      return new Response(createTwiMLResponse(
-        "I'm sorry, you've run out of chat credits. You'll receive 10 new credits at the start of next month, or you can upgrade to our premium plan for unlimited chats."
-      ), {
+      const loginMessage = verificationCode 
+        ? `You've run out of chat credits. Visit motherathena.com/sign-in to log in and manage your account. Your verification code is: ${verificationCode}. This code will expire in 15 minutes.`
+        : "I'm sorry, you've run out of chat credits. Please visit motherathena.com to manage your account.";
+
+      return new Response(createTwiMLResponse(loginMessage), {
         status: 200,
         headers: { 
           ...corsHeaders,
@@ -110,8 +112,6 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error processing request:', error);
-    console.error('Error stack:', error.stack);
-    
     return new Response(
       createTwiMLResponse('An error occurred processing your message. Please try again later.'),
       {
