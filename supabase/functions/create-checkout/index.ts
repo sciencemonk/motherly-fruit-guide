@@ -42,7 +42,9 @@ serve(async (req) => {
       throw new Error('Price ID not configured')
     }
 
-    console.log('Using price ID:', priceId);
+    // Set a default origin if none is provided
+    const origin = 'https://mother-athena.com'
+    console.log('Using origin URL:', origin);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -53,8 +55,8 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/?success=true`,
-      cancel_url: `${req.headers.get('origin')}/?canceled=true`,
+      success_url: `${origin}/?success=true`,
+      cancel_url: `${origin}/?canceled=true`,
       metadata: {
         phone_number: phone_number,
       },
