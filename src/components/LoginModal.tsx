@@ -29,19 +29,23 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true)
     try {
-      // Check if the code exists in profiles table
-      const { data: profile, error } = await supabase
+      // First, find the profile with this login code
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('phone_number')
-        .eq('login_code', verificationCode)
+        .eq('login_code', verificationCode.toUpperCase())
         .maybeSingle()
 
-      if (error) throw error
+      if (profileError) {
+        console.error('Error fetching profile:', profileError)
+        throw new Error('Error verifying code')
+      }
 
       if (!profile) {
         throw new Error('Invalid code')
       }
 
+      // Generate a token for authentication
       const { data, error: verifyError } = await supabase.functions.invoke('verify-code', {
         body: { 
           phone_number: profile.phone_number,
@@ -52,6 +56,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       if (verifyError) throw verifyError
 
       if (data?.token) {
+        // Sign in with the generated token
         const { error: signInError } = await supabase.auth.signInWithPassword({
           phone: profile.phone_number,
           password: data.token
@@ -73,8 +78,10 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       console.error('Error verifying code:', error)
       let errorMessage = "Invalid verification code. Please check and try again."
       
-      if (error instanceof Error && error.message === 'Invalid code') {
-        errorMessage = "Invalid code. Please check and try again."
+      if (error instanceof Error) {
+        if (error.message === 'Invalid code') {
+          errorMessage = "Invalid code. Please check and try again."
+        }
       }
       
       toast({
