@@ -17,7 +17,12 @@ export function FormFields({
   setPhone,
 }: FormFieldsProps) {
   return (
-    <>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold text-sage-800 mb-2">Let's get to know you</h2>
+        <p className="text-sage-600">We'll use this information to personalize your experience.</p>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="firstName" className="text-sage-700 text-lg">First Name</Label>
         <Input
@@ -39,6 +44,6 @@ export function FormFields({
           className="flex h-10 w-full rounded-md border border-sage-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-sage-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </div>
-    </>
+    </div>
   );
 }

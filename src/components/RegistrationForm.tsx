@@ -7,6 +7,13 @@ import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
+import { format } from "date-fns";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 
 export function RegistrationForm() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -92,12 +99,28 @@ export function RegistrationForm() {
               <h2 className="text-2xl font-semibold text-sage-800 mb-2">When is your baby due?</h2>
               <p className="text-sage-600">We'll customize your experience based on your stage of pregnancy.</p>
             </div>
-            <input
-              type="date"
-              value={dueDate?.toISOString().split('T')[0] || ''}
-              onChange={(e) => setDueDate(new Date(e.target.value))}
-              className="w-full p-2 border rounded-md"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         );
       case 3:
@@ -107,12 +130,28 @@ export function RegistrationForm() {
               <h2 className="text-2xl font-semibold text-sage-800 mb-2">What interests you most about having a healthy baby?</h2>
               <p className="text-sage-600">This helps us personalize your experience.</p>
             </div>
-            <textarea
-              value={interests}
-              onChange={(e) => setInterests(e.target.value)}
-              className="w-full p-2 border rounded-md h-32"
-              placeholder="Share your interests..."
-            />
+            <RadioGroup value={interests} onValueChange={setInterests} className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="nutrition" id="nutrition" />
+                <Label htmlFor="nutrition">Nutrition and diet during pregnancy</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="exercise" id="exercise" />
+                <Label htmlFor="exercise">Safe exercise and staying active</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="development" id="development" />
+                <Label htmlFor="development">Baby's development and milestones</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="mental" id="mental" />
+                <Label htmlFor="mental">Mental health and emotional wellbeing</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="preparation" id="preparation" />
+                <Label htmlFor="preparation">Birth preparation and labor</Label>
+              </div>
+            </RadioGroup>
           </div>
         );
       case 4:
@@ -126,7 +165,7 @@ export function RegistrationForm() {
               value={lifestyle}
               onChange={(e) => setLifestyle(e.target.value)}
               className="w-full p-2 border rounded-md h-32"
-              placeholder="Share about your lifestyle..."
+              placeholder="Share details about your daily routine, exercise habits, diet preferences, work life, and any specific concerns you have about your pregnancy journey..."
             />
           </div>
         );
