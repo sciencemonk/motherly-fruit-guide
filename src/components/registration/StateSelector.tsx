@@ -31,7 +31,7 @@ export function StateSelector({ state, setState }: StateSelectorProps) {
         <SelectTrigger id="state" className="w-full">
           <SelectValue placeholder="Select your state" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="item-aligned" side="bottom" align="start" sideOffset={4}>
           {states.map((stateName) => (
             <SelectItem key={stateName} value={stateName}>
               {stateName}
