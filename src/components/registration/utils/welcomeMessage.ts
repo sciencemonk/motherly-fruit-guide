@@ -12,7 +12,7 @@ export const sendWelcomeMessage = async (phoneNumber: string, firstName: string)
     const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
       body: {
         to: e164Phone,
-        message: `Welcome to Mother Athena, ${firstName}! 🤰 Your 7-day free trial starts now. You'll receive daily pregnancy tips and guidance, and you can text me anytime with questions. For emergencies, always consult your healthcare provider. Reply STOP to cancel messages.`
+        message: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
       }
     });
 
