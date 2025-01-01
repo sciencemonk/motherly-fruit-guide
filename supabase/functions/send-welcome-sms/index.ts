@@ -4,7 +4,6 @@ import twilio from 'npm:twilio'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
@@ -29,12 +28,16 @@ serve(async (req) => {
     }
 
     // Get Twilio credentials
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
 
-    if (!accountSid || !authToken) {
-      console.error('Missing Twilio credentials')
+    if (!accountSid || !authToken || !messagingServiceSid) {
+      console.error('Missing Twilio credentials:', {
+        hasAccountSid: !!accountSid,
+        hasAuthToken: !!authToken,
+        hasMessagingServiceSid: !!messagingServiceSid
+      })
       throw new Error('Missing Twilio credentials')
     }
 
@@ -47,7 +50,7 @@ serve(async (req) => {
 
     // Basic E.164 validation
     if (!/^\+[1-9]\d{1,14}$/.test(e164Phone)) {
-      throw new Error(`The 'To' number ${e164Phone} is not a valid phone number.`)
+      throw new Error(`Invalid phone number format: ${e164Phone}`)
     }
 
     console.log('Formatted phone number:', e164Phone)

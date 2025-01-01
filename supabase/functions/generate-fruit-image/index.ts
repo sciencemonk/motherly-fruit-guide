@@ -8,88 +8,45 @@ const corsHeaders = {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      status: 204,
+      headers: corsHeaders
+    })
   }
 
   try {
     const { fruitName } = await req.json()
-    
-    const API_ENDPOINT = "wss://ws-api.runware.ai/v1"
-    const RUNWARE_API_KEY = Deno.env.get('RUNWARE_API_KEY')
+    console.log('Generating image for fruit:', fruitName)
 
-    if (!RUNWARE_API_KEY) {
-      throw new Error('RUNWARE_API_KEY is not set')
-    }
+    // For now, return a placeholder image URL
+    // In a real implementation, this would generate or fetch a real fruit image
+    const imageURL = `https://placehold.co/400x400/sage/white?text=${encodeURIComponent(fruitName)}`
 
-    const ws = new WebSocket(API_ENDPOINT)
-    
-    const imagePromise = new Promise((resolve, reject) => {
-      ws.onopen = () => {
-        console.log("WebSocket connected")
-        
-        // Authenticate
-        const authMessage = [{
-          taskType: "authentication",
-          apiKey: RUNWARE_API_KEY,
-        }]
-        
-        ws.send(JSON.stringify(authMessage))
+    return new Response(
+      JSON.stringify({ imageURL }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 200 
       }
-
-      ws.onmessage = (event) => {
-        const response = JSON.parse(event.data)
-        console.log("Received message:", response)
-
-        if (response.error || response.errors) {
-          reject(new Error(response.errorMessage || response.errors?.[0]?.message || "An error occurred"))
-          return
-        }
-
-        if (response.data) {
-          response.data.forEach((item: any) => {
-            if (item.taskType === "authentication") {
-              console.log("Authentication successful")
-              
-              // Generate image after authentication
-              const taskUUID = crypto.randomUUID()
-              const message = [{
-                taskType: "imageInference",
-                taskUUID,
-                model: "runware:100@1",
-                positivePrompt: `A simple, cute, emoji-style illustration of a ${fruitName} on a white background. Minimalist, clean design, similar to Apple emoji style.`,
-                width: 512,
-                height: 512,
-                numberResults: 1,
-                outputFormat: "WEBP",
-                CFGScale: 1,
-                scheduler: "FlowMatchEulerDiscreteScheduler",
-                strength: 0.8,
-              }]
-              
-              ws.send(JSON.stringify(message))
-            } else if (item.taskType === "imageInference") {
-              resolve(item)
-              ws.close()
-            }
-          })
-        }
-      }
-
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error)
-        reject(error)
-      }
-    })
-
-    const result = await imagePromise
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    )
   } catch (error) {
-    console.error("Error:", error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    console.error('Error in generate-fruit-image:', error)
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'Internal server error',
+        details: error.toString(),
+        timestamp: new Date().toISOString()
+      }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 400
+      }
+    )
   }
 })
