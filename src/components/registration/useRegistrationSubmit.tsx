@@ -40,6 +40,19 @@ export function useRegistrationSubmit() {
     }
   };
 
+  const generateLoginCode = async (): Promise<string> => {
+    const { data, error } = await supabase.rpc('generate_alphanumeric_code', {
+      length: 6
+    });
+
+    if (error) {
+      console.error('Error generating login code:', error);
+      throw error;
+    }
+
+    return data;
+  };
+
   const handleSubmit = async ({
     firstName,
     phone,
@@ -72,6 +85,8 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
+      const loginCode = await generateLoginCode();
+
       // Check if profile exists
       const { data: existingProfile } = await supabase
         .from('profiles')
@@ -91,6 +106,7 @@ export function useRegistrationSubmit() {
             due_date: dueDate.toISOString().split('T')[0],
             interests: interests,
             lifestyle: lifestyle,
+            login_code: loginCode,
             subscription_type: 'premium',
             subscription_status: 'trial'
           })
@@ -101,16 +117,17 @@ export function useRegistrationSubmit() {
         // Insert new profile
         const { error: insertError } = await supabase
           .from('profiles')
-          .insert([{
+          .insert({
             phone_number: phone,
             first_name: firstName,
             city: city,
             due_date: dueDate.toISOString().split('T')[0],
             interests: interests,
             lifestyle: lifestyle,
+            login_code: loginCode,
             subscription_type: 'premium',
             subscription_status: 'trial'
-          }]);
+          });
           
         profileError = insertError;
       }
