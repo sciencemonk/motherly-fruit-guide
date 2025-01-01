@@ -30,12 +30,24 @@ const Welcome = () => {
           if (error) throw error
 
           setProfile(data)
+
+          // Send welcome message after successful checkout
+          const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
+            body: { phone_number: data.phone_number, first_name: data.first_name }
+          })
+
+          if (welcomeError) throw welcomeError
+
+          toast({
+            title: "Welcome to Mother Athena!",
+            description: "Please check your phone for your first message.",
+          })
         } catch (error) {
           console.error('Error fetching profile:', error)
           toast({
             variant: "destructive",
-            title: "Error loading your profile",
-            description: "We couldn't load your pregnancy report. Please try refreshing the page.",
+            title: "Error",
+            description: "There was a problem loading your profile.",
           })
         } finally {
           setIsLoading(false)
