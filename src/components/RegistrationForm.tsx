@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StepIndicator } from "./registration/StepIndicator";
 import { FormFields } from "./registration/FormFields";
 import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
@@ -13,8 +13,23 @@ import { Input } from "./ui/input";
 import { StateSelector } from "./registration/StateSelector";
 import { PregnancyReport } from "./PregnancyReport";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
+import { useSearchParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export function RegistrationForm() {
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const registrationStatus = searchParams.get('registration');
+
+  useEffect(() => {
+    if (registrationStatus === 'success') {
+      toast({
+        title: "Welcome to Mother Athena!",
+        description: "Please check your phone for your first message.",
+      });
+    }
+  }, [registrationStatus, toast]);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
