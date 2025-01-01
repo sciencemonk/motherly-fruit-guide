@@ -1,19 +1,17 @@
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface ConsentCheckboxProps {
-  smsConsent: boolean;
-  setSmsConsent: (checked: boolean) => void;
-  isLoading: boolean;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
 }
 
-export function ConsentCheckbox({ smsConsent, setSmsConsent, isLoading }: ConsentCheckboxProps) {
+export function ConsentCheckbox({ checked, onCheckedChange }: ConsentCheckboxProps) {
   return (
     <div className="flex items-start space-x-2">
       <Checkbox 
         id="sms-consent" 
-        checked={smsConsent}
-        onCheckedChange={(checked) => setSmsConsent(checked as boolean)}
-        disabled={isLoading}
+        checked={checked}
+        onCheckedChange={(checked) => onCheckedChange(checked as boolean)}
         className="mt-1"
       />
       <label
