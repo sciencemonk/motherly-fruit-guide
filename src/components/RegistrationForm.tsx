@@ -11,15 +11,14 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { Input } from "./ui/input";
 
 export function RegistrationForm() {
   const [currentStep, setCurrentStep] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [interests, setInterests] = useState("");
   const [lifestyle, setLifestyle] = useState("");
@@ -65,7 +64,7 @@ export function RegistrationForm() {
       case 0:
         return firstName.length > 0 && phone.length > 0;
       case 1:
-        return city.length > 0;
+        return city.length > 0 && state.length > 0;
       case 2:
         return dueDate !== undefined;
       case 3:
@@ -91,7 +90,34 @@ export function RegistrationForm() {
           />
         );
       case 1:
-        return <CityField city={city} setCity={setCity} />;
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Where are you located?</h2>
+              <p className="text-sage-600">We'll use this to provide local resources and connect you with nearby moms.</p>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Enter your city"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  placeholder="Enter your state"
+                />
+              </div>
+            </div>
+          </div>
+        );
       case 2:
         return (
           <div className="space-y-4">
@@ -99,28 +125,14 @@ export function RegistrationForm() {
               <h2 className="text-2xl font-semibold text-sage-800 mb-2">When is your baby due?</h2>
               <p className="text-sage-600">We'll customize your experience based on your stage of pregnancy.</p>
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !dueDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="mx-auto bg-white rounded-lg shadow p-4">
+              <Calendar
+                mode="single"
+                selected={dueDate}
+                onSelect={setDueDate}
+                className="rounded-md border"
+              />
+            </div>
           </div>
         );
       case 3:
