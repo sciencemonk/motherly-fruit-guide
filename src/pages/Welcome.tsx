@@ -18,40 +18,49 @@ const Welcome = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const phone = searchParams.get('phone')
+      console.log('Phone from URL:', phone) // Debug log
       
-      if (phone) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('phone_number', decodeURIComponent(phone))
-            .single()
+      if (!phone) {
+        console.error('No phone number provided in URL')
+        setIsLoading(false)
+        return
+      }
 
-          if (error) throw error
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('phone_number', decodeURIComponent(phone))
+          .single()
 
-          setProfile(data)
-
-          // Send welcome message after successful checkout
-          const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
-            body: { phone_number: data.phone_number, first_name: data.first_name }
-          })
-
-          if (welcomeError) throw welcomeError
-
-          toast({
-            title: "Welcome to Mother Athena!",
-            description: "Please check your phone for your first message.",
-          })
-        } catch (error) {
+        if (error) {
           console.error('Error fetching profile:', error)
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "There was a problem loading your profile.",
-          })
-        } finally {
-          setIsLoading(false)
+          throw error
         }
+
+        console.log('Profile data:', data) // Debug log
+        setProfile(data)
+
+        // Send welcome message after successful checkout
+        const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
+          body: { phone_number: data.phone_number, first_name: data.first_name }
+        })
+
+        if (welcomeError) throw welcomeError
+
+        toast({
+          title: "Welcome to Mother Athena!",
+          description: "Please check your phone for your first message.",
+        })
+      } catch (error) {
+        console.error('Error in welcome page:', error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "There was a problem loading your profile.",
+        })
+      } finally {
+        setIsLoading(false)
       }
     }
 
