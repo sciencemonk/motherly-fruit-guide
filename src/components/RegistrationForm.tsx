@@ -277,41 +277,47 @@ export function RegistrationForm() {
   }
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6">
-      <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-      {renderStep()}
-      <div className="flex justify-between mt-6">
-        {currentStep > 0 && (
-          <Button type="button" variant="outline" onClick={handleBack}>
-            Back
-          </Button>
-        )}
-        {currentStep < totalSteps - 1 ? (
-          <Button
-            type="button"
-            onClick={handleNext}
-            disabled={!isStepValid() || isLoading}
-            className="ml-auto"
-          >
-            Next
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            disabled={!isStepValid() || isLoading}
-            className="ml-auto bg-peach-500 hover:bg-peach-600"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              "Start Free Trial"
+    <div className="registration-form">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
+        <div className="form-content">
+          <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
+          <div className="flex-1">
+            {renderStep()}
+          </div>
+          <div className="flex justify-between mt-6">
+            {currentStep > 0 && (
+              <Button type="button" variant="outline" onClick={handleBack}>
+                Back
+              </Button>
             )}
-          </Button>
-        )}
-      </div>
-    </form>
+            {currentStep < totalSteps - 1 ? (
+              <Button
+                type="button"
+                onClick={handleNext}
+                disabled={!isStepValid() || isLoading}
+                className={`${currentStep === 0 ? 'w-full' : 'ml-auto'}`}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={!isStepValid() || isLoading}
+                className="ml-auto bg-peach-500 hover:bg-peach-600"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Start Free Trial"
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
