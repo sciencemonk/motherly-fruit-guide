@@ -27,10 +27,13 @@ const Welcome = () => {
       }
 
       try {
+        const decodedPhone = decodeURIComponent(phone)
+        console.log('Decoded phone:', decodedPhone) // Debug log
+
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('phone_number', decodeURIComponent(phone))
+          .eq('phone_number', decodedPhone)
           .single()
 
         if (error) {
@@ -43,7 +46,11 @@ const Welcome = () => {
 
         // Send welcome message after successful checkout
         const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
-          body: { phone_number: data.phone_number, first_name: data.first_name }
+          body: { 
+            phone_number: data.phone_number, 
+            first_name: data.first_name,
+            message: `Welcome to Mother Athena, ${data.first_name}! We're excited to be part of your pregnancy journey.`
+          }
         })
 
         if (welcomeError) throw welcomeError

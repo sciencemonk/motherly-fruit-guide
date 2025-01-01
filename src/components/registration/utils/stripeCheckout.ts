@@ -13,7 +13,7 @@ export const createCheckoutSession = async ({
   successUrl, 
   cancelUrl 
 }: CheckoutOptions) => {
-  // Ensure the success URL includes the phone number parameter
+  // Ensure the success URL includes only the phone number parameter
   const encodedPhone = encodeURIComponent(phoneNumber);
   const defaultSuccessUrl = `${window.location.origin}/welcome?phone=${encodedPhone}`;
   
