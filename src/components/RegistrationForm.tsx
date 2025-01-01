@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FormFields } from "./registration/FormFields";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
@@ -8,6 +8,7 @@ import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
 import { addMonths } from "date-fns";
 import { StepIndicator } from "./registration/StepIndicator";
 import { SocialProof } from "./registration/SocialProof";
+import { LifestyleField } from "./registration/LifestyleField";
 
 export function RegistrationForm() {
   const {
@@ -19,6 +20,8 @@ export function RegistrationForm() {
     setDueDate,
     interests,
     setInterests,
+    lifestyle,
+    setLifestyle,
     isSubmitted,
     setIsSubmitted,
     isLoading,
@@ -29,7 +32,7 @@ export function RegistrationForm() {
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 3;
+  const totalSteps = 5;
 
   const { handleSubmit } = useRegistrationSubmit();
 
@@ -45,6 +48,7 @@ export function RegistrationForm() {
       phone,
       dueDate: dueDate!,
       interests,
+      lifestyle,
       smsConsent,
       setIsLoading,
       setIsSubmitted
@@ -67,49 +71,80 @@ export function RegistrationForm() {
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
               Let's get to know you
             </h2>
-            <div className="space-y-4">
-              <FormFields
-                firstName={firstName}
-                setFirstName={setFirstName}
-                phone={phone}
-                setPhone={setPhone}
-                dueDate={undefined}
-                setDueDate={setDueDate}
-                interests={undefined}
-                setInterests={setInterests}
-                today={today}
-                maxDate={maxDate}
-                isLoading={isLoading}
-                showOnlyBasicInfo={true}
-              />
-            </div>
+            <FormFields
+              firstName={firstName}
+              setFirstName={setFirstName}
+              phone={phone}
+              setPhone={setPhone}
+              dueDate={undefined}
+              setDueDate={setDueDate}
+              interests={undefined}
+              setInterests={setInterests}
+              today={today}
+              maxDate={maxDate}
+              isLoading={isLoading}
+              showOnlyBasicInfo={true}
+            />
           </div>
         );
       case 1:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              Tell us about your pregnancy
+              When is your baby due?
             </h2>
-            <div className="space-y-4">
-              <FormFields
-                firstName={firstName}
-                setFirstName={setFirstName}
-                phone={phone}
-                setPhone={setPhone}
-                dueDate={dueDate}
-                setDueDate={setDueDate}
-                interests={interests}
-                setInterests={setInterests}
-                today={today}
-                maxDate={maxDate}
-                isLoading={isLoading}
-                showOnlyPregnancyInfo={true}
-              />
-            </div>
+            <FormFields
+              firstName={firstName}
+              setFirstName={setFirstName}
+              phone={phone}
+              setPhone={setPhone}
+              dueDate={dueDate}
+              setDueDate={setDueDate}
+              interests={interests}
+              setInterests={setInterests}
+              today={today}
+              maxDate={maxDate}
+              isLoading={isLoading}
+              showOnlyDueDate={true}
+            />
           </div>
         );
       case 2:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-sage-800 text-center">
+              Your Interests
+            </h2>
+            <FormFields
+              firstName={firstName}
+              setFirstName={setFirstName}
+              phone={phone}
+              setPhone={setPhone}
+              dueDate={dueDate}
+              setDueDate={setDueDate}
+              interests={interests}
+              setInterests={setInterests}
+              today={today}
+              maxDate={maxDate}
+              isLoading={isLoading}
+              showOnlyInterests={true}
+            />
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-sage-800 text-center">
+              Tell us about yourself
+            </h2>
+            <LifestyleField
+              lifestyle={lifestyle}
+              setLifestyle={setLifestyle}
+              isLoading={isLoading}
+            />
+          </div>
+        );
+      case 4:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
@@ -156,8 +191,12 @@ export function RegistrationForm() {
       case 0:
         return firstName && phone;
       case 1:
-        return dueDate && interests;
+        return dueDate;
       case 2:
+        return interests;
+      case 3:
+        return lifestyle.length > 0;
+      case 4:
         return smsConsent;
       default:
         return false;

@@ -6,6 +6,7 @@ interface RegistrationData {
   phone: string;
   dueDate: Date;
   interests: string;
+  lifestyle: string;
   smsConsent: boolean;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
@@ -56,11 +57,12 @@ export function useRegistrationSubmit() {
     phone,
     dueDate,
     interests,
+    lifestyle,
     smsConsent,
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
-    if (!firstName || !phone || !dueDate || !interests) {
+    if (!firstName || !phone || !dueDate || !interests || !lifestyle) {
       toast({
         variant: "destructive",
         title: "Please fill in all fields",
@@ -113,6 +115,7 @@ export function useRegistrationSubmit() {
             first_name: firstName,
             due_date: dueDate.toISOString().split('T')[0],
             interests: interests,
+            lifestyle: lifestyle,
             login_code: loginCode,
             subscription_type: 'premium',
             subscription_status: 'trial'

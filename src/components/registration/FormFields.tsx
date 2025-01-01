@@ -19,7 +19,8 @@ interface FormFieldsProps {
   maxDate: Date;
   isLoading: boolean;
   showOnlyBasicInfo?: boolean;
-  showOnlyPregnancyInfo?: boolean;
+  showOnlyDueDate?: boolean;
+  showOnlyInterests?: boolean;
 }
 
 export function FormFields({
@@ -35,7 +36,8 @@ export function FormFields({
   maxDate,
   isLoading,
   showOnlyBasicInfo,
-  showOnlyPregnancyInfo
+  showOnlyDueDate,
+  showOnlyInterests
 }: FormFieldsProps) {
   const renderBasicInfo = () => (
     <>
@@ -65,67 +67,72 @@ export function FormFields({
     </>
   );
 
-  const renderPregnancyInfo = () => (
-    <>
-      <div className="space-y-2">
-        <Label className="text-sage-700 text-lg">Due Date</Label>
-        <div className="flex justify-center">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-sage-200">
-            <Calendar
-              mode="single"
-              selected={dueDate}
-              onSelect={setDueDate}
-              disabled={(date) => date < today || date > maxDate || isLoading}
-              className={cn(
-                "mx-auto",
-                "rounded-md",
-                "[&_.rdp-day_focus]:bg-sage-50",
-                "[&_.rdp-day_hover]:bg-sage-100",
-                "[&_.rdp-day_active]:bg-sage-500",
-                "[&_.rdp-day_active]:text-white",
-                "[&_.rdp-day_selected]:bg-sage-500",
-                "[&_.rdp-day_selected]:text-white",
-                "[&_.rdp-head_cell]:text-sage-600",
-                "[&_.rdp-caption_label]:text-sage-700",
-                "[&_.rdp-nav_button]:hover:bg-sage-100",
-                "[&_.rdp-nav_button]:active:bg-sage-200"
-              )}
-              initialFocus
-            />
-          </div>
+  const renderDueDate = () => (
+    <div className="space-y-2">
+      <Label className="text-sage-700 text-lg">Due Date</Label>
+      <div className="flex justify-center">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-sage-200">
+          <Calendar
+            mode="single"
+            selected={dueDate}
+            onSelect={setDueDate}
+            disabled={(date) => date < today || date > maxDate || isLoading}
+            className={cn(
+              "mx-auto",
+              "rounded-md",
+              "[&_.rdp-day_focus]:bg-sage-50",
+              "[&_.rdp-day_hover]:bg-sage-100",
+              "[&_.rdp-day_active]:bg-sage-500",
+              "[&_.rdp-day_active]:text-white",
+              "[&_.rdp-day_selected]:bg-sage-500",
+              "[&_.rdp-day_selected]:text-white",
+              "[&_.rdp-head_cell]:text-sage-600",
+              "[&_.rdp-caption_label]:text-sage-700",
+              "[&_.rdp-nav_button]:hover:bg-sage-100",
+              "[&_.rdp-nav_button]:active:bg-sage-200"
+            )}
+            initialFocus
+          />
         </div>
       </div>
+    </div>
+  );
 
-      <div className="space-y-2">
-        <Label htmlFor="interests" className="text-sage-700 text-lg">What interests you most about having a healthy baby?</Label>
-        <Select value={interests} onValueChange={setInterests} disabled={isLoading}>
-          <SelectTrigger className="w-full bg-white/80">
-            <SelectValue placeholder="Select your main interest" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="nutrition">Nutrition & Diet During Pregnancy</SelectItem>
-            <SelectItem value="exercise">Safe Exercise & Physical Activity</SelectItem>
-            <SelectItem value="development">Baby's Development Stages</SelectItem>
-            <SelectItem value="mental-health">Mental Health & Emotional Wellbeing</SelectItem>
-            <SelectItem value="preparation">Birth Preparation & Labor</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </>
+  const renderInterests = () => (
+    <div className="space-y-2">
+      <Label htmlFor="interests" className="text-sage-700 text-lg">What interests you most about having a healthy baby?</Label>
+      <Select value={interests} onValueChange={setInterests} disabled={isLoading}>
+        <SelectTrigger className="w-full bg-white/80">
+          <SelectValue placeholder="Select your main interest" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="nutrition">Nutrition & Diet During Pregnancy</SelectItem>
+          <SelectItem value="exercise">Safe Exercise & Physical Activity</SelectItem>
+          <SelectItem value="development">Baby's Development Stages</SelectItem>
+          <SelectItem value="mental-health">Mental Health & Emotional Wellbeing</SelectItem>
+          <SelectItem value="preparation">Birth Preparation & Labor</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   );
 
   if (showOnlyBasicInfo) {
     return renderBasicInfo();
   }
 
-  if (showOnlyPregnancyInfo) {
-    return renderPregnancyInfo();
+  if (showOnlyDueDate) {
+    return renderDueDate();
+  }
+
+  if (showOnlyInterests) {
+    return renderInterests();
   }
 
   return (
     <>
       {renderBasicInfo()}
-      {renderPregnancyInfo()}
+      {renderDueDate()}
+      {renderInterests()}
     </>
   );
 }

@@ -5,6 +5,7 @@ export function useRegistrationState() {
   const [phone, setPhone] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [interests, setInterests] = useState("");
+  const [lifestyle, setLifestyle] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
@@ -20,6 +21,8 @@ export function useRegistrationState() {
     setDueDate,
     interests,
     setInterests,
+    lifestyle,
+    setLifestyle,
     isSubmitted,
     setIsSubmitted,
     isLoading,
