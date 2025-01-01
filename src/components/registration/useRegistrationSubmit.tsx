@@ -32,7 +32,7 @@ export function useRegistrationSubmit() {
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
-    if (!firstName || !phone || !city || !dueDate || !interests || !lifestyle || !preferredTime) {
+    if (!firstName || !phone || !city || !state || !dueDate || !interests || !lifestyle || !preferredTime) {
       toast({
         variant: "destructive",
         title: "Please fill in all fields",
@@ -80,20 +80,18 @@ export function useRegistrationSubmit() {
         // Create new profile
         const { error: insertError } = await supabase
           .from('profiles')
-          .insert([
-            {
-              phone_number: phone,
-              first_name: firstName,
-              city,
-              state,
-              due_date: dueDate.toISOString(),
-              interests,
-              lifestyle,
-              preferred_notification_time: preferredTime,
-              subscription_status: 'trial',
-              trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            }
-          ]);
+          .insert({
+            phone_number: phone,
+            first_name: firstName,
+            city,
+            state,
+            due_date: dueDate.toISOString(),
+            interests,
+            lifestyle,
+            preferred_notification_time: preferredTime,
+            subscription_status: 'trial',
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          });
 
         if (insertError) throw insertError;
       }

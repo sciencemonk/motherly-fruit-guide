@@ -105,6 +105,7 @@ export function RegistrationForm() {
       firstName,
       phone,
       city,
+      state,
       dueDate,
       interests,
       lifestyle,

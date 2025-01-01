@@ -90,6 +90,7 @@ export type Database = {
           next_billing_date: string | null
           phone_number: string
           preferred_notification_time: string | null
+          state: string | null
           subscription_id: string | null
           subscription_status: string | null
           subscription_type: string | null
@@ -111,6 +112,7 @@ export type Database = {
           next_billing_date?: string | null
           phone_number: string
           preferred_notification_time?: string | null
+          state?: string | null
           subscription_id?: string | null
           subscription_status?: string | null
           subscription_type?: string | null
@@ -132,6 +134,7 @@ export type Database = {
           next_billing_date?: string | null
           phone_number?: string
           preferred_notification_time?: string | null
+          state?: string | null
           subscription_id?: string | null
           subscription_status?: string | null
           subscription_type?: string | null
