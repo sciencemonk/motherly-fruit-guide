@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { convertLocalToUTC, convertUTCToLocal } from "@/utils/timeZone";
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams();
@@ -246,6 +247,7 @@ export function RegistrationForm() {
           <TimePickerField
             preferredTime={preferredTime}
             setPreferredTime={setPreferredTime}
+            city={city}
           />
         );
       case 6:
