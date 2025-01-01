@@ -13,6 +13,10 @@ import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams();

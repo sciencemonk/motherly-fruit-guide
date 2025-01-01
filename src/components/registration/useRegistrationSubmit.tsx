@@ -10,6 +10,7 @@ interface RegistrationData {
   dueDate: Date;
   interests: string;
   lifestyle: string;
+  preferredTime: string;
   smsConsent: boolean;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
@@ -25,11 +26,12 @@ export function useRegistrationSubmit() {
     dueDate,
     interests,
     lifestyle,
+    preferredTime,
     smsConsent,
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
-    if (!firstName || !phone || !city || !dueDate || !interests || !lifestyle) {
+    if (!firstName || !phone || !city || !dueDate || !interests || !lifestyle || !preferredTime) {
       toast({
         variant: "destructive",
         title: "Please fill in all fields",
@@ -57,7 +59,8 @@ export function useRegistrationSubmit() {
         city,
         dueDate,
         interests,
-        lifestyle
+        lifestyle,
+        preferredTime
       });
 
       // Get the current origin for success/cancel URLs
