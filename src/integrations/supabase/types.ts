@@ -41,7 +41,7 @@ export type Database = {
           },
         ]
       }
-      credit_transactions: {
+      message_transactions: {
         Row: {
           amount: number
           created_at: string | null
@@ -75,7 +75,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          chat_credits: number
           city: string | null
           created_at: string
           due_date: string | null
@@ -83,7 +82,6 @@ export type Database = {
           id: string
           interests: string | null
           is_premium: boolean | null
-          last_credits_reset: string | null
           last_sign_in: string | null
           lifestyle: string | null
           login_code: string
@@ -97,7 +95,6 @@ export type Database = {
           trial_ends_at: string | null
         }
         Insert: {
-          chat_credits?: number
           city?: string | null
           created_at?: string
           due_date?: string | null
@@ -105,7 +102,6 @@ export type Database = {
           id?: string
           interests?: string | null
           is_premium?: boolean | null
-          last_credits_reset?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
           login_code: string
@@ -119,7 +115,6 @@ export type Database = {
           trial_ends_at?: string | null
         }
         Update: {
-          chat_credits?: number
           city?: string | null
           created_at?: string
           due_date?: string | null
@@ -127,7 +122,6 @@ export type Database = {
           id?: string
           interests?: string | null
           is_premium?: boolean | null
-          last_credits_reset?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
           login_code?: string
@@ -200,10 +194,6 @@ export type Database = {
           length: number
         }
         Returns: string
-      }
-      reset_monthly_credits: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
     }
     Enums: {

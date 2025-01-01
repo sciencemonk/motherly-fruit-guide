@@ -4,7 +4,7 @@ import { getAIResponse } from './openai.ts'
 import { medicalKeywords, systemPromptTemplate, corsHeaders } from './constants.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getConversationHistory, saveMessage } from './chat-history.ts'
-import { deductChatCredit } from './credit-system.ts'
+import { trackMessage } from './credit-system.ts'
 import { createTwiMLResponse, calculateGestationalAge } from './utils.ts'
 
 serve(async (req) => {
@@ -45,58 +45,8 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { hasCredits } = await deductChatCredit(supabase, from);
-    if (!hasCredits) {
-      // Check if the message is a subscription choice
-      if (messageBody.trim() === '1' || messageBody.trim() === '2') {
-        console.log('Creating checkout session for subscription choice:', messageBody.trim());
-        
-        // Create a Stripe checkout session with the chosen option
-        const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseServiceKey}`
-          },
-          body: JSON.stringify({ 
-            phone_number: from,
-            price_option: messageBody.trim()
-          })
-        });
-
-        const { url: checkoutUrl, error } = await response.json();
-        
-        if (error) {
-          console.error('Error creating checkout session:', error);
-          return new Response(createTwiMLResponse("I'm sorry, there was an error creating your checkout session. Please try again later."), {
-            status: 200,
-            headers: { 
-              ...corsHeaders,
-              'Content-Type': 'text/xml'
-            }
-          });
-        }
-
-        return new Response(createTwiMLResponse(`Great choice! Click here to complete your subscription: ${checkoutUrl}`), {
-          status: 200,
-          headers: { 
-            ...corsHeaders,
-            'Content-Type': 'text/xml'
-          }
-        });
-      }
-
-      // If not a subscription choice, present the options
-      const upgradeMessage = `You've run out of chat credits. Reply with:\n1️⃣ for 50 Chat Credits ($49/month)\n2️⃣ for Unlimited Chats ($79/month)`;
-      
-      return new Response(createTwiMLResponse(upgradeMessage), {
-        status: 200,
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'text/xml'
-        }
-      });
-    }
+    // Track the message
+    await trackMessage(supabase, from);
 
     // Fetch user profile and conversation history
     const [{ data: profile }, previousMessages] = await Promise.all([
