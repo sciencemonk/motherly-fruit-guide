@@ -76,9 +76,8 @@ export function useRegistrationSubmit() {
       });
 
       if (checkoutData?.url) {
-        // Ensure the URL is properly formatted before redirecting
-        const checkoutUrl = new URL(checkoutData.url);
-        window.location.href = checkoutUrl.toString();
+        // Instead of redirecting directly, open in the same window
+        window.location.href = checkoutData.url;
       } else {
         throw new Error('No checkout URL received');
       }

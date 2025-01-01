@@ -28,7 +28,7 @@ serve(async (req) => {
             product: 'prod_RVHzCMiLrCYtzk',
             currency: 'usd',
             recurring: {
-              interval: 'month'
+              interval: 'week'  // Changed from 'month' to 'week'
             },
             unit_amount: 999, // $9.99
           },
@@ -39,7 +39,7 @@ serve(async (req) => {
       subscription_data: trial ? {
         trial_period_days: 7,
       } : undefined,
-      success_url: success_url || `${req.headers.get('origin')}/dashboard`,
+      success_url: success_url || `${req.headers.get('origin')}/dashboard?registration=success&phone=${encodeURIComponent(phone_number)}`,
       cancel_url: cancel_url || `${req.headers.get('origin')}`,
       metadata: {
         phone_number,
