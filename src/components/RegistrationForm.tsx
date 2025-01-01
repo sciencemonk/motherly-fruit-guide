@@ -9,6 +9,7 @@ import { addMonths } from "date-fns";
 import { StepIndicator } from "./registration/StepIndicator";
 import { SocialProof } from "./registration/SocialProof";
 import { LifestyleField } from "./registration/LifestyleField";
+import { CityField } from "./registration/CityField";
 
 export function RegistrationForm() {
   const {
@@ -16,6 +17,8 @@ export function RegistrationForm() {
     setFirstName,
     phone,
     setPhone,
+    city,
+    setCity,
     dueDate,
     setDueDate,
     interests,
@@ -32,7 +35,7 @@ export function RegistrationForm() {
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 5;
+  const totalSteps = 6; // Increased by 1 for the city step
 
   const { handleSubmit } = useRegistrationSubmit();
 
@@ -46,6 +49,7 @@ export function RegistrationForm() {
     await handleSubmit({
       firstName,
       phone,
+      city,
       dueDate: dueDate!,
       interests,
       lifestyle,
@@ -91,6 +95,19 @@ export function RegistrationForm() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
+              Where do you live?
+            </h2>
+            <CityField
+              city={city}
+              setCity={setCity}
+              isLoading={isLoading}
+            />
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-sage-800 text-center">
               When is your baby due?
             </h2>
             <FormFields
@@ -109,7 +126,7 @@ export function RegistrationForm() {
             />
           </div>
         );
-      case 2:
+      case 3:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
@@ -131,7 +148,7 @@ export function RegistrationForm() {
             />
           </div>
         );
-      case 3:
+      case 4:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
@@ -144,7 +161,7 @@ export function RegistrationForm() {
             />
           </div>
         );
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-semibold text-sage-800 text-center">
@@ -191,12 +208,14 @@ export function RegistrationForm() {
       case 0:
         return firstName && phone;
       case 1:
-        return dueDate;
+        return city && city.length > 0;
       case 2:
-        return interests;
+        return dueDate;
       case 3:
-        return lifestyle.length > 0;
+        return interests;
       case 4:
+        return lifestyle.length > 0;
+      case 5:
         return smsConsent;
       default:
         return false;

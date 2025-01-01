@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 export function useRegistrationState() {
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [interests, setInterests] = useState("");
   const [lifestyle, setLifestyle] = useState("");
@@ -17,6 +18,8 @@ export function useRegistrationState() {
     setFirstName,
     phone,
     setPhone,
+    city,
+    setCity,
     dueDate,
     setDueDate,
     interests,

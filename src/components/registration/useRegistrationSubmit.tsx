@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface RegistrationData {
   firstName: string;
   phone: string;
+  city: string;
   dueDate: Date;
   interests: string;
   lifestyle: string;
@@ -55,6 +56,7 @@ export function useRegistrationSubmit() {
   const handleSubmit = async ({
     firstName,
     phone,
+    city,
     dueDate,
     interests,
     lifestyle,
@@ -62,7 +64,7 @@ export function useRegistrationSubmit() {
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
-    if (!firstName || !phone || !dueDate || !interests || !lifestyle) {
+    if (!firstName || !phone || !city || !dueDate || !interests || !lifestyle) {
       toast({
         variant: "destructive",
         title: "Please fill in all fields",
@@ -113,6 +115,7 @@ export function useRegistrationSubmit() {
           {
             phone_number: phone,
             first_name: firstName,
+            city: city,
             due_date: dueDate.toISOString().split('T')[0],
             interests: interests,
             lifestyle: lifestyle,
