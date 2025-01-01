@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormFields } from "./registration/FormFields";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
