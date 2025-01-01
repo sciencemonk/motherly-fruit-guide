@@ -15,37 +15,27 @@ const Index = () => {
         <div className="container px-4 py-8 md:py-16 mx-auto">
           <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
             {/* Hero Section */}
-            <div className="text-center relative">
-              <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-to-br from-peach-200 to-peach-400 border-4 border-white shadow-lg">
-                <img
-                  src="/lovable-uploads/3e55059e-9f8f-45fe-8e4a-209511a4a83a.png"
-                  alt="Mother Athena"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-              <div className="pt-12">
-                <div className="flex justify-center mb-4">
-                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-peach-100 text-peach-800 text-sm font-medium">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    7-Day Free Trial
-                  </div>
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-peach-100 text-peach-800 text-sm font-medium">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  7-Day Free Trial
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
-                  Meet Mother Athena
-                </h1>
-                <p className="text-lg text-sage-700 max-w-2xl mx-auto mb-8">
-                  Your personal AI pregnancy guide, providing daily advice and support to help you grow a healthy baby. 
-                  Start your free 7-day trial today, then continue for just $9.99/month.
-                </p>
-                {!showRegistration && (
-                  <Button 
-                    onClick={() => setShowRegistration(true)}
-                    className="bg-peach-400 hover:bg-peach-500 text-peach-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
-                  >
-                    Start Your Free Trial
-                  </Button>
-                )}
               </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
+                Meet Mother Athena
+              </h1>
+              <p className="text-lg text-sage-700 max-w-2xl mx-auto mb-8">
+                Your personal AI pregnancy guide, providing daily advice and support to help you grow a healthy baby. 
+              </p>
+              {!showRegistration && (
+                <Button 
+                  onClick={() => setShowRegistration(true)}
+                  className="bg-peach-400 hover:bg-peach-500 text-peach-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+                >
+                  Start Your Free Trial
+                </Button>
+              )}
             </div>
 
             {/* How It Works Section */}
@@ -106,17 +96,6 @@ const Index = () => {
                 <RegistrationForm />
               </div>
             )}
-
-            {/* Pricing Info */}
-            <div className="text-center space-y-4">
-              <p className="text-sage-700">
-                <span className="font-semibold">Free 7-Day Trial</span>, then just{" "}
-                <span className="font-semibold">$9.99/month</span>
-              </p>
-              <p className="text-sm text-sage-600">
-                Cancel anytime. No commitment required.
-              </p>
-            </div>
 
             {/* Medical Disclaimer */}
             <div className="mt-12 text-center text-sm text-sage-600 px-4">
