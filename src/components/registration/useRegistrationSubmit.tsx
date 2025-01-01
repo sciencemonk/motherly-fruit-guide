@@ -85,28 +85,6 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('phone_number')
-        .eq('phone_number', phone)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Error checking existing profile:', fetchError);
-        throw fetchError;
-      }
-
-      if (existingProfile) {
-        toast({
-          variant: "destructive",
-          title: "Phone number already registered",
-          description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Generate a unique login code
       const loginCode = await generateLoginCode();
 
       const { error: insertError } = await supabase
@@ -132,7 +110,6 @@ export function useRegistrationSubmit() {
 
       await sendWelcomeMessage(phone, firstName);
 
-      // Create Stripe checkout session for trial
       const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
         'create-checkout',
         {
@@ -148,8 +125,9 @@ export function useRegistrationSubmit() {
         throw checkoutError;
       }
 
-      // Redirect to Stripe checkout
-      window.location.href = checkoutData.url;
+      if (checkoutData?.url) {
+        window.location.href = checkoutData.url;
+      }
 
       toast({
         title: "Welcome to Mother Athena!",

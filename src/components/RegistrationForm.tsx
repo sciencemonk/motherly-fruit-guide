@@ -2,7 +2,6 @@ import { useState } from "react";
 import { StepIndicator } from "./registration/StepIndicator";
 import { FormFields } from "./registration/FormFields";
 import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
-import { CityField } from "./registration/CityField";
 import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
@@ -12,6 +11,7 @@ import { Label } from "./ui/label";
 import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
+import { StateSelector } from "./registration/StateSelector";
 
 export function RegistrationForm() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -106,15 +106,7 @@ export function RegistrationForm() {
                   placeholder="Enter your city"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  placeholder="Enter your state"
-                />
-              </div>
+              <StateSelector state={state} setState={setState} />
             </div>
           </div>
         );
@@ -125,13 +117,15 @@ export function RegistrationForm() {
               <h2 className="text-2xl font-semibold text-sage-800 mb-2">When is your baby due?</h2>
               <p className="text-sage-600">We'll customize your experience based on your stage of pregnancy.</p>
             </div>
-            <div className="mx-auto bg-white rounded-lg shadow p-4">
-              <Calendar
-                mode="single"
-                selected={dueDate}
-                onSelect={setDueDate}
-                className="rounded-md border"
-              />
+            <div className="flex justify-center">
+              <div className="bg-white rounded-lg shadow p-4">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  className="rounded-md border"
+                />
+              </div>
             </div>
           </div>
         );
