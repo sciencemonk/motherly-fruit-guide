@@ -28,7 +28,7 @@ serve(async (req) => {
             product: 'prod_RVHzCMiLrCYtzk',
             currency: 'usd',
             recurring: {
-              interval: 'week'  // Changed from 'month' to 'week'
+              interval: 'week'
             },
             unit_amount: 999, // $9.99
           },
@@ -39,14 +39,17 @@ serve(async (req) => {
       subscription_data: trial ? {
         trial_period_days: 7,
       } : undefined,
-      success_url: success_url || `${req.headers.get('origin')}/dashboard?registration=success&phone=${encodeURIComponent(phone_number)}`,
-      cancel_url: cancel_url || `${req.headers.get('origin')}`,
+      // Ensure the success URL includes the full path to /welcome
+      success_url: `${new URL(req.url).origin}/welcome?phone=${encodeURIComponent(phone_number)}`,
+      cancel_url: cancel_url || `${new URL(req.url).origin}`,
       metadata: {
         phone_number,
       },
     })
 
     console.log('Payment session created:', session.id)
+    console.log('Success URL:', session.success_url) // Debug log
+    
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
