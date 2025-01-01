@@ -9,7 +9,7 @@ const OurStory = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <div 
-          className="relative h-[50vh] flex items-center"
+          className="relative h-[50vh] pt-24 flex items-center" // Added pt-24 for more padding above
           style={{
             backgroundImage: 'url("/lovable-uploads/4e1d9a07-eb10-4bd0-a20d-59eea66c2289.png")',
             backgroundSize: 'cover',
@@ -34,7 +34,7 @@ const OurStory = () => {
                   <Baby className="w-12 h-12 text-sage-600 mb-4" />
                   <h3 className="text-xl font-semibold text-sage-700 mb-3">Our Beginning</h3>
                   <p className="text-sage-700">
-                    Mother Athena was born from a vision of supporting mothers through their pregnancy journey using the power of AI and personalized care.
+                    Mother Athena began as a deeply personal project. When our founder, a software engineer, saw his wife Athena navigating the complexities of pregnancy, he realized technology could provide better support. Inspired by her journey, he created Mother Athena to combine AI-powered assistance with personalized care, naming the platform in her honor.
                   </p>
                 </div>
                 
