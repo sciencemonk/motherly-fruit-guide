@@ -32,6 +32,13 @@ serve(async (req) => {
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
 
+    // Log credential availability for debugging
+    console.log('Checking Twilio credentials:', {
+      hasAccountSid: !!accountSid,
+      hasAuthToken: !!authToken,
+      hasMessagingServiceSid: !!messagingServiceSid
+    })
+
     if (!accountSid || !authToken || !messagingServiceSid) {
       console.error('Missing Twilio credentials:', {
         hasAccountSid: !!accountSid,
@@ -56,7 +63,7 @@ serve(async (req) => {
     console.log('Formatted phone number:', e164Phone)
 
     // Send the message using Messaging Service SID
-    console.log('Attempting to send SMS...')
+    console.log('Attempting to send SMS using Messaging Service SID:', messagingServiceSid)
     const twilioMessage = await client.messages.create({
       body: message,
       to: e164Phone,
