@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Menu } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const Navbar = () => {
   const isMobile = useIsMobile()
@@ -19,10 +26,29 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center space-x-6">
-          <nav className="hidden md:flex space-x-4">
-            <Link to="/our-story" className="text-sage-700 hover:text-sage-900">Our Story</Link>
-            <Link to="/contact" className="text-sage-700 hover:text-sage-900">Contact Us</Link>
-          </nav>
+          {isMobile ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-2">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Open menu</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px] bg-white">
+                <DropdownMenuItem asChild>
+                  <Link to="/our-story" className="w-full">Our Story</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/contact" className="w-full">Contact Us</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <nav className="hidden md:flex space-x-4">
+              <Link to="/our-story" className="text-sage-700 hover:text-sage-900">Our Story</Link>
+              <Link to="/contact" className="text-sage-700 hover:text-sage-900">Contact Us</Link>
+            </nav>
+          )}
         </div>
       </div>
     </div>
