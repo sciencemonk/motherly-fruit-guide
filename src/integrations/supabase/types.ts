@@ -85,6 +85,7 @@ export type Database = {
           is_premium: boolean | null
           last_credits_reset: string | null
           last_sign_in: string | null
+          lifestyle: string | null
           login_code: string
           next_billing_date: string | null
           phone_number: string
@@ -104,6 +105,7 @@ export type Database = {
           is_premium?: boolean | null
           last_credits_reset?: string | null
           last_sign_in?: string | null
+          lifestyle?: string | null
           login_code: string
           next_billing_date?: string | null
           phone_number: string
@@ -123,6 +125,7 @@ export type Database = {
           is_premium?: boolean | null
           last_credits_reset?: string | null
           last_sign_in?: string | null
+          lifestyle?: string | null
           login_code?: string
           next_billing_date?: string | null
           phone_number?: string
