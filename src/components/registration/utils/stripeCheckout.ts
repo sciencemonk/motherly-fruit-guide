@@ -20,7 +20,8 @@ export const createCheckoutSession = async ({
         phone_number: phoneNumber,
         trial,
         success_url: successUrl,
-        cancel_url: cancelUrl
+        cancel_url: cancelUrl,
+        product_id: 'prod_RVHzCMiLrCYtzk' // Updated product ID
       }
     }
   );

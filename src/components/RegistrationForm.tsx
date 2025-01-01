@@ -15,20 +15,13 @@ import { PregnancyReport } from "./PregnancyReport";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const registrationStatus = searchParams.get('registration');
-
-  useEffect(() => {
-    if (registrationStatus === 'success') {
-      toast({
-        title: "Welcome to Mother Athena!",
-        description: "Please check your phone for your first message.",
-      });
-    }
-  }, [registrationStatus, toast]);
+  const phoneFromParams = searchParams.get('phone');
 
   const [currentStep, setCurrentStep] = useState(0);
   const [firstName, setFirstName] = useState("");
@@ -41,8 +34,51 @@ export function RegistrationForm() {
   const [smsConsent, setSmsConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
 
   const { handleSubmit } = useRegistrationSubmit();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (registrationStatus === 'success' && phoneFromParams) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('phone_number', decodeURIComponent(phoneFromParams))
+            .single();
+
+          if (error) throw error;
+
+          setProfile(data);
+          setFirstName(data.first_name);
+          setDueDate(new Date(data.due_date));
+          setIsSubmitted(true);
+
+          // Send welcome message after successful checkout
+          const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
+            body: { phone_number: data.phone_number, first_name: data.first_name }
+          });
+
+          if (welcomeError) throw welcomeError;
+
+          toast({
+            title: "Welcome to Mother Athena!",
+            description: "Please check your phone for your first message.",
+          });
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "There was a problem loading your profile.",
+          });
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [registrationStatus, phoneFromParams, toast]);
 
   const totalSteps = 6;
 
@@ -216,11 +252,11 @@ export function RegistrationForm() {
     }
   };
 
-  if (isSubmitted) {
+  if (isSubmitted && dueDate && profile) {
     return (
-      <div className="text-center space-y-4">
-        <h2 className="text-2xl font-semibold text-sage-800">Welcome to Mother Athena!</h2>
-        <p className="text-sage-600">Please check your phone for a welcome message.</p>
+      <div className="space-y-6">
+        <WelcomeMessage firstName={firstName} />
+        <PregnancyReport dueDate={dueDate} firstName={firstName} />
       </div>
     );
   }

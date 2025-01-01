@@ -24,7 +24,14 @@ serve(async (req) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: Deno.env.get('STRIPE_PRICE_ID'),
+          price_data: {
+            product: 'prod_RVHzCMiLrCYtzk',
+            currency: 'usd',
+            recurring: {
+              interval: 'month'
+            },
+            unit_amount: 999, // $9.99
+          },
           quantity: 1,
         },
       ],

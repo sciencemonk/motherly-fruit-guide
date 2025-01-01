@@ -50,6 +50,7 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
+      // Create profile first
       await handleProfileUpdate({
         firstName,
         phone,
@@ -59,22 +60,9 @@ export function useRegistrationSubmit() {
         lifestyle
       });
 
-      // Set submitted state before sending welcome message and creating checkout
-      setIsSubmitted(true);
-
-      // Send welcome message in the background
-      sendWelcomeMessage(phone, firstName).catch(error => {
-        console.error('Error sending welcome message:', error);
-        toast({
-          variant: "destructive",
-          title: "Welcome message error",
-          description: "There was a problem sending your welcome message, but your account was created successfully.",
-        });
-      });
-
       // Get the current origin for success/cancel URLs
       const origin = window.location.origin;
-      const successUrl = `${origin}/?registration=success`;
+      const successUrl = `${origin}/?registration=success&phone=${encodeURIComponent(phone)}`;
       const cancelUrl = `${origin}/?registration=cancelled`;
 
       const checkoutData = await createCheckoutSession({
