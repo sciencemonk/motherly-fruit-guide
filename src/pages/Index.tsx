@@ -3,7 +3,10 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { Baby, MessageSquare, Brain, Heart, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { useSearchParams } from "react-router-dom"
+import { sendWelcomeMessage } from "@/components/registration/utils/welcomeMessage"
 import {
   Dialog,
   DialogContent,
@@ -12,6 +15,33 @@ import {
 
 const Index = () => {
   const [showRegistration, setShowRegistration] = useState(false)
+  const [searchParams] = useSearchParams()
+  const { toast } = useToast()
+
+  useEffect(() => {
+    const registration = searchParams.get('registration')
+    const phone = searchParams.get('phone')
+    const firstName = searchParams.get('firstName')
+
+    if (registration === 'success' && phone) {
+      // Send welcome message
+      sendWelcomeMessage(phone, firstName || '')
+        .then(() => {
+          toast({
+            title: "Welcome to Mother Athena!",
+            description: "Check your phone for a welcome message. We're excited to be part of your journey!",
+          })
+        })
+        .catch((error) => {
+          console.error('Error sending welcome message:', error)
+          toast({
+            variant: "destructive",
+            title: "Welcome message error",
+            description: "There was a problem sending your welcome message. Our team has been notified.",
+          })
+        })
+    }
+  }, [searchParams, toast])
 
   const handleOpenChange = (open: boolean) => {
     // Only allow closing via the X button by ignoring outside clicks
