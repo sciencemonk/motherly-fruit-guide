@@ -1,12 +1,12 @@
 import { useToast } from "@/hooks/use-toast";
-import { sendWelcomeMessage } from "./utils/welcomeMessage";
+import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "./utils/stripeCheckout";
-import { handleProfileUpdate } from "./utils/profileManagement";
 
 interface RegistrationData {
   firstName: string;
   phone: string;
   city: string;
+  state: string;
   dueDate: Date;
   interests: string;
   lifestyle: string;
@@ -23,6 +23,7 @@ export function useRegistrationSubmit() {
     firstName,
     phone,
     city,
+    state,
     dueDate,
     interests,
     lifestyle,
@@ -52,16 +53,50 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Create profile first
-      await handleProfileUpdate({
-        firstName,
-        phone,
-        city,
-        dueDate,
-        interests,
-        lifestyle,
-        preferredTime
-      });
+      // First check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('phone_number', phone)
+        .maybeSingle();
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName,
+            city,
+            state,
+            due_date: dueDate.toISOString(),
+            interests,
+            lifestyle,
+            preferred_notification_time: preferredTime,
+          })
+          .eq('phone_number', phone);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              phone_number: phone,
+              first_name: firstName,
+              city,
+              state,
+              due_date: dueDate.toISOString(),
+              interests,
+              lifestyle,
+              preferred_notification_time: preferredTime,
+              subscription_status: 'trial',
+              trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            }
+          ]);
+
+        if (insertError) throw insertError;
+      }
 
       // Get the current origin for success/cancel URLs
       const origin = window.location.origin;
@@ -76,7 +111,6 @@ export function useRegistrationSubmit() {
       });
 
       if (checkoutData?.url) {
-        // Instead of redirecting directly, open in the same window
         window.location.href = checkoutData.url;
       } else {
         throw new Error('No checkout URL received');
