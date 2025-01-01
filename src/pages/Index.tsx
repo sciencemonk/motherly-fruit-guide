@@ -13,6 +13,14 @@ import {
 const Index = () => {
   const [showRegistration, setShowRegistration] = useState(false)
 
+  const handleOpenChange = (open: boolean) => {
+    // Only allow closing via the X button by ignoring outside clicks
+    if (!open) {
+      return;
+    }
+    setShowRegistration(open);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
@@ -33,7 +41,7 @@ const Index = () => {
               <p className="text-lg text-sage-700 max-w-2xl mx-auto mb-8">
                 Your personal AI pregnancy guide, providing daily advice and support to help you grow a healthy baby. 
               </p>
-              <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
+              <Dialog open={showRegistration} onOpenChange={handleOpenChange}>
                 <DialogTrigger asChild>
                   <Button 
                     className="bg-peach-400 hover:bg-peach-500 text-peach-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
