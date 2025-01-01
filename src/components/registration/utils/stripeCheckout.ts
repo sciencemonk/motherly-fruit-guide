@@ -13,13 +13,13 @@ export const createCheckoutSession = async ({
   successUrl, 
   cancelUrl 
 }: CheckoutOptions) => {
-  // Get the current origin for success/cancel URLs
-  const origin = window.location.origin;
+  // Use absolute URLs for production
+  const baseUrl = 'https://motherathena.com';
   
   // Ensure the success URL includes the phone parameter
   const encodedPhone = encodeURIComponent(phoneNumber);
-  const defaultSuccessUrl = `${origin}/welcome?phone=${encodedPhone}&registration=success`;
-  const defaultCancelUrl = `${origin}/?registration=cancelled`;
+  const defaultSuccessUrl = `${baseUrl}/welcome?phone=${encodedPhone}&registration=success`;
+  const defaultCancelUrl = `${baseUrl}/?registration=cancelled`;
   
   console.log('Creating checkout with success URL:', successUrl || defaultSuccessUrl); // Debug log
   

@@ -105,11 +105,10 @@ export function useRegistrationSubmit() {
         if (insertError) throw insertError;
       }
 
-      // Get the current origin for success/cancel URLs
-      const origin = window.location.origin;
-      // Only include the phone parameter in the success URL
-      const successUrl = `${origin}/welcome?phone=${encodeURIComponent(phone)}&registration=success`;
-      const cancelUrl = `${origin}/?registration=cancelled`;
+      // Use absolute URLs for production
+      const baseUrl = 'https://motherathena.com';
+      const successUrl = `${baseUrl}/welcome?phone=${encodeURIComponent(phone)}&registration=success`;
+      const cancelUrl = `${baseUrl}/?registration=cancelled`;
 
       console.log('Creating checkout with URLs:', { successUrl, cancelUrl }); // Debug log
 
