@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormFields } from "./registration/FormFields";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
@@ -6,6 +6,8 @@ import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useRegistrationState } from "./registration/RegistrationState";
 import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
 import { addMonths } from "date-fns";
+import { StepIndicator } from "./registration/StepIndicator";
+import { SocialProof } from "./registration/SocialProof";
 
 export function RegistrationForm() {
   const {
@@ -26,11 +28,14 @@ export function RegistrationForm() {
     welcomeRef
   } = useRegistrationState();
 
+  const [currentStep, setCurrentStep] = useState(0);
+  const totalSteps = 3;
+
   const { handleSubmit } = useRegistrationSubmit();
 
   // Calculate the date range for due date selection
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time to start of day
+  today.setHours(0, 0, 0, 0);
   const maxDate = addMonths(today, 9);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -45,54 +50,165 @@ export function RegistrationForm() {
       setIsSubmitted
     });
 
-    // Scroll to the welcome message after a short delay to ensure it's rendered
     setTimeout(() => {
       welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
-  // Add effect to scroll to top on page load/refresh
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-sage-800 text-center">
+              Let's get to know you
+            </h2>
+            <div className="space-y-4">
+              <FormFields
+                firstName={firstName}
+                setFirstName={setFirstName}
+                phone={phone}
+                setPhone={setPhone}
+                dueDate={undefined}
+                setDueDate={setDueDate}
+                interests={undefined}
+                setInterests={setInterests}
+                today={today}
+                maxDate={maxDate}
+                isLoading={isLoading}
+                showOnlyBasicInfo={true}
+              />
+            </div>
+          </div>
+        );
+      case 1:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-sage-800 text-center">
+              Tell us about your pregnancy
+            </h2>
+            <div className="space-y-4">
+              <FormFields
+                firstName={firstName}
+                setFirstName={setFirstName}
+                phone={phone}
+                setPhone={setPhone}
+                dueDate={dueDate}
+                setDueDate={setDueDate}
+                interests={interests}
+                setInterests={setInterests}
+                today={today}
+                maxDate={maxDate}
+                isLoading={isLoading}
+                showOnlyPregnancyInfo={true}
+              />
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-semibold text-sage-800 text-center">
+              Start Your Free Trial
+            </h2>
+            <p className="text-center text-sage-600">
+              Join thousands of mothers who trust Mother Athena for daily pregnancy guidance
+            </p>
+            <SocialProof />
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-sage-800">
+                    Premium Pregnancy Support
+                  </h3>
+                  <p className="text-sage-600 mt-2">
+                    Get personalized daily tips and unlimited chat support
+                  </p>
+                  <div className="mt-4">
+                    <p className="text-2xl font-bold text-sage-800">
+                      $9.99<span className="text-base font-normal text-sage-600">/month</span>
+                    </p>
+                    <p className="text-sm text-sage-600 mt-1">
+                      after 7-day free trial
+                    </p>
+                  </div>
+                </div>
+                <ConsentCheckbox
+                  smsConsent={smsConsent}
+                  setSmsConsent={setSmsConsent}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0:
+        return firstName && phone;
+      case 1:
+        return dueDate && interests;
+      case 2:
+        return smsConsent;
+      default:
+        return false;
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div ref={welcomeRef}>
+        <WelcomeMessage firstName={firstName} />
+      </div>
+    );
+  }
+
   return (
     <div>
-      {!isSubmitted ? (
-        <form onSubmit={onSubmit} className="space-y-8 w-full max-w-md mx-auto">
-          <FormFields
-            firstName={firstName}
-            setFirstName={setFirstName}
-            phone={phone}
-            setPhone={setPhone}
-            dueDate={dueDate}
-            setDueDate={setDueDate}
-            interests={interests}
-            setInterests={setInterests}
-            today={today}
-            maxDate={maxDate}
-            isLoading={isLoading}
-          />
-
-          <ConsentCheckbox
-            smsConsent={smsConsent}
-            setSmsConsent={setSmsConsent}
-            isLoading={isLoading}
-          />
-
-          <Button 
-            type="submit" 
-            className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
-            disabled={isLoading}
-          >
-            {isLoading ? "Processing..." : "Start My Free Trial"}
-          </Button>
-        </form>
-      ) : (
-        <div ref={welcomeRef}>
-          <WelcomeMessage firstName={firstName} />
+      <form onSubmit={onSubmit} className="space-y-8 w-full max-w-md mx-auto">
+        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
+        {renderStep()}
+        <div className="flex justify-between space-x-4">
+          {currentStep > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(prev => prev - 1)}
+              disabled={isLoading}
+              className="flex-1"
+            >
+              Back
+            </Button>
+          )}
+          {currentStep < totalSteps - 1 ? (
+            <Button
+              type="button"
+              onClick={() => setCurrentStep(prev => prev + 1)}
+              disabled={!canProceed() || isLoading}
+              className="flex-1 bg-peach-300 hover:bg-peach-400 text-peach-900"
+            >
+              Continue
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              className="flex-1 bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg"
+              disabled={!canProceed() || isLoading}
+            >
+              {isLoading ? "Processing..." : "Start Free Trial"}
+            </Button>
+          )}
         </div>
-      )}
+      </form>
     </div>
   );
 }

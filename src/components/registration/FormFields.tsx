@@ -13,11 +13,13 @@ interface FormFieldsProps {
   setPhone: (value: string | undefined) => void;
   dueDate: Date | undefined;
   setDueDate: (date: Date | undefined) => void;
-  interests: string;
+  interests: string | undefined;
   setInterests: (value: string) => void;
   today: Date;
   maxDate: Date;
   isLoading: boolean;
+  showOnlyBasicInfo?: boolean;
+  showOnlyPregnancyInfo?: boolean;
 }
 
 export function FormFields({
@@ -31,9 +33,11 @@ export function FormFields({
   setInterests,
   today,
   maxDate,
-  isLoading
+  isLoading,
+  showOnlyBasicInfo,
+  showOnlyPregnancyInfo
 }: FormFieldsProps) {
-  return (
+  const renderBasicInfo = () => (
     <>
       <div className="space-y-2">
         <Label htmlFor="firstName" className="text-sage-700 text-lg">First Name</Label>
@@ -58,7 +62,11 @@ export function FormFields({
           disabled={isLoading}
         />
       </div>
+    </>
+  );
 
+  const renderPregnancyInfo = () => (
+    <>
       <div className="space-y-2">
         <Label className="text-sage-700 text-lg">Due Date</Label>
         <div className="flex justify-center">
@@ -103,6 +111,21 @@ export function FormFields({
           </SelectContent>
         </Select>
       </div>
+    </>
+  );
+
+  if (showOnlyBasicInfo) {
+    return renderBasicInfo();
+  }
+
+  if (showOnlyPregnancyInfo) {
+    return renderPregnancyInfo();
+  }
+
+  return (
+    <>
+      {renderBasicInfo()}
+      {renderPregnancyInfo()}
     </>
   );
 }
