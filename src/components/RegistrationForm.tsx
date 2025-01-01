@@ -8,10 +8,11 @@ import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
-import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
 import { StateSelector } from "./registration/StateSelector";
+import { PregnancyReport } from "./PregnancyReport";
+import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 
 export function RegistrationForm() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -77,6 +78,15 @@ export function RegistrationForm() {
         return false;
     }
   };
+
+  if (isSubmitted && dueDate) {
+    return (
+      <div className="space-y-6">
+        <WelcomeMessage firstName={firstName} />
+        <PregnancyReport dueDate={dueDate} firstName={firstName} />
+      </div>
+    );
+  }
 
   const renderStep = () => {
     switch (currentStep) {
