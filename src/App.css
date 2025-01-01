@@ -56,20 +56,34 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 50;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .registration-form form {
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding: 1rem;
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
   }
 
   .registration-form .form-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding-bottom: 1rem;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
   }
 
   /* Fix phone input on mobile */
@@ -80,14 +94,53 @@
 
   .PhoneInputInput {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
     font-size: 1rem;
+    height: 2.75rem;
   }
 
   /* Adjust step indicator spacing */
   .step-indicator {
     margin: 1rem 0;
+    padding: 0 1rem;
+  }
+
+  /* Ensure inputs and content are properly spaced */
+  .registration-form input,
+  .registration-form select,
+  .registration-form textarea {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  /* Ensure buttons are properly sized */
+  .registration-form button {
+    width: auto;
+    min-width: 100px;
+  }
+
+  /* Add proper spacing for headings and text */
+  .registration-form h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .registration-form p {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Ensure radio groups are properly spaced */
+  .registration-form .space-y-3 {
+    margin-top: 1rem;
+  }
+
+  /* Fix calendar positioning */
+  .registration-form .bg-white.rounded-lg {
+    margin: 0 auto;
+    max-width: 100%;
+    overflow: hidden;
   }
 }
