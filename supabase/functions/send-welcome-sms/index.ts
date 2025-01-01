@@ -31,7 +31,7 @@ serve(async (req) => {
     // Get Twilio credentials
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID') || 'MG1fa945c66e3013f6a9b3ad77bf8a05e4'
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
 
     if (!accountSid || !authToken) {
       console.error('Missing Twilio credentials')
@@ -42,9 +42,14 @@ serve(async (req) => {
     const client = twilio(accountSid, authToken)
 
     // Ensure the phone number is in E.164 format
-    // Remove any non-digit characters and ensure it starts with +
     const formattedPhone = to.replace(/\D/g, '')
     const e164Phone = formattedPhone.startsWith('+') ? formattedPhone : `+${formattedPhone}`
+
+    // Basic E.164 validation
+    if (!/^\+[1-9]\d{1,14}$/.test(e164Phone)) {
+      throw new Error(`The 'To' number ${e164Phone} is not a valid phone number.`)
+    }
+
     console.log('Formatted phone number:', e164Phone)
 
     // Send the message using Messaging Service SID
@@ -81,7 +86,7 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       }),
       { 
-        status: error.status || 500,
+        status: error.status || 400,
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json' 

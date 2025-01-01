@@ -20,9 +20,13 @@ export function useRegistrationSubmit() {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
+      // Ensure phone number is in E.164 format
+      const formattedPhone = phoneNumber.replace(/\D/g, '');
+      const e164Phone = formattedPhone.startsWith('+') ? formattedPhone : `+${formattedPhone}`;
+      
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
-          to: phoneNumber,
+          to: e164Phone,
           message: `Welcome to Mother Athena, ${firstName}! 🤰 Your 7-day free trial starts now. You'll receive daily pregnancy tips and guidance, and you can text me anytime with questions. For emergencies, always consult your healthcare provider. Reply STOP to cancel messages.`
         }
       });
@@ -87,12 +91,17 @@ export function useRegistrationSubmit() {
     try {
       const loginCode = await generateLoginCode();
 
-      // Check if profile exists
-      const { data: existingProfile } = await supabase
+      // Check if profile exists - using maybeSingle() instead of single()
+      const { data: existingProfile, error: queryError } = await supabase
         .from('profiles')
         .select('phone_number')
         .eq('phone_number', phone)
-        .single();
+        .maybeSingle();
+
+      if (queryError) {
+        console.error('Error checking existing profile:', queryError);
+        throw queryError;
+      }
 
       let profileError;
       
