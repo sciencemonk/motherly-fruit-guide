@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 import { PregnancyReport } from "@/components/PregnancyReport"
 import { WelcomeMessage } from "@/components/pregnancy-report/WelcomeMessage"
-import { supabase } from "@/integrations/supabase/client"
-import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
 import { Share2, Twitter, Facebook } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 
@@ -16,25 +16,20 @@ const Welcome = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const phone = searchParams.get('phone')
-    
-    if (phone) {
-      const fetchProfile = async () => {
+    const fetchProfile = async () => {
+      const phone = searchParams.get('phone')
+      
+      if (phone) {
         try {
           const { data, error } = await supabase
             .from('profiles')
-            .select('first_name, due_date')
-            .eq('phone_number', phone)
+            .select('*')
+            .eq('phone_number', decodeURIComponent(phone))
             .single()
 
           if (error) throw error
 
-          if (data) {
-            setProfile({
-              firstName: data.first_name,
-              dueDate: data.due_date ? new Date(data.due_date) : undefined
-            })
-          }
+          setProfile(data)
         } catch (error) {
           console.error('Error fetching profile:', error)
           toast({
@@ -46,34 +41,38 @@ const Welcome = () => {
           setIsLoading(false)
         }
       }
-
-      fetchProfile()
     }
+
+    fetchProfile()
   }, [searchParams, toast])
 
-  const shareOnTwitter = () => {
+  const handleShare = (platform: 'twitter' | 'facebook') => {
     const text = encodeURIComponent("I just started my pregnancy journey with Mother Athena - the most advanced AI pregnancy guide! 🤰✨")
     const url = encodeURIComponent("https://motherathena.com")
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank')
-  }
 
-  const shareOnFacebook = () => {
-    const url = encodeURIComponent("https://motherathena.com")
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`
+    }
+
+    window.open(shareUrls[platform], '_blank', 'width=600,height=400')
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
-        <div className="animate-pulse text-sage-600">Loading your pregnancy report...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse">Loading your pregnancy guide...</div>
       </div>
     )
   }
 
-  if (!profile?.dueDate) {
+  if (!profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
-        <div className="text-sage-600">No pregnancy information found.</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-sage-800 mb-4">Profile Not Found</h1>
+          <p className="text-sage-600">We couldn't find your profile. Please try signing up again.</p>
+        </div>
       </div>
     )
   }
@@ -82,45 +81,45 @@ const Welcome = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
       <main className="flex-grow container px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <WelcomeMessage firstName={profile.firstName || ''} />
+        <div className="max-w-4xl mx-auto">
+          <WelcomeMessage firstName={profile.first_name} />
           
-          <div className="flex justify-center gap-4 mb-8">
-            <Button onClick={shareOnTwitter} className="flex items-center gap-2">
-              <Twitter className="w-4 h-4" />
-              Share on X
-            </Button>
-            <Button onClick={shareOnFacebook} className="flex items-center gap-2">
-              <Facebook className="w-4 h-4" />
-              Share on Facebook
-            </Button>
-          </div>
-
-          <PregnancyReport 
-            dueDate={profile.dueDate} 
-            firstName={profile.firstName}
-          />
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-8 shadow-lg mt-8">
-            <h2 className="text-2xl font-semibold text-sage-800 mb-4">Your Pregnancy Journey Begins</h2>
-            <div className="space-y-4 text-sage-700">
-              <p>
-                Welcome to Mother Athena! We're excited to be part of your pregnancy journey. 
-                Here's what you can expect:
-              </p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li>Daily personalized tips and advice via SMS</li>
-                <li>Weekly development updates about your baby</li>
-                <li>24/7 access to AI-powered pregnancy support</li>
-                <li>Customized nutrition and exercise recommendations</li>
-                <li>Regular check-ins and milestone celebrations</li>
-              </ul>
-              <p>
-                Remember to check your phone for daily updates and feel free to text us anytime 
-                with your questions or concerns.
-              </p>
+          {/* Social Sharing */}
+          <div className="my-8 p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-sage-800 mb-4 flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Share Your Journey
+            </h2>
+            <p className="text-sage-600 mb-4">
+              Let your friends and family know about your pregnancy journey with Mother Athena!
+            </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => handleShare('twitter')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Twitter className="w-4 h-4" />
+                Share on X
+              </Button>
+              <Button
+                onClick={() => handleShare('facebook')}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Facebook className="w-4 h-4" />
+                Share on Facebook
+              </Button>
             </div>
           </div>
+
+          {/* Pregnancy Report */}
+          {profile.due_date && (
+            <PregnancyReport 
+              dueDate={new Date(profile.due_date)} 
+              firstName={profile.first_name}
+            />
+          )}
         </div>
       </main>
       <Footer />
