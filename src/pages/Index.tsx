@@ -1,7 +1,7 @@
 import { RegistrationForm } from "@/components/RegistrationForm"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { Baby, MessageSquare, Brain, Heart } from "lucide-react"
+import { Baby, MessageSquare, Brain, Heart, Sparkles } from "lucide-react"
 
 const Index = () => {
   return (
@@ -12,12 +12,18 @@ const Index = () => {
           <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
             {/* Hero Section */}
             <div className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-peach-100 text-peach-800 text-sm font-medium">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  7-Day Free Trial
+                </div>
+              </div>
               <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
-                Your Best Friend During Pregnancy
+                Your AI Pregnancy Guide
               </h1>
               <p className="text-lg text-sage-700 max-w-2xl mx-auto">
-                Track your baby's growth, get expert guidance, and receive weekly updates 
-                through our AI-powered text message support. Free to get started!
+                Get daily personalized pregnancy advice, tips, and guidance through text messages. 
+                Start your free 7-day trial today, then continue for just $9.99/month.
               </p>
             </div>
 
@@ -27,9 +33,9 @@ const Index = () => {
                 <div className="mx-auto w-12 h-12 rounded-full bg-peach-100 flex items-center justify-center">
                   <Baby className="w-6 h-6 text-peach-500" />
                 </div>
-                <h3 className="font-semibold text-sage-800">Track Growth</h3>
+                <h3 className="font-semibold text-sage-800">Daily Updates</h3>
                 <p className="text-sage-600 text-sm">
-                  See your baby's size and development week by week
+                  Receive daily messages about your baby's development
                 </p>
               </div>
               
@@ -37,9 +43,9 @@ const Index = () => {
                 <div className="mx-auto w-12 h-12 rounded-full bg-peach-100 flex items-center justify-center">
                   <MessageSquare className="w-6 h-6 text-peach-500" />
                 </div>
-                <h3 className="font-semibold text-sage-800">Get Support</h3>
+                <h3 className="font-semibold text-sage-800">24/7 Support</h3>
                 <p className="text-sage-600 text-sm">
-                  Text us anytime with your pregnancy questions
+                  Chat anytime with Mother Athena about your pregnancy
                 </p>
               </div>
 
@@ -47,9 +53,9 @@ const Index = () => {
                 <div className="mx-auto w-12 h-12 rounded-full bg-peach-100 flex items-center justify-center">
                   <Brain className="w-6 h-6 text-peach-500" />
                 </div>
-                <h3 className="font-semibold text-sage-800">Learn Weekly</h3>
+                <h3 className="font-semibold text-sage-800">Expert Guidance</h3>
                 <p className="text-sage-600 text-sm">
-                  Receive updates about your baby's development
+                  Get evidence-based advice tailored to your journey
                 </p>
               </div>
 
@@ -57,25 +63,36 @@ const Index = () => {
                 <div className="mx-auto w-12 h-12 rounded-full bg-peach-100 flex items-center justify-center">
                   <Heart className="w-6 h-6 text-peach-500" />
                 </div>
-                <h3 className="font-semibold text-sage-800">Feel Connected</h3>
+                <h3 className="font-semibold text-sage-800">Personalized Care</h3>
                 <p className="text-sage-600 text-sm">
-                  Stay informed and supported throughout your journey
+                  Receive support focused on your specific interests
                 </p>
               </div>
             </div>
 
-            {/* Form Section with New Context */}
+            {/* Form Section */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg">
               <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-semibold text-sage-800 mb-3">
-                  Discover Your Baby's Journey
+                  Start Your Pregnancy Journey
                 </h2>
                 <p className="text-sage-700">
-                  Enter your due date to see your baby's current size and sign up for free weekly updates via text message.
+                  Begin your 7-day free trial and get personalized pregnancy guidance via text message.
                 </p>
               </div>
               
               <RegistrationForm />
+            </div>
+
+            {/* Pricing Info */}
+            <div className="text-center space-y-4">
+              <p className="text-sage-700">
+                <span className="font-semibold">Free 7-Day Trial</span>, then just{" "}
+                <span className="font-semibold">$9.99/month</span>
+              </p>
+              <p className="text-sm text-sage-600">
+                Cancel anytime. No commitment required.
+              </p>
             </div>
 
             {/* Medical Disclaimer */}

@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PregnancyReport } from "./PregnancyReport";
 import { FormFields } from "./registration/FormFields";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
@@ -16,13 +15,14 @@ export function RegistrationForm() {
     setPhone,
     dueDate,
     setDueDate,
+    interests,
+    setInterests,
     isSubmitted,
     setIsSubmitted,
     isLoading,
     setIsLoading,
     smsConsent,
     setSmsConsent,
-    reportRef,
     welcomeRef
   } = useRegistrationState();
 
@@ -39,6 +39,7 @@ export function RegistrationForm() {
       firstName,
       phone,
       dueDate: dueDate!,
+      interests,
       smsConsent,
       setIsLoading,
       setIsSubmitted
@@ -47,10 +48,6 @@ export function RegistrationForm() {
     // Scroll to the welcome message after a short delay to ensure it's rendered
     setTimeout(() => {
       welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
-      // After showing the welcome message, scroll to the report
-      setTimeout(() => {
-        reportRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 2000);
     }, 100);
   };
 
@@ -70,6 +67,8 @@ export function RegistrationForm() {
             setPhone={setPhone}
             dueDate={dueDate}
             setDueDate={setDueDate}
+            interests={interests}
+            setInterests={setInterests}
             today={today}
             maxDate={maxDate}
             isLoading={isLoading}
@@ -86,17 +85,12 @@ export function RegistrationForm() {
             className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
             disabled={isLoading}
           >
-            {isLoading ? "Processing..." : "Start My Journey"}
+            {isLoading ? "Processing..." : "Start My Free Trial"}
           </Button>
         </form>
       ) : (
-        <div>
-          <div ref={welcomeRef}>
-            <WelcomeMessage firstName={firstName} />
-          </div>
-          <div ref={reportRef} className="mt-8">
-            <PregnancyReport dueDate={dueDate!} firstName={firstName} />
-          </div>
+        <div ref={welcomeRef}>
+          <WelcomeMessage firstName={firstName} />
         </div>
       )}
     </div>

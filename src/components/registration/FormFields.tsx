@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
@@ -12,6 +13,8 @@ interface FormFieldsProps {
   setPhone: (value: string | undefined) => void;
   dueDate: Date | undefined;
   setDueDate: (date: Date | undefined) => void;
+  interests: string;
+  setInterests: (value: string) => void;
   today: Date;
   maxDate: Date;
   isLoading: boolean;
@@ -24,6 +27,8 @@ export function FormFields({
   setPhone,
   dueDate,
   setDueDate,
+  interests,
+  setInterests,
   today,
   maxDate,
   isLoading
@@ -81,6 +86,22 @@ export function FormFields({
             />
           </div>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="interests" className="text-sage-700 text-lg">What interests you most about having a healthy baby?</Label>
+        <Select value={interests} onValueChange={setInterests} disabled={isLoading}>
+          <SelectTrigger className="w-full bg-white/80">
+            <SelectValue placeholder="Select your main interest" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="nutrition">Nutrition & Diet During Pregnancy</SelectItem>
+            <SelectItem value="exercise">Safe Exercise & Physical Activity</SelectItem>
+            <SelectItem value="development">Baby's Development Stages</SelectItem>
+            <SelectItem value="mental-health">Mental Health & Emotional Wellbeing</SelectItem>
+            <SelectItem value="preparation">Birth Preparation & Labor</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </>
   );

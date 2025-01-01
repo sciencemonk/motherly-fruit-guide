@@ -80,6 +80,7 @@ export type Database = {
           due_date: string | null
           first_name: string | null
           id: string
+          interests: string | null
           is_premium: boolean | null
           last_credits_reset: string | null
           last_sign_in: string | null
@@ -89,6 +90,7 @@ export type Database = {
           subscription_id: string | null
           subscription_status: string | null
           subscription_type: string | null
+          trial_ends_at: string | null
         }
         Insert: {
           chat_credits?: number
@@ -96,6 +98,7 @@ export type Database = {
           due_date?: string | null
           first_name?: string | null
           id?: string
+          interests?: string | null
           is_premium?: boolean | null
           last_credits_reset?: string | null
           last_sign_in?: string | null
@@ -105,6 +108,7 @@ export type Database = {
           subscription_id?: string | null
           subscription_status?: string | null
           subscription_type?: string | null
+          trial_ends_at?: string | null
         }
         Update: {
           chat_credits?: number
@@ -112,6 +116,7 @@ export type Database = {
           due_date?: string | null
           first_name?: string | null
           id?: string
+          interests?: string | null
           is_premium?: boolean | null
           last_credits_reset?: string | null
           last_sign_in?: string | null
@@ -121,6 +126,7 @@ export type Database = {
           subscription_id?: string | null
           subscription_status?: string | null
           subscription_type?: string | null
+          trial_ends_at?: string | null
         }
         Relationships: []
       }

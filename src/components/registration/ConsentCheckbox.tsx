@@ -20,7 +20,7 @@ export function ConsentCheckbox({ smsConsent, setSmsConsent, isLoading }: Consen
         htmlFor="sms-consent"
         className="text-xs peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sage-700"
       >
-        I agree to the terms of service, privacy notice, and to receive text messages from Mother Athena to answer my pregnancy questions!
+        I agree to receive daily pregnancy tips and guidance via text message from Mother Athena. I understand that after my 7-day free trial, I'll be charged $9.99/month unless I cancel. Message frequency varies, message and data rates may apply. Reply STOP to cancel at any time.
       </label>
     </div>
   );
