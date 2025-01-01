@@ -1,30 +1,30 @@
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface CityFieldProps {
   city: string;
-  setCity: (value: string) => void;
-  isLoading: boolean;
+  setCity: (city: string) => void;
 }
 
-export function CityField({
-  city,
-  setCity,
-  isLoading
-}: CityFieldProps) {
+export function CityField({ city, setCity }: CityFieldProps) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor="city" className="text-sage-700 text-lg">
-        What city do you live in?
-      </Label>
-      <Input
-        id="city"
-        placeholder="Enter your city"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        className="w-full bg-white/80 backdrop-blur-sm border-sage-200 focus:border-sage-400 focus:ring-sage-400 text-sage-800 placeholder:text-sage-400"
-        disabled={isLoading}
-      />
+    <div className="space-y-4">
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold text-sage-800 mb-2">What city do you live in?</h2>
+        <p className="text-sage-600">We'll use this to provide local resources and connect you with nearby moms.</p>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="city">City</Label>
+        <Input
+          id="city"
+          type="text"
+          placeholder="Enter your city"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="w-full"
+        />
+      </div>
     </div>
   );
 }

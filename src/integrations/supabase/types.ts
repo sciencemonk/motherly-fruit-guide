@@ -76,6 +76,7 @@ export type Database = {
       profiles: {
         Row: {
           chat_credits: number
+          city: string | null
           created_at: string
           due_date: string | null
           first_name: string | null
@@ -94,6 +95,7 @@ export type Database = {
         }
         Insert: {
           chat_credits?: number
+          city?: string | null
           created_at?: string
           due_date?: string | null
           first_name?: string | null
@@ -112,6 +114,7 @@ export type Database = {
         }
         Update: {
           chat_credits?: number
+          city?: string | null
           created_at?: string
           due_date?: string | null
           first_name?: string | null

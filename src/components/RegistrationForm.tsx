@@ -1,218 +1,68 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { FormFields } from "./registration/FormFields";
-import { ConsentCheckbox } from "./registration/ConsentCheckbox";
-import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
-import { useRegistrationState } from "./registration/RegistrationState";
-import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
-import { addMonths } from "date-fns";
+import { useState } from "react";
 import { StepIndicator } from "./registration/StepIndicator";
-import { SocialProof } from "./registration/SocialProof";
-import { LifestyleField } from "./registration/LifestyleField";
+import { FormFields } from "./registration/FormFields";
+import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
 import { CityField } from "./registration/CityField";
+import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
+import { ConsentCheckbox } from "./registration/ConsentCheckbox";
+import { SocialProof } from "./registration/SocialProof";
 
 export function RegistrationForm() {
-  const {
-    firstName,
-    setFirstName,
-    phone,
-    setPhone,
-    city,
-    setCity,
-    dueDate,
-    setDueDate,
-    interests,
-    setInterests,
-    lifestyle,
-    setLifestyle,
-    isSubmitted,
-    setIsSubmitted,
-    isLoading,
-    setIsLoading,
-    smsConsent,
-    setSmsConsent,
-    welcomeRef
-  } = useRegistrationState();
-
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 6; // Increased by 1 for the city step
+  const [firstName, setFirstName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [dueDate, setDueDate] = useState<Date>();
+  const [interests, setInterests] = useState("");
+  const [lifestyle, setLifestyle] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const { handleSubmit } = useRegistrationSubmit();
 
-  // Calculate the date range for due date selection
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const maxDate = addMonths(today, 9);
+  const totalSteps = 6;
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const handleNext = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!dueDate) return;
+
     await handleSubmit({
       firstName,
       phone,
       city,
-      dueDate: dueDate!,
+      dueDate,
       interests,
       lifestyle,
       smsConsent,
       setIsLoading,
-      setIsSubmitted
+      setIsSubmitted,
     });
-
-    setTimeout(() => {
-      welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  const renderStep = () => {
+  const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              Let's get to know you
-            </h2>
-            <FormFields
-              firstName={firstName}
-              setFirstName={setFirstName}
-              phone={phone}
-              setPhone={setPhone}
-              dueDate={undefined}
-              setDueDate={setDueDate}
-              interests={undefined}
-              setInterests={setInterests}
-              today={today}
-              maxDate={maxDate}
-              isLoading={isLoading}
-              showOnlyBasicInfo={true}
-            />
-          </div>
-        );
+        return firstName.length > 0 && phone.length > 0;
       case 1:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              Where do you live?
-            </h2>
-            <CityField
-              city={city}
-              setCity={setCity}
-              isLoading={isLoading}
-            />
-          </div>
-        );
+        return city.length > 0;
       case 2:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              When is your baby due?
-            </h2>
-            <FormFields
-              firstName={firstName}
-              setFirstName={setFirstName}
-              phone={phone}
-              setPhone={setPhone}
-              dueDate={dueDate}
-              setDueDate={setDueDate}
-              interests={interests}
-              setInterests={setInterests}
-              today={today}
-              maxDate={maxDate}
-              isLoading={isLoading}
-              showOnlyDueDate={true}
-            />
-          </div>
-        );
+        return dueDate !== undefined;
       case 3:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              Your Interests
-            </h2>
-            <FormFields
-              firstName={firstName}
-              setFirstName={setFirstName}
-              phone={phone}
-              setPhone={setPhone}
-              dueDate={dueDate}
-              setDueDate={setDueDate}
-              interests={interests}
-              setInterests={setInterests}
-              today={today}
-              maxDate={maxDate}
-              isLoading={isLoading}
-              showOnlyInterests={true}
-            />
-          </div>
-        );
-      case 4:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              Tell us about yourself
-            </h2>
-            <LifestyleField
-              lifestyle={lifestyle}
-              setLifestyle={setLifestyle}
-              isLoading={isLoading}
-            />
-          </div>
-        );
-      case 5:
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-sage-800 text-center">
-              Start Your Free Trial
-            </h2>
-            <p className="text-center text-sage-600">
-              Join thousands of mothers who trust Mother Athena for daily pregnancy guidance
-            </p>
-            <SocialProof />
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6">
-              <div className="space-y-4">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-sage-800">
-                    Premium Pregnancy Support
-                  </h3>
-                  <p className="text-sage-600 mt-2">
-                    Get personalized daily tips and unlimited chat support
-                  </p>
-                  <div className="mt-4">
-                    <p className="text-2xl font-bold text-sage-800">
-                      $9.99<span className="text-base font-normal text-sage-600">/month</span>
-                    </p>
-                    <p className="text-sm text-sage-600 mt-1">
-                      after 7-day free trial
-                    </p>
-                  </div>
-                </div>
-                <ConsentCheckbox
-                  smsConsent={smsConsent}
-                  setSmsConsent={setSmsConsent}
-                  isLoading={isLoading}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const canProceed = () => {
-    switch (currentStep) {
-      case 0:
-        return firstName && phone;
-      case 1:
-        return city && city.length > 0;
-      case 2:
-        return dueDate;
-      case 3:
-        return interests;
+        return interests.length > 0;
       case 4:
         return lifestyle.length > 0;
       case 5:
@@ -222,51 +72,125 @@ export function RegistrationForm() {
     }
   };
 
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <FormFields
+            firstName={firstName}
+            setFirstName={setFirstName}
+            phone={phone}
+            setPhone={setPhone}
+          />
+        );
+      case 1:
+        return <CityField city={city} setCity={setCity} />;
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-sage-800 mb-2">When is your baby due?</h2>
+              <p className="text-sage-600">We'll customize your experience based on your stage of pregnancy.</p>
+            </div>
+            <input
+              type="date"
+              value={dueDate?.toISOString().split('T')[0] || ''}
+              onChange={(e) => setDueDate(new Date(e.target.value))}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-sage-800 mb-2">What interests you most about having a healthy baby?</h2>
+              <p className="text-sage-600">This helps us personalize your experience.</p>
+            </div>
+            <textarea
+              value={interests}
+              onChange={(e) => setInterests(e.target.value)}
+              className="w-full p-2 border rounded-md h-32"
+              placeholder="Share your interests..."
+            />
+          </div>
+        );
+      case 4:
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Tell Mother Athena more about yourself and your lifestyle</h2>
+              <p className="text-sage-600">This helps us provide more personalized support.</p>
+            </div>
+            <textarea
+              value={lifestyle}
+              onChange={(e) => setLifestyle(e.target.value)}
+              className="w-full p-2 border rounded-md h-32"
+              placeholder="Share about your lifestyle..."
+            />
+          </div>
+        );
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Start Your Free Trial</h2>
+              <p className="text-sage-600">7 days free, then $9.99/month</p>
+            </div>
+            <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+            <SocialProof />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   if (isSubmitted) {
     return (
-      <div ref={welcomeRef}>
-        <WelcomeMessage firstName={firstName} />
+      <div className="text-center space-y-4">
+        <h2 className="text-2xl font-semibold text-sage-800">Welcome to Mother Athena!</h2>
+        <p className="text-sage-600">Please check your phone for a welcome message.</p>
       </div>
     );
   }
 
   return (
-    <div>
-      <form onSubmit={onSubmit} className="space-y-8 w-full max-w-md mx-auto">
-        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-        {renderStep()}
-        <div className="flex justify-between space-x-4">
-          {currentStep > 0 && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setCurrentStep(prev => prev - 1)}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              Back
-            </Button>
-          )}
-          {currentStep < totalSteps - 1 ? (
-            <Button
-              type="button"
-              onClick={() => setCurrentStep(prev => prev + 1)}
-              disabled={!canProceed() || isLoading}
-              className="flex-1 bg-peach-300 hover:bg-peach-400 text-peach-900"
-            >
-              Continue
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              className="flex-1 bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg"
-              disabled={!canProceed() || isLoading}
-            >
-              {isLoading ? "Processing..." : "Start Free Trial"}
-            </Button>
-          )}
-        </div>
-      </form>
-    </div>
+    <form onSubmit={handleFormSubmit} className="space-y-6">
+      <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
+      {renderStep()}
+      <div className="flex justify-between mt-6">
+        {currentStep > 0 && (
+          <Button type="button" variant="outline" onClick={handleBack}>
+            Back
+          </Button>
+        )}
+        {currentStep < totalSteps - 1 ? (
+          <Button
+            type="button"
+            onClick={handleNext}
+            disabled={!isStepValid() || isLoading}
+            className="ml-auto"
+          >
+            Next
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            disabled={!isStepValid() || isLoading}
+            className="ml-auto bg-peach-500 hover:bg-peach-600"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Start Free Trial"
+            )}
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }
