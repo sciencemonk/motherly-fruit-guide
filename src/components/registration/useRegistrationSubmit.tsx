@@ -146,7 +146,23 @@ export function useRegistrationSubmit() {
         throw profileError;
       }
 
-      await sendWelcomeMessage(phone, firstName);
+      // Set submitted state before sending welcome message and creating checkout
+      setIsSubmitted(true);
+
+      // Send welcome message in the background
+      sendWelcomeMessage(phone, firstName).catch(error => {
+        console.error('Error sending welcome message:', error);
+        toast({
+          variant: "destructive",
+          title: "Welcome message error",
+          description: "There was a problem sending your welcome message, but your account was created successfully.",
+        });
+      });
+
+      // Get the current origin for success/cancel URLs
+      const origin = window.location.origin;
+      const successUrl = `${origin}/?registration=success`;
+      const cancelUrl = `${origin}/?registration=cancelled`;
 
       try {
         const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
@@ -154,7 +170,9 @@ export function useRegistrationSubmit() {
           {
             body: { 
               phone_number: phone,
-              trial: true
+              trial: true,
+              success_url: successUrl,
+              cancel_url: cancelUrl
             }
           }
         );
@@ -163,8 +181,6 @@ export function useRegistrationSubmit() {
           console.error('Error creating checkout session:', checkoutError);
           throw checkoutError;
         }
-
-        setIsSubmitted(true);
 
         if (checkoutData?.url) {
           // Ensure the URL is properly formatted before redirecting
@@ -182,10 +198,6 @@ export function useRegistrationSubmit() {
         });
       }
 
-      toast({
-        title: "Welcome to Mother Athena!",
-        description: "We're excited to be part of your pregnancy journey.",
-      });
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -193,7 +205,6 @@ export function useRegistrationSubmit() {
         title: "Registration error",
         description: "There was a problem with your registration. Please try again.",
       });
-    } finally {
       setIsLoading(false);
     }
   };

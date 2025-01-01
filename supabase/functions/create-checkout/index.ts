@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { phone_number, trial } = await req.json()
+    const { phone_number, trial, success_url, cancel_url } = await req.json()
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -32,8 +32,8 @@ serve(async (req) => {
       subscription_data: trial ? {
         trial_period_days: 7,
       } : undefined,
-      success_url: `${req.headers.get('origin')}/dashboard`,
-      cancel_url: `${req.headers.get('origin')}`,
+      success_url: success_url || `${req.headers.get('origin')}/dashboard`,
+      cancel_url: cancel_url || `${req.headers.get('origin')}`,
       metadata: {
         phone_number,
       },
