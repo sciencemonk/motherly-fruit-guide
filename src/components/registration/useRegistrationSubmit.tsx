@@ -148,25 +148,38 @@ export function useRegistrationSubmit() {
 
       await sendWelcomeMessage(phone, firstName);
 
-      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
-        'create-checkout',
-        {
-          body: { 
-            phone_number: phone,
-            trial: true
+      try {
+        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
+          'create-checkout',
+          {
+            body: { 
+              phone_number: phone,
+              trial: true
+            }
           }
+        );
+
+        if (checkoutError) {
+          console.error('Error creating checkout session:', checkoutError);
+          throw checkoutError;
         }
-      );
 
-      if (checkoutError) {
-        console.error('Error creating checkout session:', checkoutError);
-        throw checkoutError;
-      }
+        setIsSubmitted(true);
 
-      setIsSubmitted(true);
-
-      if (checkoutData?.url) {
-        window.location.href = checkoutData.url;
+        if (checkoutData?.url) {
+          // Ensure the URL is properly formatted before redirecting
+          const checkoutUrl = new URL(checkoutData.url);
+          window.location.href = checkoutUrl.toString();
+        } else {
+          throw new Error('No checkout URL received');
+        }
+      } catch (error) {
+        console.error('Checkout error:', error);
+        toast({
+          variant: "destructive",
+          title: "Checkout error",
+          description: "There was a problem setting up the payment. Please try again.",
+        });
       }
 
       toast({
