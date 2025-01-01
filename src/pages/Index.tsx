@@ -2,8 +2,12 @@ import { RegistrationForm } from "@/components/RegistrationForm"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { Baby, MessageSquare, Brain, Heart, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 const Index = () => {
+  const [showRegistration, setShowRegistration] = useState(false)
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
@@ -11,20 +15,37 @@ const Index = () => {
         <div className="container px-4 py-8 md:py-16 mx-auto">
           <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
             {/* Hero Section */}
-            <div className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-peach-100 text-peach-800 text-sm font-medium">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  7-Day Free Trial
-                </div>
+            <div className="text-center relative">
+              <div className="absolute -top-24 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full bg-gradient-to-br from-peach-200 to-peach-400 border-4 border-white shadow-lg">
+                <img
+                  src="/lovable-uploads/3e55059e-9f8f-45fe-8e4a-209511a4a83a.png"
+                  alt="Mother Athena"
+                  className="w-full h-full object-cover rounded-full"
+                />
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
-                Your AI Pregnancy Guide
-              </h1>
-              <p className="text-lg text-sage-700 max-w-2xl mx-auto">
-                Get daily personalized pregnancy advice, tips, and guidance through text messages. 
-                Start your free 7-day trial today, then continue for just $9.99/month.
-              </p>
+              <div className="pt-12">
+                <div className="flex justify-center mb-4">
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-peach-100 text-peach-800 text-sm font-medium">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    7-Day Free Trial
+                  </div>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
+                  Meet Mother Athena
+                </h1>
+                <p className="text-lg text-sage-700 max-w-2xl mx-auto mb-8">
+                  Your personal AI pregnancy guide, providing daily advice and support to help you grow a healthy baby. 
+                  Start your free 7-day trial today, then continue for just $9.99/month.
+                </p>
+                {!showRegistration && (
+                  <Button 
+                    onClick={() => setShowRegistration(true)}
+                    className="bg-peach-400 hover:bg-peach-500 text-peach-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+                  >
+                    Start Your Free Trial
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* How It Works Section */}
@@ -71,18 +92,20 @@ const Index = () => {
             </div>
 
             {/* Form Section */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-semibold text-sage-800 mb-3">
-                  Start Your Pregnancy Journey
-                </h2>
-                <p className="text-sage-700">
-                  Begin your 7-day free trial and get personalized pregnancy guidance via text message.
-                </p>
+            {showRegistration && (
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl md:text-3xl font-semibold text-sage-800 mb-3">
+                    Start Your Pregnancy Journey
+                  </h2>
+                  <p className="text-sage-700">
+                    Begin your 7-day free trial and get personalized pregnancy guidance via text message.
+                  </p>
+                </div>
+                
+                <RegistrationForm />
               </div>
-              
-              <RegistrationForm />
-            </div>
+            )}
 
             {/* Pricing Info */}
             <div className="text-center space-y-4">
