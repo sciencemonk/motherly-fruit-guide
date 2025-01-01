@@ -112,13 +112,15 @@ export function RegistrationForm() {
                   {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  initialFocus
-                />
+              <PopoverContent className="w-auto p-0" align="start" onInteractOutside={(e) => e.preventDefault()}>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Calendar
+                    mode="single"
+                    selected={dueDate}
+                    onSelect={setDueDate}
+                    initialFocus
+                  />
+                </div>
               </PopoverContent>
             </Popover>
           </div>
