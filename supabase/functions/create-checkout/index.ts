@@ -20,6 +20,8 @@ serve(async (req) => {
     })
 
     console.log('Creating payment session...')
+    console.log('Success URL provided:', success_url) // Debug log
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -39,16 +41,15 @@ serve(async (req) => {
       subscription_data: trial ? {
         trial_period_days: 7,
       } : undefined,
-      // Ensure the success URL includes the full path to /welcome
-      success_url: `${new URL(req.url).origin}/welcome?phone=${encodeURIComponent(phone_number)}`,
-      cancel_url: cancel_url || `${new URL(req.url).origin}`,
+      success_url: success_url, // Use the provided success_url
+      cancel_url: cancel_url,
       metadata: {
         phone_number,
       },
     })
 
     console.log('Payment session created:', session.id)
-    console.log('Success URL:', session.success_url) // Debug log
+    console.log('Final success URL:', session.success_url) // Debug log
     
     return new Response(
       JSON.stringify({ url: session.url }),
