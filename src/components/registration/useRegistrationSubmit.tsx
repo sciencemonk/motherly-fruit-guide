@@ -86,11 +86,38 @@ export function useRegistrationSubmit() {
 
     try {
       const loginCode = await generateLoginCode();
-
-      const { error: insertError } = await supabase
+      
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .insert([
-          {
+        .select('phone_number')
+        .eq('phone_number', phone)
+        .single();
+
+      let profileError;
+      
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName,
+            city: city,
+            due_date: dueDate.toISOString().split('T')[0],
+            interests: interests,
+            lifestyle: lifestyle,
+            login_code: loginCode,
+            subscription_type: 'premium',
+            subscription_status: 'trial'
+          })
+          .eq('phone_number', phone);
+          
+        profileError = updateError;
+      } else {
+        // Insert new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([{
             phone_number: phone,
             first_name: firstName,
             city: city,
@@ -100,12 +127,14 @@ export function useRegistrationSubmit() {
             login_code: loginCode,
             subscription_type: 'premium',
             subscription_status: 'trial'
-          }
-        ]);
+          }]);
+          
+        profileError = insertError;
+      }
 
-      if (insertError) {
-        console.error('Error storing profile:', insertError);
-        throw insertError;
+      if (profileError) {
+        console.error('Error with profile:', profileError);
+        throw profileError;
       }
 
       await sendWelcomeMessage(phone, firstName);
