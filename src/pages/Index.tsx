@@ -4,6 +4,11 @@ import Footer from "@/components/Footer"
 import { Baby, MessageSquare, Brain, Heart, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 const Index = () => {
   const [showRegistration, setShowRegistration] = useState(false)
@@ -28,14 +33,20 @@ const Index = () => {
               <p className="text-lg text-sage-700 max-w-2xl mx-auto mb-8">
                 Your personal AI pregnancy guide, providing daily advice and support to help you grow a healthy baby. 
               </p>
-              {!showRegistration && (
-                <Button 
-                  onClick={() => setShowRegistration(true)}
-                  className="bg-peach-400 hover:bg-peach-500 text-peach-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
-                >
-                  Start Your Free Trial
-                </Button>
-              )}
+              <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-peach-400 hover:bg-peach-500 text-peach-900 font-semibold text-lg px-8 py-6 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+                  >
+                    Start Your Free Trial
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] p-0">
+                  <div className="p-6">
+                    <RegistrationForm />
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             {/* How It Works Section */}
@@ -80,22 +91,6 @@ const Index = () => {
                 </p>
               </div>
             </div>
-
-            {/* Form Section */}
-            {showRegistration && (
-              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg">
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl md:text-3xl font-semibold text-sage-800 mb-3">
-                    Start Your Pregnancy Journey
-                  </h2>
-                  <p className="text-sage-700">
-                    Begin your 7-day free trial and get personalized pregnancy guidance via text message.
-                  </p>
-                </div>
-                
-                <RegistrationForm />
-              </div>
-            )}
 
             {/* Medical Disclaimer */}
             <div className="mt-12 text-center text-sm text-sage-600 px-4">
