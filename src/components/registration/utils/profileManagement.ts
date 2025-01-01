@@ -7,6 +7,7 @@ interface ProfileData {
   dueDate: Date;
   interests: string;
   lifestyle: string;
+  preferredTime: string;
 }
 
 export const handleProfileUpdate = async ({
@@ -15,7 +16,8 @@ export const handleProfileUpdate = async ({
   city,
   dueDate,
   interests,
-  lifestyle
+  lifestyle,
+  preferredTime
 }: ProfileData) => {
   // Check if profile exists
   const { data: existingProfile, error: queryError } = await supabase
@@ -35,6 +37,7 @@ export const handleProfileUpdate = async ({
     due_date: dueDate.toISOString().split('T')[0],
     interests: interests,
     lifestyle: lifestyle,
+    preferred_notification_time: preferredTime,
     login_code: await generateLoginCode(),
     subscription_type: 'premium',
     subscription_status: 'trial'

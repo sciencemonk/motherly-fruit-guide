@@ -14,3 +14,6 @@ verify_jwt = false
 
 [send-welcome-sms]
 verify_jwt = false
+
+[send-daily-update]
+verify_jwt = false

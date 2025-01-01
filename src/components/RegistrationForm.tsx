@@ -6,11 +6,8 @@ import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Label } from "./ui/label";
-import { Calendar } from "./ui/calendar";
-import { Input } from "./ui/input";
 import { StateSelector } from "./registration/StateSelector";
+import { TimePickerField } from "./registration/TimePickerField";
 import { PregnancyReport } from "./PregnancyReport";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useSearchParams } from "react-router-dom";
@@ -31,6 +28,7 @@ export function RegistrationForm() {
   const [dueDate, setDueDate] = useState<Date>();
   const [interests, setInterests] = useState("");
   const [lifestyle, setLifestyle] = useState("");
+  const [preferredTime, setPreferredTime] = useState("09:00");
   const [smsConsent, setSmsConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -80,7 +78,7 @@ export function RegistrationForm() {
     fetchProfile();
   }, [registrationStatus, phoneFromParams, toast]);
 
-  const totalSteps = 6;
+  const totalSteps = 7; // Increased by 1 for the time picker step
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -105,6 +103,7 @@ export function RegistrationForm() {
       dueDate,
       interests,
       lifestyle,
+      preferredTime,
       smsConsent,
       setIsLoading,
       setIsSubmitted,
@@ -124,6 +123,8 @@ export function RegistrationForm() {
       case 4:
         return lifestyle.length > 0;
       case 5:
+        return preferredTime.length > 0;
+      case 6:
         return smsConsent;
       default:
         return false;
@@ -237,6 +238,13 @@ export function RegistrationForm() {
           </div>
         );
       case 5:
+        return (
+          <TimePickerField
+            preferredTime={preferredTime}
+            setPreferredTime={setPreferredTime}
+          />
+        );
+      case 6:
         return (
           <div className="space-y-6">
             <div className="text-center">
