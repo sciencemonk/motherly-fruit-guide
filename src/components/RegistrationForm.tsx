@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ConsentStep } from "./registration/ConsentStep";
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams();
@@ -138,9 +139,10 @@ export function RegistrationForm() {
   if (isSubmitted && dueDate) {
     return (
       <div className="space-y-6">
-        <DevelopmentPreview dueDate={dueDate} />
-        <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
-        <SocialProof />
+        <ConsentStep
+          smsConsent={smsConsent}
+          onSmsConsentChange={setSmsConsent}
+        />
       </div>
     );
   }
@@ -252,15 +254,10 @@ export function RegistrationForm() {
         );
       case 6:
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Start Your Free Trial</h2>
-              <p className="text-sage-600">7 days free, then $9.99/month</p>
-            </div>
-            <DevelopmentPreview dueDate={dueDate!} />
-            <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
-            <SocialProof />
-          </div>
+          <ConsentStep
+            smsConsent={smsConsent}
+            onSmsConsentChange={setSmsConsent}
+          />
         );
       default:
         return null;
