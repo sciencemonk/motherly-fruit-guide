@@ -23,14 +23,20 @@ async function sendWelcomeMessage(phoneNumber: string, firstName: string) {
     throw new Error('Missing Twilio credentials')
   }
 
+  // Ensure phone number is in E.164 format
+  const formattedPhone = phoneNumber.replace(/\D/g, '')
+  const e164Phone = formattedPhone.startsWith('+') ? formattedPhone : `+${formattedPhone}`
+
   const client = twilio(accountSid, authToken)
   
   const message = `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
 
+  console.log('Attempting to send message to:', e164Phone)
+  
   return client.messages.create({
     body: message,
     messagingServiceSid,
-    to: phoneNumber
+    to: e164Phone
   })
 }
 
@@ -106,12 +112,13 @@ serve(async (req) => {
 
         // Send welcome message
         try {
-          console.log('Attempting to send welcome message')
-          await sendWelcomeMessage(phone_number, profile.first_name)
-          console.log('Welcome message sent successfully')
+          console.log('Attempting to send welcome message to:', phone_number, 'for:', profile.first_name)
+          const messageResponse = await sendWelcomeMessage(phone_number, profile.first_name)
+          console.log('Welcome message sent successfully:', messageResponse.sid)
         } catch (error) {
           console.error('Error sending welcome message:', error)
-          // Don't throw here, we don't want to fail the whole webhook if just the message fails
+          // Log the error but don't throw, as we don't want to fail the webhook
+          // This ensures the subscription is still processed even if the message fails
         }
 
         break
