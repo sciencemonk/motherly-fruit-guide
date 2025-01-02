@@ -86,9 +86,8 @@ serve(async (req) => {
           console.log('Sending welcome message for:', phone_number)
           const welcomeMessage = `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
           
-          // Construct the full URL for the edge function
-          const projectUrl = Deno.env.get('SUPABASE_URL')
-          const functionUrl = `${projectUrl}/functions/v1/send-welcome-sms`
+          // Use the correct URL format for edge functions
+          const functionUrl = `https://${Deno.env.get('SUPABASE_PROJECT_ID')}.supabase.co/functions/v1/send-welcome-sms`
           
           console.log('Calling edge function at:', functionUrl)
           
