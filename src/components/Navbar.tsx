@@ -15,13 +15,10 @@ const Navbar = () => {
     <div className="fixed top-0 left-0 right-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-16 items-center">
         <div className="flex flex-1 items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/lovable-uploads/1420e5a5-3360-4ab7-9dc2-f184d4774b05.png" 
-              alt="Mother Athena Logo" 
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <span className="font-bold">Mother Athena</span>
+          <Link to="/" className="flex items-center">
+            <div className="bg-gradient-to-r from-peach-500 to-peach-400 rounded-lg px-4 py-2">
+              <span className="font-sans text-xl font-medium text-white">Mother Athena</span>
+            </div>
           </Link>
         </div>
         
