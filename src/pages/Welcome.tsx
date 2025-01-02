@@ -1,158 +1,68 @@
-import { useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { PregnancyReport } from "@/components/PregnancyReport"
-import { WelcomeMessage } from "@/components/pregnancy-report/WelcomeMessage"
-import { Share2, Twitter, Facebook } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Navbar from "@/components/Navbar"
-import Footer from "@/components/Footer"
+import { Heart, Baby, MessageCircle } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const Welcome = () => {
-  const [searchParams] = useSearchParams()
-  const { toast } = useToast()
-  const [profile, setProfile] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const phone = searchParams.get('phone')
-      console.log('Phone from URL:', phone) // Debug log
-      
-      if (!phone) {
-        console.error('No phone number provided in URL')
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        const decodedPhone = decodeURIComponent(phone)
-        console.log('Decoded phone:', decodedPhone) // Debug log
-
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('phone_number', decodedPhone)
-          .single()
-
-        if (error) {
-          console.error('Error fetching profile:', error)
-          throw error
-        }
-
-        console.log('Profile data:', data) // Debug log
-        setProfile(data)
-
-        // Send welcome message after successful checkout
-        const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
-          body: { 
-            phone_number: data.phone_number, 
-            first_name: data.first_name,
-            message: `Welcome to Mother Athena, ${data.first_name}! We're excited to be part of your pregnancy journey.`
-          }
-        })
-
-        if (welcomeError) throw welcomeError
-
-        toast({
-          title: "Welcome to Mother Athena!",
-          description: "Please check your phone for your first message.",
-        })
-      } catch (error) {
-        console.error('Error in welcome page:', error)
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "There was a problem loading your profile.",
-        })
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchProfile()
-  }, [searchParams, toast])
-
-  const handleShare = (platform: 'twitter' | 'facebook') => {
-    const text = encodeURIComponent("I just started my pregnancy journey with Mother Athena - the most advanced AI pregnancy guide! 🤰✨")
-    const url = encodeURIComponent("https://motherathena.com")
-
-    const shareUrls = {
-      twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`
-    }
-
-    window.open(shareUrls[platform], '_blank', 'width=600,height=400')
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">Loading your pregnancy guide...</div>
-      </div>
-    )
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-sage-800 mb-4">Profile Not Found</h1>
-          <p className="text-sage-600">We couldn't find your profile. Please try signing up again.</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
       <main className="flex-grow container px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <WelcomeMessage firstName={profile.first_name} />
-          
-          {/* Social Sharing */}
-          <div className="my-8 p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold text-sage-800 mb-4 flex items-center gap-2">
-              <Share2 className="w-5 h-5" />
-              Share Your Journey
-            </h2>
-            <p className="text-sage-600 mb-4">
-              Let your friends and family know about your pregnancy journey with Mother Athena!
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Welcome Message */}
+          <div className="text-center space-y-4">
+            <h1 className="text-3xl font-bold text-sage-800">Welcome to Mother Athena!</h1>
+            <p className="text-xl text-sage-600">Your AI-powered pregnancy companion</p>
+          </div>
+
+          {/* Message Alert */}
+          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-peach-500">
+            <div className="flex items-center gap-3 mb-3">
+              <MessageCircle className="w-6 h-6 text-peach-500" />
+              <h2 className="text-xl font-semibold text-sage-800">Check Your Phone</h2>
+            </div>
+            <p className="text-sage-600">
+              We've sent your first message from Mother Athena. Keep an eye on your phone for daily personalized updates about your pregnancy journey.
             </p>
-            <div className="flex gap-4">
-              <Button
-                onClick={() => handleShare('twitter')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Twitter className="w-4 h-4" />
-                Share on X
-              </Button>
-              <Button
-                onClick={() => handleShare('facebook')}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Facebook className="w-4 h-4" />
-                Share on Facebook
-              </Button>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="flex items-center gap-3 mb-4">
+                <Heart className="w-6 h-6 text-peach-500" />
+                <h3 className="text-xl font-semibold text-sage-800">Daily Support</h3>
+              </div>
+              <p className="text-sage-600">
+                Receive daily messages with personalized advice, tips, and insights tailored to your stage of pregnancy.
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="flex items-center gap-3 mb-4">
+                <Baby className="w-6 h-6 text-peach-500" />
+                <h3 className="text-xl font-semibold text-sage-800">Track Development</h3>
+              </div>
+              <p className="text-sage-600">
+                Stay informed about your baby's growth and development with weekly updates and milestone tracking.
+              </p>
             </div>
           </div>
 
-          {/* Pregnancy Report */}
-          {profile.due_date && (
-            <PregnancyReport 
-              dueDate={new Date(profile.due_date)} 
-              firstName={profile.first_name}
-            />
-          )}
+          {/* Getting Started Tips */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-semibold text-sage-800 mb-4">Getting Started</h3>
+            <ul className="space-y-3 text-sage-600">
+              <li>✓ Save Mother Athena's number in your contacts</li>
+              <li>✓ Reply to our messages anytime with questions</li>
+              <li>✓ Share important updates with your healthcare provider</li>
+              <li>✓ Enable notifications to never miss an update</li>
+            </ul>
+          </div>
         </div>
       </main>
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Welcome
+export default Welcome;

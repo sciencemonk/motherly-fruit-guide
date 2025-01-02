@@ -8,8 +8,7 @@ import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
 import { StateSelector } from "./registration/StateSelector";
 import { TimePickerField } from "./registration/TimePickerField";
-import { PregnancyReport } from "./PregnancyReport";
-import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
+import { DevelopmentPreview } from "./DevelopmentPreview";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { convertLocalToUTC, convertUTCToLocal } from "@/utils/timeZone";
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams();
@@ -140,8 +138,9 @@ export function RegistrationForm() {
   if (isSubmitted && dueDate) {
     return (
       <div className="space-y-6">
-        <WelcomeMessage firstName={firstName} />
-        <PregnancyReport dueDate={dueDate} firstName={firstName} />
+        <DevelopmentPreview dueDate={dueDate} />
+        <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+        <SocialProof />
       </div>
     );
   }
@@ -258,6 +257,7 @@ export function RegistrationForm() {
               <h2 className="text-2xl font-semibold text-sage-800 mb-2">Start Your Free Trial</h2>
               <p className="text-sage-600">7 days free, then $9.99/month</p>
             </div>
+            <DevelopmentPreview dueDate={dueDate!} />
             <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
             <SocialProof />
           </div>
@@ -266,15 +266,6 @@ export function RegistrationForm() {
         return null;
     }
   };
-
-  if (isSubmitted && dueDate && profile) {
-    return (
-      <div className="space-y-6">
-        <WelcomeMessage firstName={firstName} />
-        <PregnancyReport dueDate={dueDate} firstName={firstName} />
-      </div>
-    );
-  }
 
   return (
     <div className="registration-form">
