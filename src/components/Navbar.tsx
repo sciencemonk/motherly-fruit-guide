@@ -16,7 +16,11 @@ const Navbar = () => {
       <div className="container flex h-16 items-center">
         <div className="flex flex-1 items-center">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl">🤰</span>
+            <img 
+              src="/lovable-uploads/aa44d04a-eb3f-47d2-8c27-2eb414b0aa15.png" 
+              alt="Mother Athena Avatar" 
+              className="w-8 h-8 rounded-full object-cover"
+            />
             <span className="font-bold">Mother Athena</span>
           </Link>
         </div>
