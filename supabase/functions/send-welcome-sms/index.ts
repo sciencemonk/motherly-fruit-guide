@@ -19,13 +19,21 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Processing welcome SMS request')
+    
     if (req.method !== 'POST') {
       throw new Error('Method not allowed')
     }
 
-    const { to, message } = await req.json()
-    console.log('Request payload:', { to, hasMessage: !!message })
+    const requestData = await req.json()
+    console.log('Request payload:', {
+      hasTo: !!requestData.to,
+      hasMessage: !!requestData.message,
+      to: requestData.to // Log the actual phone number for debugging
+    })
 
+    const { to, message } = requestData
+    
     if (!to || !message) {
       throw new Error('Missing required fields: to and message')
     }

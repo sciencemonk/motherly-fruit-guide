@@ -1,14 +1,18 @@
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export const sendWelcomeMessage = async (phoneNumber: string, firstName: string) => {
   try {
-    console.log('Sending welcome message to:', phoneNumber);
+    console.log('Attempting to send welcome message to:', phoneNumber);
     
     // Ensure phone number is in E.164 format
     const formattedPhone = phoneNumber.replace(/\D/g, '');
     const e164Phone = formattedPhone.startsWith('+') ? formattedPhone : `+${formattedPhone}`;
     
+    console.log('Invoking send-welcome-sms function with params:', {
+      to: e164Phone,
+      firstName
+    });
+
     const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
       body: {
         to: e164Phone,
@@ -17,7 +21,7 @@ export const sendWelcomeMessage = async (phoneNumber: string, firstName: string)
     });
 
     if (error) {
-      console.error('Supabase function error:', error);
+      console.error('Error from edge function:', error);
       throw error;
     }
 
