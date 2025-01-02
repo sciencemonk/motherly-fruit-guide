@@ -10,12 +10,12 @@ export async function getAIResponse(message: string, systemPrompt: string, apiKe
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini', // Fixed model name
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
         ],
-        max_tokens: 500, // Balanced token limit for most responses
+        max_tokens: 500,
         temperature: 0.7,
       }),
     });
