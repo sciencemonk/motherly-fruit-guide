@@ -7,8 +7,11 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log('Received request to send-welcome-sms function')
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request')
     return new Response(null, { 
       status: 204, 
       headers: corsHeaders 
@@ -21,7 +24,7 @@ serve(async (req) => {
     }
 
     const { to, message } = await req.json()
-    console.log('Received request to send SMS to:', to)
+    console.log('Request payload:', { to, hasMessage: !!message })
 
     if (!to || !message) {
       throw new Error('Missing required fields: to and message')
@@ -40,11 +43,7 @@ serve(async (req) => {
     })
 
     if (!accountSid || !authToken || !messagingServiceSid) {
-      console.error('Missing Twilio credentials:', {
-        hasAccountSid: !!accountSid,
-        hasAuthToken: !!authToken,
-        hasMessagingServiceSid: !!messagingServiceSid
-      })
+      console.error('Missing Twilio credentials')
       throw new Error('Missing Twilio credentials')
     }
 

@@ -81,33 +81,19 @@ serve(async (req) => {
           throw updateError
         }
 
-        // Send welcome message using direct HTTP request to the edge function
+        // Send welcome message using the edge function
         try {
           console.log('Sending welcome message for:', phone_number)
-          const welcomeMessage = `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
-          
-          // Use the correct URL format for edge functions
-          const functionUrl = `https://${Deno.env.get('SUPABASE_PROJECT_ID')}.supabase.co/functions/v1/send-welcome-sms`
-          
-          console.log('Calling edge function at:', functionUrl)
-          
-          const response = await fetch(functionUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-            },
-            body: JSON.stringify({
+          const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
+            body: {
               to: phone_number,
-              message: welcomeMessage
-            })
+              message: `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+            }
           })
 
-          const responseText = await response.text()
-          console.log('Edge function response:', responseText)
-
-          if (!response.ok) {
-            throw new Error(`Failed to send welcome message: ${responseText}`)
+          if (welcomeError) {
+            console.error('Error sending welcome message:', welcomeError)
+            throw welcomeError
           }
 
           console.log('Welcome message sent successfully')
