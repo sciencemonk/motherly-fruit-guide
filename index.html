@@ -8,6 +8,22 @@
     <meta name="author" content="Mother Athena" />
     <meta property="og:image" content="/lovable-uploads/3e55059e-9f8f-45fe-8e4a-209511a4a83a.png" />
     <link rel="icon" type="image/png" href="/lovable-uploads/9d5c9571-6110-4c69-b6fe-21da84aa483b.png" />
+    <!-- Handle client-side routing -->
+    <script>
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafgraph/spa-github-pages
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
   </head>
 
   <body>
