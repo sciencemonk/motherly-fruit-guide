@@ -7,7 +7,11 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  console.log('Received request to send-welcome-sms function')
+  console.log('Received request to send-welcome-sms function', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  })
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -29,7 +33,8 @@ serve(async (req) => {
     console.log('Request payload:', {
       hasTo: !!requestData.to,
       hasMessage: !!requestData.message,
-      to: requestData.to // Log the actual phone number for debugging
+      to: requestData.to, // Log the actual phone number for debugging
+      messageLength: requestData.message?.length
     })
 
     const { to, message } = requestData
@@ -47,7 +52,8 @@ serve(async (req) => {
     console.log('Checking Twilio credentials:', {
       hasAccountSid: !!accountSid,
       hasAuthToken: !!authToken,
-      hasMessagingServiceSid: !!messagingServiceSid
+      hasMessagingServiceSid: !!messagingServiceSid,
+      envKeys: Object.keys(Deno.env.toObject())
     })
 
     if (!accountSid || !authToken || !messagingServiceSid) {
