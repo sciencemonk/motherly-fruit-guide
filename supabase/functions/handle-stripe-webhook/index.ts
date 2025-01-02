@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Twilio } from 'npm:twilio'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +11,20 @@ const corsHeaders = {
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
 })
+
+// Initialize Twilio client
+const initTwilioClient = () => {
+  const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
+  const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+  const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
+
+  if (!accountSid || !authToken || !messagingServiceSid) {
+    console.error('Missing Twilio credentials')
+    throw new Error('Missing Twilio credentials')
+  }
+
+  return new Twilio(accountSid, authToken)
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -84,27 +99,40 @@ serve(async (req) => {
           throw updateError
         }
 
-        // Send welcome message using handle-sms function
+        // Send welcome message directly using Twilio
         try {
-          console.log('Sending welcome message for:', phone_number)
-          const { error: welcomeError } = await supabase.functions.invoke('handle-sms', {
-            body: {
-              From: Deno.env.get('TWILIO_PHONE_NUMBER'),
-              To: phone_number,
-              Body: `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
-            }
+          console.log('Attempting to send welcome SMS to:', phone_number)
+          const twilioClient = initTwilioClient()
+          const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
+          
+          // Ensure phone number is in E.164 format
+          const formattedPhone = phone_number.startsWith('+') ? phone_number : `+${phone_number.replace(/\D/g, '')}`
+          
+          const message = await twilioClient.messages.create({
+            body: `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`,
+            messagingServiceSid,
+            to: formattedPhone
           })
 
-          if (welcomeError) {
-            console.error('Error from handle-sms function:', welcomeError)
-            throw welcomeError
+          console.log('Welcome SMS sent successfully:', message.sid)
+          
+          // Save the message to chat history
+          const { error: chatError } = await supabase
+            .from('chat_history')
+            .insert({
+              phone_number: phone_number,
+              role: 'assistant',
+              content: message.body
+            })
+
+          if (chatError) {
+            console.error('Error saving to chat history:', chatError)
           }
 
-          console.log('Welcome message sent successfully')
         } catch (error) {
-          console.error('Error sending welcome message:', error)
+          console.error('Error sending welcome SMS:', error)
           // Log the error but don't throw, as we don't want to fail the webhook
-          // This ensures the subscription is still processed even if the message fails
+          // This ensures the subscription is still processed even if the SMS fails
         }
 
         break
