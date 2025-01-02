@@ -20,22 +20,25 @@ serve(async (req) => {
     const signature = req.headers.get('stripe-signature')
   
     if (!signature) {
+      console.error('No Stripe signature found in webhook request')
       return new Response('No signature', { status: 400 })
     }
 
     const body = await req.text()
+    console.log('Received webhook body:', body)
+    
     const event = stripe.webhooks.constructEvent(
       body,
       signature,
       Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET') || ''
     )
 
+    console.log('Processing webhook event:', event.type)
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
-
-    console.log('Processing webhook event:', event.type)
 
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -81,18 +84,19 @@ serve(async (req) => {
           throw updateError
         }
 
-        // Send welcome message using the edge function
+        // Send welcome message using handle-sms function
         try {
           console.log('Sending welcome message for:', phone_number)
-          const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
+          const { error: welcomeError } = await supabase.functions.invoke('handle-sms', {
             body: {
-              to: phone_number,
-              message: `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+              From: Deno.env.get('TWILIO_PHONE_NUMBER'),
+              To: phone_number,
+              Body: `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
             }
           })
 
           if (welcomeError) {
-            console.error('Error sending welcome message:', welcomeError)
+            console.error('Error from handle-sms function:', welcomeError)
             throw welcomeError
           }
 
