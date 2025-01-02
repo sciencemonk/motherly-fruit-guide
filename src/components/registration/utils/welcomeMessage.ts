@@ -13,19 +13,20 @@ export const sendWelcomeMessage = async (phoneNumber: string, firstName: string)
       hostname: window.location.hostname
     });
 
-    // Construct the function URL based on the environment
-    const functionName = 'send-welcome-sms';
+    // Use the handle-sms function instead
+    const functionName = 'handle-sms';
     
-    console.log('Invoking send-welcome-sms function with params:', {
-      to: e164Phone,
-      firstName,
-      functionName
+    console.log('Invoking handle-sms function with params:', {
+      From: process.env.TWILIO_PHONE_NUMBER,
+      To: e164Phone,
+      Body: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
     });
 
     const { data, error } = await supabase.functions.invoke(functionName, {
       body: {
-        to: e164Phone,
-        message: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+        From: process.env.TWILIO_PHONE_NUMBER,
+        To: e164Phone,
+        Body: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
       }
     });
 

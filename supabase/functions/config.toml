@@ -12,8 +12,5 @@ verify_jwt = false
 [generate-fruit-image]
 verify_jwt = false
 
-[send-welcome-sms]
-verify_jwt = false
-
 [send-daily-update]
 verify_jwt = false
