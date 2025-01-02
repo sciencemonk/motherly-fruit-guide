@@ -8,7 +8,6 @@ import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
 import { StateSelector } from "./registration/StateSelector";
 import { TimePickerField } from "./registration/TimePickerField";
-import { DevelopmentPreview } from "./registration/DevelopmentPreview";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,19 +117,19 @@ export function RegistrationForm() {
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return firstName.length > 0 && phone.length > 0;
+        return firstName?.length > 0 && phone?.length > 0;
       case 1:
-        return city.length > 0 && state.length > 0;
+        return city?.length > 0 && state?.length > 0;
       case 2:
         return dueDate !== undefined;
       case 3:
-        return interests.length > 0;
+        return interests?.length > 0;
       case 4:
-        return lifestyle.length > 0;
+        return lifestyle?.length > 0;
       case 5:
-        return preferredTime.length > 0;
+        return preferredTime?.length > 0;
       case 6:
-        return smsConsent;
+        return smsConsent === true;
       default:
         return false;
     }
