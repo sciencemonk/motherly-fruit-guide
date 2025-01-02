@@ -8,6 +8,8 @@ import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
 import { StateSelector } from "./registration/StateSelector";
 import { TimePickerField } from "./registration/TimePickerField";
+import { PregnancyReport } from "./PregnancyReport";
+import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ConsentStep } from "./registration/ConsentStep";
+import { convertLocalToUTC, convertUTCToLocal } from "@/utils/timeZone";
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams();
@@ -117,19 +119,19 @@ export function RegistrationForm() {
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return firstName?.length > 0 && phone?.length > 0;
+        return firstName.length > 0 && phone.length > 0;
       case 1:
-        return city?.length > 0 && state?.length > 0;
+        return city.length > 0 && state.length > 0;
       case 2:
         return dueDate !== undefined;
       case 3:
-        return interests?.length > 0;
+        return interests.length > 0;
       case 4:
-        return lifestyle?.length > 0;
+        return lifestyle.length > 0;
       case 5:
-        return preferredTime?.length > 0;
+        return preferredTime.length > 0;
       case 6:
-        return smsConsent === true;
+        return smsConsent;
       default:
         return false;
     }
@@ -138,10 +140,8 @@ export function RegistrationForm() {
   if (isSubmitted && dueDate) {
     return (
       <div className="space-y-6">
-        <ConsentStep
-          smsConsent={smsConsent}
-          onSmsConsentChange={setSmsConsent}
-        />
+        <WelcomeMessage firstName={firstName} />
+        <PregnancyReport dueDate={dueDate} firstName={firstName} />
       </div>
     );
   }
@@ -253,15 +253,28 @@ export function RegistrationForm() {
         );
       case 6:
         return (
-          <ConsentStep
-            smsConsent={smsConsent}
-            onSmsConsentChange={setSmsConsent}
-          />
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Start Your Free Trial</h2>
+              <p className="text-sage-600">7 days free, then $9.99/month</p>
+            </div>
+            <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
+            <SocialProof />
+          </div>
         );
       default:
         return null;
     }
   };
+
+  if (isSubmitted && dueDate && profile) {
+    return (
+      <div className="space-y-6">
+        <WelcomeMessage firstName={firstName} />
+        <PregnancyReport dueDate={dueDate} firstName={firstName} />
+      </div>
+    );
+  }
 
   return (
     <div className="registration-form">

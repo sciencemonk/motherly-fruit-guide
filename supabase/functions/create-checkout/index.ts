@@ -20,8 +20,6 @@ serve(async (req) => {
     })
 
     console.log('Creating payment session...')
-    console.log('Success URL provided:', success_url) // Debug log
-    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -30,7 +28,7 @@ serve(async (req) => {
             product: 'prod_RVHzCMiLrCYtzk',
             currency: 'usd',
             recurring: {
-              interval: 'week'
+              interval: 'week'  // Changed from 'month' to 'week'
             },
             unit_amount: 999, // $9.99
           },
@@ -41,16 +39,14 @@ serve(async (req) => {
       subscription_data: trial ? {
         trial_period_days: 7,
       } : undefined,
-      success_url: success_url, // Use the provided success_url
-      cancel_url: cancel_url,
+      success_url: success_url || `${req.headers.get('origin')}/dashboard?registration=success&phone=${encodeURIComponent(phone_number)}`,
+      cancel_url: cancel_url || `${req.headers.get('origin')}`,
       metadata: {
         phone_number,
       },
     })
 
     console.log('Payment session created:', session.id)
-    console.log('Final success URL:', session.success_url) // Debug log
-    
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
