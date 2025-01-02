@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import twilio from 'npm:twilio'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,34 +10,6 @@ const corsHeaders = {
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
 })
-
-async function sendWelcomeMessage(phoneNumber: string, firstName: string) {
-  console.log('Sending welcome message to:', phoneNumber, 'for:', firstName)
-  
-  const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
-  const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-  const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
-
-  if (!accountSid || !authToken || !messagingServiceSid) {
-    throw new Error('Missing Twilio credentials')
-  }
-
-  // Ensure phone number is in E.164 format
-  const formattedPhone = phoneNumber.replace(/\D/g, '')
-  const e164Phone = formattedPhone.startsWith('+') ? formattedPhone : `+${formattedPhone}`
-
-  const client = twilio(accountSid, authToken)
-  
-  const message = `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
-
-  console.log('Attempting to send message to:', e164Phone)
-  
-  return client.messages.create({
-    body: message,
-    messagingServiceSid,
-    to: e164Phone
-  })
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -110,11 +81,24 @@ serve(async (req) => {
           throw updateError
         }
 
-        // Send welcome message
+        // Send welcome message using the dedicated edge function
         try {
-          console.log('Attempting to send welcome message to:', phone_number, 'for:', profile.first_name)
-          const messageResponse = await sendWelcomeMessage(phone_number, profile.first_name)
-          console.log('Welcome message sent successfully:', messageResponse.sid)
+          console.log('Invoking send-welcome-sms function for:', phone_number)
+          const { data: welcomeData, error: welcomeError } = await supabase.functions.invoke(
+            'send-welcome-sms',
+            {
+              body: {
+                to: phone_number,
+                message: `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+              }
+            }
+          )
+
+          if (welcomeError) {
+            throw welcomeError
+          }
+
+          console.log('Welcome message sent successfully:', welcomeData)
         } catch (error) {
           console.error('Error sending welcome message:', error)
           // Log the error but don't throw, as we don't want to fail the webhook
