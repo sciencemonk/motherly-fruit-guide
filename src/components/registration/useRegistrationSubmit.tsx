@@ -107,8 +107,7 @@ export function useRegistrationSubmit() {
 
       // Get the current origin for success/cancel URLs
       const origin = window.location.origin;
-      // Only include the phone parameter in the success URL
-      const successUrl = `${origin}/welcome?phone=${encodeURIComponent(phone)}`;
+      const successUrl = `${origin}/welcome`;
       const cancelUrl = `${origin}/?registration=cancelled`;
 
       const checkoutData = await createCheckoutSession({
