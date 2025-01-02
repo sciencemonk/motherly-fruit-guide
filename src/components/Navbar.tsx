@@ -16,9 +16,7 @@ const Navbar = () => {
       <div className="container flex h-16 items-center">
         <div className="flex flex-1 items-center">
           <Link to="/" className="flex items-center">
-            <div className="bg-gradient-to-r from-peach-500 to-peach-400 rounded-lg px-4 py-2">
-              <span className="font-sans text-xl font-medium text-white">Mother Athena</span>
-            </div>
+            <span className="font-['Futura-Md-BT'] text-xl font-medium text-black">Mother Athena</span>
           </Link>
         </div>
         
@@ -42,8 +40,8 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <nav className="hidden md:flex space-x-4">
-              <Link to="/our-story" className="text-black hover:text-gray-600">Our Story</Link>
-              <Link to="/contact" className="text-black hover:text-gray-600">Contact Us</Link>
+              <Link to="/our-story" className="text-black hover:text-gray-600 font-['Futura-Md-BT']">Our Story</Link>
+              <Link to="/contact" className="text-black hover:text-gray-600 font-['Futura-Md-BT']">Contact Us</Link>
             </nav>
           )}
         </div>
