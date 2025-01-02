@@ -86,7 +86,12 @@ serve(async (req) => {
           console.log('Sending welcome message for:', phone_number)
           const welcomeMessage = `Hi ${profile.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
           
-          const functionUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-welcome-sms`
+          // Construct the full URL for the edge function
+          const projectUrl = Deno.env.get('SUPABASE_URL')
+          const functionUrl = `${projectUrl}/functions/v1/send-welcome-sms`
+          
+          console.log('Calling edge function at:', functionUrl)
+          
           const response = await fetch(functionUrl, {
             method: 'POST',
             headers: {
@@ -99,13 +104,14 @@ serve(async (req) => {
             })
           })
 
+          const responseText = await response.text()
+          console.log('Edge function response:', responseText)
+
           if (!response.ok) {
-            const error = await response.text()
-            throw new Error(`Failed to send welcome message: ${error}`)
+            throw new Error(`Failed to send welcome message: ${responseText}`)
           }
 
-          const result = await response.json()
-          console.log('Welcome message sent successfully:', result)
+          console.log('Welcome message sent successfully')
         } catch (error) {
           console.error('Error sending welcome message:', error)
           // Log the error but don't throw, as we don't want to fail the webhook
