@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { sendWelcomeMessage } from "./registration/utils/welcomeMessage"
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams()
@@ -54,25 +55,24 @@ export function RegistrationForm() {
           setDueDate(new Date(data.due_date))
           setIsSubmitted(true)
 
-          console.log('Sending welcome SMS to:', phoneFromParams)
-          
-          // Send welcome message after successful checkout
-          const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
-            body: { 
-              to: decodeURIComponent(phoneFromParams),
-              message: `Hi ${data.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
-            }
+          // Send welcome message
+          await sendWelcomeMessage(
+            decodeURIComponent(phoneFromParams),
+            data.first_name
+          ).then(() => {
+            toast({
+              title: "Welcome to Mother Athena!",
+              description: "Please check your phone for your first message.",
+            })
+          }).catch((error) => {
+            console.error('Error sending welcome message:', error)
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "There was a problem sending your welcome message.",
+            })
           })
 
-          if (welcomeError) {
-            console.error('Error sending welcome SMS:', welcomeError)
-            throw welcomeError
-          }
-
-          toast({
-            title: "Welcome to Mother Athena!",
-            description: "Please check your phone for your first message.",
-          })
         } catch (error) {
           console.error('Error fetching profile:', error)
           toast({
