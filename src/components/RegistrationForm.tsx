@@ -54,12 +54,20 @@ export function RegistrationForm() {
           setDueDate(new Date(data.due_date))
           setIsSubmitted(true)
 
+          console.log('Sending welcome SMS to:', phoneFromParams)
+          
           // Send welcome message after successful checkout
           const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
-            body: { phone_number: data.phone_number, first_name: data.first_name }
+            body: { 
+              to: decodeURIComponent(phoneFromParams),
+              message: `Hi ${data.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+            }
           })
 
-          if (welcomeError) throw welcomeError
+          if (welcomeError) {
+            console.error('Error sending welcome SMS:', welcomeError)
+            throw welcomeError
+          }
 
           toast({
             title: "Welcome to Mother Athena!",
