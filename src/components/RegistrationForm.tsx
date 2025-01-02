@@ -8,7 +8,7 @@ import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { SocialProof } from "./registration/SocialProof";
 import { StateSelector } from "./registration/StateSelector";
 import { TimePickerField } from "./registration/TimePickerField";
-import { DevelopmentPreview } from "./DevelopmentPreview";
+import { DevelopmentPreview } from "./registration/DevelopmentPreview";
 import { useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";

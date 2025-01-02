@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Brain } from "lucide-react";
 
 interface DevelopmentPreviewProps {
   dueDate: Date;
@@ -56,14 +57,21 @@ export function DevelopmentPreview({ dueDate }: DevelopmentPreviewProps) {
   const developmentInfo = getDevelopmentInfo(gestationalAge);
 
   return (
-    <div className="space-y-4">
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-sage-800 mb-2">Your Baby's Development</h2>
-        <p className="text-sage-600">Week {gestationalAge}</p>
-      </div>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <p className="text-sage-700">{developmentInfo}</p>
-      </div>
-    </div>
+    <Card className="bg-white/80 backdrop-blur-sm">
+      <CardHeader>
+        <div className="flex items-center justify-center gap-2 text-peach-500">
+          <Brain className="h-5 w-5" />
+          <CardTitle>Your Baby's Development</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-sage-600">Week {gestationalAge}</p>
+          </div>
+          <p className="text-sage-700">{developmentInfo}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
