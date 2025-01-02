@@ -1,45 +1,42 @@
-import { useState, useEffect } from "react";
-import { StepIndicator } from "./registration/StepIndicator";
-import { FormFields } from "./registration/FormFields";
-import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
-import { Button } from "./ui/button";
-import { Loader2 } from "lucide-react";
-import { ConsentCheckbox } from "./registration/ConsentCheckbox";
-import { SocialProof } from "./registration/SocialProof";
-import { StateSelector } from "./registration/StateSelector";
-import { TimePickerField } from "./registration/TimePickerField";
-import { PregnancyReport } from "./PregnancyReport";
-import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
-import { useSearchParams } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { convertLocalToUTC, convertUTCToLocal } from "@/utils/timeZone";
+import { useState, useEffect } from "react"
+import { StepIndicator } from "./registration/StepIndicator"
+import { FormFields } from "./registration/FormFields"
+import { useRegistrationSubmit } from "./registration/useRegistrationSubmit"
+import { Button } from "./ui/button"
+import { Loader2 } from "lucide-react"
+import { ConsentCheckbox } from "./registration/ConsentCheckbox"
+import { SocialProof } from "./registration/SocialProof"
+import { StateSelector } from "./registration/StateSelector"
+import { TimePickerField } from "./registration/TimePickerField"
+import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
+import { useSearchParams } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Calendar } from "@/components/ui/calendar"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export function RegistrationForm() {
-  const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  const registrationStatus = searchParams.get('registration');
-  const phoneFromParams = searchParams.get('phone');
+  const [searchParams] = useSearchParams()
+  const { toast } = useToast()
+  const registrationStatus = searchParams.get('registration')
+  const phoneFromParams = searchParams.get('phone')
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [firstName, setFirstName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [dueDate, setDueDate] = useState<Date>();
-  const [interests, setInterests] = useState("");
-  const [lifestyle, setLifestyle] = useState("");
-  const [preferredTime, setPreferredTime] = useState("09:00");
-  const [smsConsent, setSmsConsent] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [profile, setProfile] = useState<any>(null);
+  const [currentStep, setCurrentStep] = useState(0)
+  const [firstName, setFirstName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [city, setCity] = useState("")
+  const [state, setState] = useState("")
+  const [dueDate, setDueDate] = useState<Date>()
+  const [interests, setInterests] = useState("")
+  const [lifestyle, setLifestyle] = useState("")
+  const [preferredTime, setPreferredTime] = useState("09:00")
+  const [smsConsent, setSmsConsent] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const { handleSubmit } = useRegistrationSubmit();
+  const { handleSubmit } = useRegistrationSubmit()
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -49,57 +46,56 @@ export function RegistrationForm() {
             .from('profiles')
             .select('*')
             .eq('phone_number', decodeURIComponent(phoneFromParams))
-            .single();
+            .single()
 
-          if (error) throw error;
+          if (error) throw error
 
-          setProfile(data);
-          setFirstName(data.first_name);
-          setDueDate(new Date(data.due_date));
-          setIsSubmitted(true);
+          setFirstName(data.first_name)
+          setDueDate(new Date(data.due_date))
+          setIsSubmitted(true)
 
           // Send welcome message after successful checkout
           const { error: welcomeError } = await supabase.functions.invoke('send-welcome-sms', {
             body: { phone_number: data.phone_number, first_name: data.first_name }
-          });
+          })
 
-          if (welcomeError) throw welcomeError;
+          if (welcomeError) throw welcomeError
 
           toast({
             title: "Welcome to Mother Athena!",
             description: "Please check your phone for your first message.",
-          });
+          })
         } catch (error) {
-          console.error('Error fetching profile:', error);
+          console.error('Error fetching profile:', error)
           toast({
             variant: "destructive",
             title: "Error",
             description: "There was a problem loading your profile.",
-          });
+          })
         }
       }
-    };
+    }
 
-    fetchProfile();
-  }, [registrationStatus, phoneFromParams, toast]);
+    fetchProfile()
+  }, [registrationStatus, phoneFromParams, toast])
 
-  const totalSteps = 7; // Increased by 1 for the time picker step
+  const totalSteps = 7
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!dueDate) return;
+    e.preventDefault()
+    if (!dueDate) return
 
     await handleSubmit({
       firstName,
@@ -113,37 +109,36 @@ export function RegistrationForm() {
       smsConsent,
       setIsLoading,
       setIsSubmitted,
-    });
-  };
+    })
+  }
 
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return firstName.length > 0 && phone.length > 0;
+        return firstName?.length > 0 && phone?.length > 0
       case 1:
-        return city.length > 0 && state.length > 0;
+        return city?.length > 0 && state?.length > 0
       case 2:
-        return dueDate !== undefined;
+        return dueDate !== undefined
       case 3:
-        return interests.length > 0;
+        return interests?.length > 0
       case 4:
-        return lifestyle.length > 0;
+        return lifestyle?.length > 0
       case 5:
-        return preferredTime.length > 0;
+        return preferredTime?.length > 0
       case 6:
-        return smsConsent;
+        return smsConsent === true
       default:
-        return false;
+        return false
     }
-  };
+  }
 
-  if (isSubmitted && dueDate) {
+  if (isSubmitted) {
     return (
       <div className="space-y-6">
         <WelcomeMessage firstName={firstName} />
-        <PregnancyReport dueDate={dueDate} firstName={firstName} />
       </div>
-    );
+    )
   }
 
   const renderStep = () => {
@@ -156,7 +151,7 @@ export function RegistrationForm() {
             phone={phone}
             setPhone={setPhone}
           />
-        );
+        )
       case 1:
         return (
           <div className="space-y-4">
@@ -177,7 +172,7 @@ export function RegistrationForm() {
               <StateSelector state={state} setState={setState} />
             </div>
           </div>
-        );
+        )
       case 2:
         return (
           <div className="space-y-4">
@@ -196,7 +191,7 @@ export function RegistrationForm() {
               </div>
             </div>
           </div>
-        );
+        )
       case 3:
         return (
           <div className="space-y-4">
@@ -227,7 +222,7 @@ export function RegistrationForm() {
               </div>
             </RadioGroup>
           </div>
-        );
+        )
       case 4:
         return (
           <div className="space-y-4">
@@ -242,7 +237,7 @@ export function RegistrationForm() {
               placeholder="Share details about your daily routine, exercise habits, diet preferences, work life, and any specific concerns you have about your pregnancy journey..."
             />
           </div>
-        );
+        )
       case 5:
         return (
           <TimePickerField
@@ -250,7 +245,7 @@ export function RegistrationForm() {
             setPreferredTime={setPreferredTime}
             city={city}
           />
-        );
+        )
       case 6:
         return (
           <div className="space-y-6">
@@ -261,19 +256,10 @@ export function RegistrationForm() {
             <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
             <SocialProof />
           </div>
-        );
+        )
       default:
-        return null;
+        return null
     }
-  };
-
-  if (isSubmitted && dueDate && profile) {
-    return (
-      <div className="space-y-6">
-        <WelcomeMessage firstName={firstName} />
-        <PregnancyReport dueDate={dueDate} firstName={firstName} />
-      </div>
-    );
   }
 
   return (
@@ -319,5 +305,5 @@ export function RegistrationForm() {
         </div>
       </form>
     </div>
-  );
+  )
 }
