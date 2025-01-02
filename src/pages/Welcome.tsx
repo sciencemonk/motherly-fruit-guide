@@ -19,10 +19,10 @@ const Welcome = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
-      <main className="flex-grow container px-4 py-16 md:py-24">
+      <main className="flex-grow container px-4 py-8 md:py-24">
         <div className="max-w-4xl mx-auto space-y-12">
           {/* Welcome Message */}
-          <div className="text-center space-y-6 bg-white p-10 md:p-12 rounded-lg shadow-md">
+          <div className="text-center space-y-6 bg-white p-8 md:p-12 rounded-lg shadow-md mt-4 md:mt-0">
             <h1 className="text-4xl font-bold text-sage-800">Welcome to Mother Athena!</h1>
             <p className="text-2xl text-sage-600">Your AI-powered pregnancy companion</p>
             <div className="mt-8 text-sage-700 space-y-4">
@@ -32,7 +32,7 @@ const Welcome = () => {
           </div>
 
           {/* Helpful Information */}
-          <div className="bg-white p-10 md:p-12 rounded-lg shadow-md space-y-8">
+          <div className="bg-white p-8 md:p-12 rounded-lg shadow-md space-y-8">
             <h2 className="text-3xl font-semibold text-sage-800">What to Expect</h2>
             <div className="space-y-6 text-sage-700">
               <p className="text-lg">Mother Athena will be your trusted companion throughout your pregnancy journey, providing:</p>
@@ -47,7 +47,7 @@ const Welcome = () => {
           </div>
 
           {/* Social Sharing */}
-          <div className="bg-white p-10 md:p-12 rounded-lg shadow-md">
+          <div className="bg-white p-8 md:p-12 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold text-sage-800 mb-6 flex items-center gap-2">
               <Share2 className="w-6 h-6" />
               Share Your Journey
