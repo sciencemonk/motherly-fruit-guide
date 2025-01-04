@@ -59,9 +59,6 @@ const Index = () => {
       <Dialog open={showRegistration} onOpenChange={setShowRegistration}>
         <DialogContent className="sm:max-w-[600px] p-0">
           <div className="p-6">
-            <h2 className="text-2xl font-semibold text-sage-800 mb-4">
-              Start Your Journey with Mother Athena
-            </h2>
             <RegistrationForm />
           </div>
         </DialogContent>
