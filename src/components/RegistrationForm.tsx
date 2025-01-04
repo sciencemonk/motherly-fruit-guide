@@ -9,6 +9,7 @@ import { BasicInfoStep } from "./registration/steps/BasicInfoStep";
 import { PregnancyStatusStep } from "./registration/steps/PregnancyStatusStep";
 import { LocationStep } from "./registration/steps/LocationStep";
 import { DueDateStep } from "./registration/steps/DueDateStep";
+import { CycleInfoStep } from "./registration/steps/CycleInfoStep";
 import { InterestsStep } from "./registration/steps/InterestsStep";
 import { LifestyleStep } from "./registration/steps/LifestyleStep";
 import { NotificationTimeStep } from "./registration/steps/NotificationTimeStep";
@@ -23,6 +24,8 @@ export function RegistrationForm() {
     setPhone,
     dueDate,
     setDueDate,
+    lastPeriod,
+    setLastPeriod,
     city,
     setCity,
     state,
@@ -46,13 +49,13 @@ export function RegistrationForm() {
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 8; // Increased by 1 for the new pregnancy status step
+  const totalSteps = 8;
 
   const { handleSubmit } = useRegistrationSubmit();
 
   // Calculate the date range for due date selection
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time to start of day
+  today.setHours(0, 0, 0, 0);
   const maxDate = addMonths(today, 9);
 
   const onSubmit = async () => {
@@ -60,6 +63,7 @@ export function RegistrationForm() {
       firstName,
       phone,
       dueDate: dueDate!,
+      lastPeriod,
       city,
       state,
       interests,
@@ -71,17 +75,14 @@ export function RegistrationForm() {
       setIsSubmitted
     });
 
-    // Scroll to the welcome message after a short delay to ensure it's rendered
     setTimeout(() => {
       welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
-      // After showing the welcome message, scroll to the report
       setTimeout(() => {
         reportRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 2000);
     }, 100);
   };
 
-  // Add effect to scroll to top on page load/refresh
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -148,16 +149,28 @@ export function RegistrationForm() {
         />
       )}
 
-      {currentStep === 3 && pregnancyStatus === 'expecting' && (
-        <DueDateStep
-          dueDate={dueDate}
-          setDueDate={setDueDate}
-          today={today}
-          maxDate={maxDate}
-          isLoading={isLoading}
-          onBack={handleBack}
-          onNext={handleNext}
-        />
+      {currentStep === 3 && (
+        <>
+          {pregnancyStatus === 'expecting' ? (
+            <DueDateStep
+              dueDate={dueDate}
+              setDueDate={setDueDate}
+              today={today}
+              maxDate={maxDate}
+              isLoading={isLoading}
+              onBack={handleBack}
+              onNext={handleNext}
+            />
+          ) : (
+            <CycleInfoStep
+              lastPeriod={lastPeriod}
+              setLastPeriod={setLastPeriod}
+              isLoading={isLoading}
+              onBack={handleBack}
+              onNext={handleNext}
+            />
+          )}
+        </>
       )}
 
       {currentStep === 4 && (

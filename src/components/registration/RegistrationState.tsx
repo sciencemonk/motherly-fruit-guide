@@ -4,6 +4,7 @@ export function useRegistrationState() {
   const [firstName, setFirstName] = useState("");
   const [phone, setPhone] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
+  const [lastPeriod, setLastPeriod] = useState<Date>();
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [interests, setInterests] = useState("");
@@ -23,6 +24,8 @@ export function useRegistrationState() {
     setPhone,
     dueDate,
     setDueDate,
+    lastPeriod,
+    setLastPeriod,
     city,
     setCity,
     state,

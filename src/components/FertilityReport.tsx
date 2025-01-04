@@ -10,7 +10,7 @@ export function FertilityReport({ firstName = "" }: FertilityReportProps) {
         <div className="space-y-4">
           <div>
             <h4 className="font-medium text-sage-700">Track Your Cycle</h4>
-            <p className="text-sage-600">Understanding your menstrual cycle is crucial for identifying your fertile window. Consider using ovulation prediction kits and tracking your basal body temperature.</p>
+            <p className="text-sage-600">Understanding your menstrual cycle is crucial for identifying your fertile window. We'll help you track your cycle and predict your most fertile days using your period information.</p>
           </div>
           <div>
             <h4 className="font-medium text-sage-700">Nutrition</h4>
@@ -30,10 +30,11 @@ export function FertilityReport({ firstName = "" }: FertilityReportProps) {
       <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 border border-sage-200">
         <h3 className="text-xl font-semibold text-sage-800 mb-4">Next Steps</h3>
         <ul className="list-disc list-inside space-y-2 text-sage-600">
-          <li>Track your cycle using our daily notifications</li>
+          <li>Enter your last period date to start tracking your fertility window</li>
+          <li>Receive personalized notifications about your fertile days</li>
           <li>Chat with Mother Athena about fertility optimization</li>
-          <li>Consider scheduling a preconception checkup with your healthcare provider</li>
-          <li>Join our community of women on similar journeys</li>
+          <li>Schedule a preconception checkup with your healthcare provider</li>
+          <li>Join our community of women on similar fertility journeys</li>
         </ul>
       </div>
     </div>
