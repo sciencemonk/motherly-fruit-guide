@@ -130,6 +130,7 @@ export function RegistrationSteps({
           isLoading={isLoading}
           onBack={onBack}
           onNext={onNext}
+          pregnancyStatus={formData.pregnancyStatus}
         />
       )}
 

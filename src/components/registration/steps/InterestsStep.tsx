@@ -8,6 +8,7 @@ interface InterestsStepProps {
   isLoading: boolean;
   onBack: () => void;
   onNext: () => void;
+  pregnancyStatus: string;
 }
 
 export function InterestsStep({
@@ -15,20 +16,38 @@ export function InterestsStep({
   setInterests,
   isLoading,
   onBack,
-  onNext
+  onNext,
+  pregnancyStatus
 }: InterestsStepProps) {
-  const interestOptions = [
-    "Nutrition and diet during pregnancy",
-    "Safe exercise and staying active",
-    "Baby's development and milestones",
-    "Mental health and emotional wellbeing",
-    "Birth preparation and labor"
-  ];
+  const getInterestOptions = () => {
+    if (pregnancyStatus === 'trying') {
+      return [
+        "Optimizing your menstrual cycle and ovulation tracking",
+        "Nutrition and supplements for fertility",
+        "Environmental factors affecting fertility",
+        "Stress management and emotional wellbeing",
+        "Exercise and lifestyle changes for fertility"
+      ];
+    }
+    return [
+      "Nutrition and diet during pregnancy",
+      "Safe exercise and staying active",
+      "Baby's development and milestones",
+      "Mental health and emotional wellbeing",
+      "Birth preparation and labor"
+    ];
+  };
+
+  const interestOptions = getInterestOptions();
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-sage-800 mb-2">What interests you most about having a healthy baby?</h2>
+        <h2 className="text-2xl font-semibold text-sage-800 mb-2">
+          {pregnancyStatus === 'trying' 
+            ? "What areas are you most interested in helping your fertility?"
+            : "What interests you most about having a healthy baby?"}
+        </h2>
         <p className="text-sage-600 mb-6">This helps us personalize your experience.</p>
       </div>
 
