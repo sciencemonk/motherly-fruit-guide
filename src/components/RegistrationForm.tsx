@@ -117,6 +117,20 @@ export function RegistrationForm() {
 
       if (insertError) throw insertError
 
+      // Send welcome message using handle-sms function
+      const response = await supabase.functions.invoke('handle-sms', {
+        body: {
+          From: process.env.TWILIO_PHONE_NUMBER,
+          To: phone,
+          Body: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+        }
+      })
+
+      if (response.error) {
+        console.error('Error sending welcome message:', response.error)
+        throw response.error
+      }
+
       // Redirect to welcome page with phone parameter
       window.location.href = `/welcome?phone=${encodeURIComponent(phone)}&registration=success`
     } catch (error) {
