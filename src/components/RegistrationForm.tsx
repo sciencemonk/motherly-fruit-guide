@@ -6,11 +6,13 @@ import { Loader2 } from "lucide-react"
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
 import { useSearchParams } from "react-router-dom"
 import { useRegistrationSubmit } from "./registration/RegistrationState"
+import { useToast } from "@/hooks/use-toast"
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams()
   const registrationStatus = searchParams.get('registration')
   const phoneFromParams = searchParams.get('phone')
+  const { toast } = useToast()
 
   const [currentStep, setCurrentStep] = useState(0)
   const [firstName, setFirstName] = useState("")
@@ -28,19 +30,39 @@ export function RegistrationForm() {
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
+      console.log(`Moving to step ${currentStep + 1}`)
       setCurrentStep(currentStep + 1)
     }
   }
 
   const handleBack = () => {
     if (currentStep > 0) {
+      console.log(`Moving back to step ${currentStep - 1}`)
       setCurrentStep(currentStep - 1)
     }
   }
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!dueDate) return
+    if (!dueDate) {
+      toast({
+        variant: "destructive",
+        title: "Due date required",
+        description: "Please select your due date to continue.",
+      })
+      return
+    }
+
+    console.log('Starting registration submission with data:', {
+      firstName,
+      phone,
+      city,
+      state,
+      dueDate: dueDate.toISOString(),
+      interests,
+      preferredTime,
+      smsConsent
+    })
 
     await handleSubmit({
       firstName,
@@ -74,6 +96,7 @@ export function RegistrationForm() {
   }
 
   if (isSubmitted || (registrationStatus === 'success' && phoneFromParams)) {
+    console.log('Registration completed successfully, showing welcome message')
     return (
       <div className="space-y-6">
         <WelcomeMessage firstName={firstName} />

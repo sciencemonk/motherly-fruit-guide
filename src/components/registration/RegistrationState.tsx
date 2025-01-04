@@ -33,16 +33,21 @@ export function useRegistrationSubmit() {
 
     try {
       // Generate login code
+      console.log('Generating login code...');
       const { data: loginCode, error: loginCodeError } = await supabase
         .rpc('generate_alphanumeric_code', {
           length: 6
         });
 
-      if (loginCodeError) throw loginCodeError;
+      if (loginCodeError) {
+        console.error('Login code generation error:', loginCodeError);
+        throw loginCodeError;
+      }
 
       console.log('Generated login code successfully');
 
       // Create new profile with trial status
+      console.log('Creating profile...');
       const { error: insertError } = await supabase
         .from('profiles')
         .insert({
@@ -58,7 +63,10 @@ export function useRegistrationSubmit() {
           login_code: loginCode
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Profile creation error:', insertError);
+        throw insertError;
+      }
 
       console.log('Profile created successfully, sending welcome message');
 
@@ -71,7 +79,10 @@ export function useRegistrationSubmit() {
         }
       });
 
-      if (response.error) throw response.error;
+      if (response.error) {
+        console.error('Welcome message error:', response.error);
+        throw response.error;
+      }
 
       console.log('Welcome message sent successfully');
       
