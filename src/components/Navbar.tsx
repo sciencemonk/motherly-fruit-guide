@@ -60,11 +60,9 @@ const Navbar = () => {
               alt="Mother Athena Icon" 
               className="h-8 w-8 rounded-full object-cover"
             />
-            <img 
-              src="/lovable-uploads/69f336f3-e9b9-4a10-8c60-7bd394449613.png" 
-              alt="Mother Athena Logo" 
-              className="h-8 object-contain"
-            />
+            <span className="text-xl font-medium text-sage-800" style={{ fontFamily: 'Futura, sans-serif' }}>
+              Mother Athena
+            </span>
           </Link>
         </div>
         
