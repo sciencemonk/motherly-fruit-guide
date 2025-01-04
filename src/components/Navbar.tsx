@@ -56,11 +56,10 @@ const Navbar = () => {
         <div className="flex flex-1 items-center">
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/1420e5a5-3360-4ab7-9dc2-f184d4774b05.png" 
+              src="/lovable-uploads/69f336f3-e9b9-4a10-8c60-7bd394449613.png" 
               alt="Mother Athena Logo" 
-              className="w-10 h-10 rounded-full object-cover"
+              className="h-8"
             />
-            <span className="font-bold">Mother Athena</span>
           </Link>
         </div>
         
