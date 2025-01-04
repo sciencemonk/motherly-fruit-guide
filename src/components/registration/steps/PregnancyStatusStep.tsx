@@ -31,7 +31,7 @@ export function PregnancyStatusStep({
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="expecting" id="expecting" />
-          <Label htmlFor="expecting" className="text-lg">I'm expecting a baby</Label>
+          <Label htmlFor="expecting" className="text-lg">I'm pregnant</Label>
         </div>
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="trying" id="trying" />
