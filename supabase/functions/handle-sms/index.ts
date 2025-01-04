@@ -22,7 +22,7 @@ serve(async (req) => {
   }
 
   try {
-    const { From, To, Body } = await req.json()
+    const { To, Body } = await req.json()
     
     if (!To || !Body) {
       console.error('Missing required parameters:', { To, Body })
@@ -30,7 +30,6 @@ serve(async (req) => {
     }
 
     console.log('Sending SMS with params:', {
-      from: From,
       to: To,
       bodyPreview: Body?.substring(0, 50) + '...' // Log first 50 chars for privacy
     })

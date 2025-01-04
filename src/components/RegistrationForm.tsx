@@ -4,7 +4,7 @@ import { RegistrationSteps } from "./registration/RegistrationSteps"
 import { Button } from "./ui/button"
 import { Loader2 } from "lucide-react"
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams, useNavigate } from "react-router-dom"
 import { useRegistrationSubmit } from "./registration/RegistrationState"
 import { useToast } from "@/hooks/use-toast"
 import { DialogTitle } from "@/components/ui/dialog"
@@ -14,6 +14,7 @@ export function RegistrationForm() {
   const registrationStatus = searchParams.get('registration')
   const phoneFromParams = searchParams.get('phone')
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const [currentStep, setCurrentStep] = useState(0)
   const [firstName, setFirstName] = useState("")
@@ -79,6 +80,9 @@ export function RegistrationForm() {
         preferredTime,
         smsConsent
       })
+      
+      // Redirect to welcome page with necessary parameters
+      navigate(`/welcome?phone=${encodeURIComponent(phone)}&firstName=${encodeURIComponent(firstName)}&registration=success`)
     } catch (error) {
       console.error('Registration error:', error)
       toast({

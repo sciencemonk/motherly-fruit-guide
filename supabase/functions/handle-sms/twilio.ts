@@ -1,6 +1,8 @@
 import twilio from 'npm:twilio'
 
 export async function sendTwilioResponse(message: string, to: string): Promise<string> {
+  console.log('Initializing Twilio with credentials...')
+  
   const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
   const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
   const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
@@ -11,21 +13,21 @@ export async function sendTwilioResponse(message: string, to: string): Promise<s
       hasAuthToken: !!authToken,
       hasMessagingServiceSid: !!messagingServiceSid
     })
-    throw new Error('Missing Twilio credentials')
+    throw new Error('Missing required Twilio credentials')
   }
 
   try {
-    console.log('Initializing Twilio client...')
+    console.log('Creating Twilio client...')
     const client = twilio(accountSid, authToken)
     
-    console.log('Sending Twilio message to:', to)
+    console.log('Sending message to:', to)
     const twilioMessage = await client.messages.create({
       body: message,
-      to: to,
-      messagingServiceSid: messagingServiceSid,
+      messagingServiceSid,
+      to: to
     })
 
-    console.log('Response sent successfully:', twilioMessage.sid)
+    console.log('Message sent successfully:', twilioMessage.sid)
     return twilioMessage.sid
   } catch (error) {
     console.error('Twilio error:', error)
