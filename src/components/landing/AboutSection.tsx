@@ -20,7 +20,7 @@ export const AboutSection = () => {
               </div>
               
               <div className="flex flex-col items-center text-center p-8 bg-sage-50/50 rounded-xl transition-all duration-300 hover:shadow-md">
-                <Flower className="w-12 h-12 text-peach-400 mb-6" />
+                <Heart className="w-12 h-12 text-peach-400 mb-6" />
                 <p className="text-sage-700 leading-relaxed">
                   Combining their technical expertise with their firsthand experience of pregnancy, they created Mother Athena 
                   to ensure that all expecting parents have access to reliable information and support whenever they need it.
