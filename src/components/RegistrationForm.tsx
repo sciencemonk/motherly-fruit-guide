@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { StepIndicator } from "./registration/StepIndicator"
 import { RegistrationSteps } from "./registration/RegistrationSteps"
 import { Button } from "./ui/button"
 import { Loader2 } from "lucide-react"
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
 import { useSearchParams } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useRegistrationSubmit } from "./registration/RegistrationState"
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams()
-  const { toast } = useToast()
   const registrationStatus = searchParams.get('registration')
   const phoneFromParams = searchParams.get('phone')
 
@@ -23,53 +21,8 @@ export function RegistrationForm() {
   const [interests, setInterests] = useState("")
   const [preferredTime, setPreferredTime] = useState("09:00")
   const [smsConsent, setSmsConsent] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (registrationStatus === 'success' && phoneFromParams) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('phone_number', decodeURIComponent(phoneFromParams))
-            .single()
-
-          if (error) throw error
-
-          setFirstName(data.first_name)
-          setDueDate(new Date(data.due_date))
-          setIsSubmitted(true)
-
-          // Send welcome message using handle-sms function
-          const response = await supabase.functions.invoke('handle-sms', {
-            body: {
-              From: process.env.TWILIO_PHONE_NUMBER,
-              To: decodeURIComponent(phoneFromParams),
-              Body: `Hi ${data.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
-            }
-          })
-
-          if (response.error) throw response.error
-
-          toast({
-            title: "Welcome to Mother Athena!",
-            description: "Please check your phone for your first message.",
-          })
-        } catch (error) {
-          console.error('Error:', error)
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "There was a problem sending your welcome message.",
-          })
-        }
-      }
-    }
-
-    fetchProfile()
-  }, [registrationStatus, phoneFromParams, toast])
+  
+  const { isLoading, isSubmitted, handleSubmit } = useRegistrationSubmit()
 
   const totalSteps = 6
 
@@ -85,63 +38,20 @@ export function RegistrationForm() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!dueDate) return
-    setIsLoading(true)
 
-    try {
-      // Generate login code
-      const { data: loginCode, error: loginCodeError } = await supabase
-        .rpc('generate_alphanumeric_code', {
-          length: 6
-        })
-
-      if (loginCodeError) throw loginCodeError
-
-      // Create new profile with trial status
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          phone_number: phone,
-          first_name: firstName,
-          city,
-          state,
-          due_date: dueDate.toISOString(),
-          interests,
-          preferred_notification_time: preferredTime,
-          subscription_status: 'trial',
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          login_code: loginCode
-        })
-
-      if (insertError) throw insertError
-
-      // Send welcome message using handle-sms function
-      const response = await supabase.functions.invoke('handle-sms', {
-        body: {
-          From: process.env.TWILIO_PHONE_NUMBER,
-          To: phone,
-          Body: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
-        }
-      })
-
-      if (response.error) {
-        console.error('Error sending welcome message:', response.error)
-        throw response.error
-      }
-
-      // Redirect to welcome page with phone parameter
-      window.location.href = `/welcome?phone=${encodeURIComponent(phone)}&registration=success`
-    } catch (error) {
-      console.error('Registration error:', error)
-      toast({
-        variant: "destructive",
-        title: "Registration error",
-        description: "There was a problem with your registration. Please try again.",
-      })
-      setIsLoading(false)
-    }
+    await handleSubmit({
+      firstName,
+      phone,
+      city,
+      state,
+      dueDate,
+      interests,
+      preferredTime,
+      smsConsent
+    })
   }
 
   const isStepValid = () => {
@@ -163,7 +73,7 @@ export function RegistrationForm() {
     }
   }
 
-  if (isSubmitted) {
+  if (isSubmitted || (registrationStatus === 'success' && phoneFromParams)) {
     return (
       <div className="space-y-6">
         <WelcomeMessage firstName={firstName} />
@@ -173,7 +83,7 @@ export function RegistrationForm() {
 
   return (
     <div className="registration-form">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         <div className="form-content">
           <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
           <div className="flex-1">
