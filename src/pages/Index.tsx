@@ -16,18 +16,21 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <div 
-          className="relative min-h-screen flex items-center" 
+          className="relative min-h-screen flex items-center w-full" 
           style={{
             backgroundImage: 'url("/lovable-uploads/697b5151-7c43-45fa-983b-768bffef969e.png")',
             backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundPosition: 'center',
+            width: '100vw',
+            marginLeft: 'calc(-50vw + 50%)',
+            marginRight: 'calc(-50vw + 50%)'
           }}
         >
           {/* Dark Overlay */}
           <div className="absolute inset-0 bg-black/30" />
           
           {/* Content */}
-          <div className="container relative z-10 px-4 md:px-6 py-16 md:py-24">
+          <div className="relative z-10 px-4 md:px-6 py-16 md:py-24 max-w-[1400px] mx-auto">
             <div className="max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm border border-white/20">
                 <Sparkles className="w-4 h-4" />
