@@ -54,16 +54,16 @@ const Navbar = () => {
     <div className="fixed top-0 left-0 right-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-16 items-center">
         <div className="flex flex-1 items-center">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center gap-2">
             <img 
               src="/lovable-uploads/083f2b6d-1d79-4672-9c90-f99eb0fffdcf.png" 
               alt="Mother Athena Icon" 
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full object-cover"
             />
             <img 
               src="/lovable-uploads/69f336f3-e9b9-4a10-8c60-7bd394449613.png" 
               alt="Mother Athena Logo" 
-              className="h-8"
+              className="h-8 object-contain"
             />
           </Link>
         </div>
