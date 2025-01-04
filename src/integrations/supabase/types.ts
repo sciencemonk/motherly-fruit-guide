@@ -83,6 +83,7 @@ export type Database = {
           id: string
           interests: string | null
           is_premium: boolean | null
+          last_period: string | null
           last_sign_in: string | null
           lifestyle: string | null
           login_code: string
@@ -105,6 +106,7 @@ export type Database = {
           id?: string
           interests?: string | null
           is_premium?: boolean | null
+          last_period?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
           login_code: string
@@ -127,6 +129,7 @@ export type Database = {
           id?: string
           interests?: string | null
           is_premium?: boolean | null
+          last_period?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
           login_code?: string
