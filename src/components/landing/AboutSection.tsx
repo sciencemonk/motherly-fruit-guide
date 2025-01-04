@@ -1,4 +1,4 @@
-import { Baby, Flower } from "lucide-react"
+import { Heart, Flower } from "lucide-react"
 
 export const AboutSection = () => {
   return (
@@ -12,7 +12,7 @@ export const AboutSection = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               <div className="flex flex-col items-center text-center p-8 bg-sage-50/50 rounded-xl transition-all duration-300 hover:shadow-md">
-                <Baby className="w-12 h-12 text-sage-600 mb-6" />
+                <Heart className="w-12 h-12 text-sage-600 mb-6" />
                 <p className="text-sage-700 leading-relaxed">
                   Mother Athena was born from a personal journey. Our founder, an engineer, and his wife were expecting 
                   their first child when they realized the need for better pregnancy support.
@@ -29,7 +29,7 @@ export const AboutSection = () => {
             </div>
 
             <div className="flex flex-col items-center text-center p-8 bg-cream/50 rounded-xl transition-all duration-300 hover:shadow-md">
-              <Baby className="w-12 h-12 text-sage-500 mb-6" />
+              <Heart className="w-12 h-12 text-sage-500 mb-6" />
               <p className="text-sage-700 leading-relaxed max-w-2xl">
                 Today, Mother Athena continues to grow and evolve, guided by feedback from our community of parents 
                 and healthcare professionals. We're committed to providing evidence-based guidance and emotional support 
