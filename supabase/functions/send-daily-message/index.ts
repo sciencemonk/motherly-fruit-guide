@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Twilio } from 'npm:twilio'
+import { Twilio } from 'npm:twilio@4.19.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +25,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting daily message function...');
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -34,6 +36,8 @@ serve(async (req) => {
     const now = new Date()
     const currentHour = now.getUTCHours()
     const currentMinute = now.getUTCMinutes()
+    
+    console.log(`Current UTC time: ${currentHour}:${currentMinute}`);
 
     // Find users whose preferred notification time matches current UTC time
     const { data: profiles, error: profilesError } = await supabaseClient
@@ -47,29 +51,37 @@ serve(async (req) => {
     }
 
     if (!profiles || profiles.length === 0) {
+      console.log('No messages to send at this time');
       return new Response(
         JSON.stringify({ message: 'No messages to send at this time' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const twilio = new Twilio(
-      Deno.env.get('TWILIO_A2P_ACCOUNT_SID'),
-      Deno.env.get('TWILIO_AUTH_TOKEN')
-    )
+    console.log(`Found ${profiles.length} profiles to send messages to`);
 
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
-    const openAiKey = Deno.env.get('OPENAI_API_KEY')
+    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID');
+    const openAiKey = Deno.env.get('OPENAI_API_KEY');
+
+    if (!accountSid || !authToken || !messagingServiceSid || !openAiKey) {
+      throw new Error('Missing required environment variables');
+    }
+
+    const twilio = new Twilio(accountSid, authToken);
 
     // Process each profile
     for (const profile of profiles) {
       try {
+        console.log(`Processing profile for ${profile.phone_number}`);
+        
         let message: string
 
         if (profile.pregnancy_status === 'expecting') {
-          message = await generatePregnancyMessage(profile, openAiKey!)
+          message = await generatePregnancyMessage(profile, openAiKey)
         } else {
-          message = await generateFertilityMessage(profile, openAiKey!)
+          message = await generateFertilityMessage(profile, openAiKey)
         }
 
         // Send message via Twilio
@@ -127,7 +139,7 @@ async function generatePregnancyMessage(profile: Profile, apiKey: string): Promi
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4',
       messages: [
         { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
         { role: 'user', content: prompt }
@@ -183,7 +195,7 @@ async function generateFertilityMessage(profile: Profile, apiKey: string): Promi
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4',
       messages: [
         { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
         { role: 'user', content: prompt }
