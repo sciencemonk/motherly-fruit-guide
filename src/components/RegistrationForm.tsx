@@ -91,6 +91,14 @@ export function RegistrationForm() {
     setIsLoading(true)
 
     try {
+      // Generate login code
+      const { data: loginCode, error: loginCodeError } = await supabase
+        .rpc('generate_alphanumeric_code', {
+          length: 6
+        })
+
+      if (loginCodeError) throw loginCodeError
+
       // Create new profile with trial status
       const { error: insertError } = await supabase
         .from('profiles')
@@ -103,7 +111,8 @@ export function RegistrationForm() {
           interests,
           preferred_notification_time: preferredTime,
           subscription_status: 'trial',
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          login_code: loginCode
         })
 
       if (insertError) throw insertError

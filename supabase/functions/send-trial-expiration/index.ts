@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from 'npm:@supabase/supabase-js'
 import { Twilio } from 'npm:twilio'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
