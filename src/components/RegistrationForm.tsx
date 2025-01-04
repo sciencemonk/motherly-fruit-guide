@@ -1,12 +1,17 @@
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { addMonths } from "date-fns";
 import { PregnancyReport } from "./PregnancyReport";
-import { FormFields } from "./registration/FormFields";
-import { ConsentCheckbox } from "./registration/ConsentCheckbox";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useRegistrationState } from "./registration/RegistrationState";
 import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
-import { addMonths } from "date-fns";
+import { BasicInfoStep } from "./registration/steps/BasicInfoStep";
+import { LocationStep } from "./registration/steps/LocationStep";
+import { DueDateStep } from "./registration/steps/DueDateStep";
+import { InterestsStep } from "./registration/steps/InterestsStep";
+import { LifestyleStep } from "./registration/steps/LifestyleStep";
+import { NotificationTimeStep } from "./registration/steps/NotificationTimeStep";
+import { FinalStep } from "./registration/steps/FinalStep";
+import { ProgressIndicator } from "./registration/ProgressIndicator";
 
 export function RegistrationForm() {
   const {
@@ -16,6 +21,16 @@ export function RegistrationForm() {
     setPhone,
     dueDate,
     setDueDate,
+    city,
+    setCity,
+    state,
+    setState,
+    interests,
+    setInterests,
+    lifestyle,
+    setLifestyle,
+    preferredTime,
+    setPreferredTime,
     isSubmitted,
     setIsSubmitted,
     isLoading,
@@ -26,6 +41,9 @@ export function RegistrationForm() {
     welcomeRef
   } = useRegistrationState();
 
+  const [currentStep, setCurrentStep] = useState(0);
+  const totalSteps = 7;
+
   const { handleSubmit } = useRegistrationSubmit();
 
   // Calculate the date range for due date selection
@@ -33,12 +51,16 @@ export function RegistrationForm() {
   today.setHours(0, 0, 0, 0); // Reset time to start of day
   const maxDate = addMonths(today, 9);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async () => {
     await handleSubmit({
       firstName,
       phone,
       dueDate: dueDate!,
+      city,
+      state,
+      interests,
+      lifestyle,
+      preferredTime,
       smsConsent,
       setIsLoading,
       setIsSubmitted
@@ -59,45 +81,104 @@ export function RegistrationForm() {
     window.scrollTo(0, 0);
   }, []);
 
+  const handleNext = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
+  };
+
+  const handleBack = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  if (isSubmitted) {
+    return (
+      <div>
+        <div ref={welcomeRef}>
+          <WelcomeMessage firstName={firstName} />
+        </div>
+        <div ref={reportRef} className="mt-8">
+          <PregnancyReport dueDate={dueDate!} firstName={firstName} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md mx-auto">
-      {!isSubmitted ? (
-        <form onSubmit={onSubmit} className="space-y-6">
-          <FormFields
-            firstName={firstName}
-            setFirstName={setFirstName}
-            phone={phone}
-            setPhone={setPhone}
-            dueDate={dueDate}
-            setDueDate={setDueDate}
-            today={today}
-            maxDate={maxDate}
-            isLoading={isLoading}
-          />
+      <ProgressIndicator totalSteps={totalSteps} currentStep={currentStep} />
+      
+      {currentStep === 0 && (
+        <BasicInfoStep
+          firstName={firstName}
+          setFirstName={setFirstName}
+          phone={phone}
+          setPhone={setPhone}
+          isLoading={isLoading}
+          onNext={handleNext}
+        />
+      )}
 
-          <ConsentCheckbox
-            smsConsent={smsConsent}
-            setSmsConsent={setSmsConsent}
-            isLoading={isLoading}
-          />
+      {currentStep === 1 && (
+        <LocationStep
+          city={city}
+          setCity={setCity}
+          state={state}
+          setState={setState}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      )}
 
-          <Button 
-            type="submit" 
-            className="w-full bg-peach-500 hover:bg-peach-600 text-white font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
-            disabled={isLoading}
-          >
-            {isLoading ? "Processing..." : "Start My Journey"}
-          </Button>
-        </form>
-      ) : (
-        <div>
-          <div ref={welcomeRef}>
-            <WelcomeMessage firstName={firstName} />
-          </div>
-          <div ref={reportRef} className="mt-8">
-            <PregnancyReport dueDate={dueDate!} firstName={firstName} />
-          </div>
-        </div>
+      {currentStep === 2 && (
+        <DueDateStep
+          dueDate={dueDate}
+          setDueDate={setDueDate}
+          today={today}
+          maxDate={maxDate}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      )}
+
+      {currentStep === 3 && (
+        <InterestsStep
+          interests={interests}
+          setInterests={setInterests}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      )}
+
+      {currentStep === 4 && (
+        <LifestyleStep
+          lifestyle={lifestyle}
+          setLifestyle={setLifestyle}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      )}
+
+      {currentStep === 5 && (
+        <NotificationTimeStep
+          preferredTime={preferredTime}
+          setPreferredTime={setPreferredTime}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      )}
+
+      {currentStep === 6 && (
+        <FinalStep
+          smsConsent={smsConsent}
+          setSmsConsent={setSmsConsent}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onSubmit={onSubmit}
+        />
       )}
     </div>
   );
