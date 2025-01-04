@@ -36,7 +36,10 @@ const Navbar = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[200px] bg-white">
                 <DropdownMenuItem asChild>
-                  <Link to="/our-story" className="w-full">Our Story</Link>
+                  <Link to="/pregnancy-guide" className="w-full">Pregnancy Guide</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/about-us" className="w-full">About Us</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/contact" className="w-full">Contact Us</Link>
@@ -45,7 +48,8 @@ const Navbar = () => {
             </DropdownMenu>
           ) : (
             <nav className="hidden md:flex space-x-4">
-              <Link to="/our-story" className="text-sage-700 hover:text-sage-900">Our Story</Link>
+              <Link to="/pregnancy-guide" className="text-sage-700 hover:text-sage-900">Pregnancy Guide</Link>
+              <Link to="/about-us" className="text-sage-700 hover:text-sage-900">About Us</Link>
               <Link to="/contact" className="text-sage-700 hover:text-sage-900">Contact Us</Link>
             </nav>
           )}
