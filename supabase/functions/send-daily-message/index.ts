@@ -101,7 +101,7 @@ serve(async (req) => {
 
 async function generatePersonalizedMessage(profile: Profile, gestationalAge: number): Promise<string> {
   const messageTypes = [
-    { type: 'development', weight: profile.interests?.includes('Baby\'s development') ? 2 : 1 },
+    { type: 'development', weight: profile.interests?.includes("Baby's development") ? 2 : 1 },
     { type: 'exercise', weight: profile.lifestyle?.includes('exercise') ? 2 : 1 },
     { type: 'nutrition', weight: profile.interests?.includes('Nutrition') ? 2 : 1 },
     { type: 'quote', weight: 1 },
@@ -128,20 +128,20 @@ async function generatePersonalizedMessage(profile: Profile, gestationalAge: num
       `Your little one is growing steadily! This week (${gestationalAge}), they're about the size of a ${gestationalAge < 13 ? 'lime' : gestationalAge < 27 ? 'mango' : 'watermelon'}. 🍎`,
     ],
     exercise: [
-      'Time for some gentle movement! Try prenatal yoga or a short walk today. Remember to listen to your body and stay hydrated! 🧘‍♀️',
-      'Exercise tip: Swimming is a great low-impact workout during pregnancy. It helps reduce swelling and supports your growing belly! 🏊‍♀️',
+      "Time for some gentle movement! Try prenatal yoga or a short walk today. Remember to listen to your body and stay hydrated! 🧘‍♀️",
+      "Exercise tip: Swimming is a great low-impact workout during pregnancy. It helps reduce swelling and supports your growing belly! 🏊‍♀️",
     ],
     nutrition: [
-      'Nutrition reminder: Include folate-rich foods like leafy greens in your meals today. Your baby needs these nutrients for healthy development! 🥗',
-      'Craving something sweet? Try some fresh fruits! They're packed with vitamins and natural sugars your body needs. 🍎',
+      "Nutrition reminder: Include folate-rich foods like leafy greens in your meals today. Your baby needs these nutrients for healthy development! 🥗",
+      "Craving something sweet? Try some fresh fruits! They are packed with vitamins and natural sugars your body needs. 🍎",
     ],
     quote: [
-      '"A mother's joy begins when new life is stirring inside... when a tiny heartbeat is heard for the very first time, and a playful kick reminds her that she is never alone." 💝',
-      '"Pregnancy is the only time when you can do nothing and still be productive!" Keep growing that little miracle! ✨',
+      "A mother's joy begins when new life is stirring inside... when a tiny heartbeat is heard for the very first time, and a playful kick reminds her that she is never alone. 💝",
+      "Pregnancy is the only time when you can do nothing and still be productive! Keep growing that little miracle! ✨",
     ],
     tip: [
-      'Remember to take your prenatal vitamins and stay hydrated today! Small actions make a big difference. 💪',
-      'Take a moment to connect with your baby today. Put your hand on your belly and take some deep breaths. 🫂',
+      "Remember to take your prenatal vitamins and stay hydrated today! Small actions make a big difference. 💪",
+      "Take a moment to connect with your baby today. Put your hand on your belly and take some deep breaths. 🫂",
     ],
   }
 
