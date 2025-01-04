@@ -26,14 +26,16 @@ export function useRegistrationSubmit() {
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw error;
+        // Don't throw the error, just log it
+        return { success: false, error };
       }
 
       console.log('Welcome message response:', data);
-      return data;
+      return { success: true, data };
     } catch (error) {
       console.error("Error sending welcome message:", error);
-      throw error;
+      // Don't throw the error, just return failure
+      return { success: false, error };
     }
   };
 
@@ -66,6 +68,7 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
+      // Check for existing profile
       const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('phone_number')
@@ -87,6 +90,7 @@ export function useRegistrationSubmit() {
         return;
       }
 
+      // Create new profile
       const { error: insertError } = await supabase
         .from('profiles')
         .insert([
@@ -98,26 +102,23 @@ export function useRegistrationSubmit() {
         ]);
 
       if (insertError) {
-        if (insertError.code === '23505') {
-          toast({
-            variant: "destructive",
-            title: "Phone number already registered",
-            description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
-          });
-          setIsLoading(false);
-          return;
-        }
         console.error('Error storing profile:', insertError);
         throw insertError;
       }
 
-      await sendWelcomeMessage(phone, firstName);
+      // Attempt to send welcome message but don't block on failure
+      const welcomeResult = await sendWelcomeMessage(phone, firstName);
+      if (!welcomeResult.success) {
+        console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
+        // Log the error but don't throw - we still want to complete registration
+      }
 
       toast({
         title: "Welcome to Mother Athena!",
         description: "We're excited to be part of your pregnancy journey.",
       });
       
+      // Set submitted to true even if welcome message failed
       setIsSubmitted(true);
     } catch (error) {
       console.error('Registration error:', error);
