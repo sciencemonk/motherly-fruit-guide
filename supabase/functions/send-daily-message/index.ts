@@ -15,6 +15,8 @@ interface Profile {
   interests: string
   lifestyle: string
   preferred_notification_time: string
+  pregnancy_status: string
+  last_period?: string
 }
 
 serve(async (req) => {
@@ -61,13 +63,19 @@ serve(async (req) => {
     // Process each profile
     for (const profile of profiles) {
       try {
-        // Calculate weeks of pregnancy
-        const dueDate = new Date(profile.due_date)
-        const today = new Date()
-        const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7))
+        let message: string
 
-        // Generate personalized message based on user preferences and pregnancy stage
-        const message = await generatePersonalizedMessage(profile, gestationalAge)
+        if (profile.pregnancy_status === 'expecting') {
+          // Calculate weeks of pregnancy
+          const dueDate = new Date(profile.due_date)
+          const today = new Date()
+          const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7))
+          
+          message = await generatePregnancyMessage(profile, gestationalAge)
+        } else {
+          // For users trying to conceive
+          message = await generateFertilityMessage(profile)
+        }
 
         // Send message via Twilio
         await twilio.messages.create({
@@ -99,13 +107,12 @@ serve(async (req) => {
   }
 })
 
-async function generatePersonalizedMessage(profile: Profile, gestationalAge: number): Promise<string> {
+async function generatePregnancyMessage(profile: Profile, gestationalAge: number): Promise<string> {
   const messageTypes = [
     { type: 'development', weight: profile.interests?.includes("Baby's development") ? 2 : 1 },
-    { type: 'exercise', weight: profile.lifestyle?.includes('exercise') ? 2 : 1 },
-    { type: 'nutrition', weight: profile.interests?.includes('Nutrition') ? 2 : 1 },
-    { type: 'quote', weight: 1 },
-    { type: 'tip', weight: 1 }
+    { type: 'lifestyle', weight: profile.lifestyle?.includes('active') ? 2 : 1 },
+    { type: 'mindset', weight: profile.interests?.includes('Mental health') ? 2 : 1 },
+    { type: 'environment', weight: 1 }
   ]
 
   // Weighted random selection of message type
@@ -127,27 +134,64 @@ async function generatePersonalizedMessage(profile: Profile, gestationalAge: num
       `Hey ${profile.first_name}! At week ${gestationalAge}, your baby is developing their ${gestationalAge < 13 ? 'vital organs' : gestationalAge < 27 ? 'senses' : 'final features'}. Keep taking good care of yourself! 🌱`,
       `Your little one is growing steadily! This week (${gestationalAge}), they're about the size of a ${gestationalAge < 13 ? 'lime' : gestationalAge < 27 ? 'mango' : 'watermelon'}. 🍎`,
     ],
-    exercise: [
-      "Time for some gentle movement! Try prenatal yoga or a short walk today. Remember to listen to your body and stay hydrated! 🧘‍♀️",
-      "Exercise tip: Swimming is a great low-impact workout during pregnancy. It helps reduce swelling and supports your growing belly! 🏊‍♀️",
+    lifestyle: [
+      `${profile.first_name}, maintaining an ${profile.lifestyle} lifestyle is great for your baby! Remember to stay hydrated and get some gentle movement today. 💪`,
+      `Your healthy choices matter! Consider trying some prenatal yoga or a short walk to support your wellbeing today. 🧘‍♀️`,
     ],
-    nutrition: [
-      "Nutrition reminder: Include folate-rich foods like leafy greens in your meals today. Your baby needs these nutrients for healthy development! 🥗",
-      "Craving something sweet? Try some fresh fruits! They are packed with vitamins and natural sugars your body needs. 🍎",
+    mindset: [
+      `Take a moment for yourself today, ${profile.first_name}. A positive mindset supports both you and your baby's development. ✨`,
+      `Remember to breathe deeply and connect with your baby today. Your emotional wellbeing is just as important as physical health. 🫂`,
     ],
-    quote: [
-      "A mother's joy begins when new life is stirring inside... when a tiny heartbeat is heard for the very first time, and a playful kick reminds her that she is never alone. 💝",
-      "Pregnancy is the only time when you can do nothing and still be productive! Keep growing that little miracle! ✨",
-    ],
-    tip: [
-      "Remember to take your prenatal vitamins and stay hydrated today! Small actions make a big difference. 💪",
-      "Take a moment to connect with your baby today. Put your hand on your belly and take some deep breaths. 🫂",
+    environment: [
+      `Creating a nurturing environment is key! Today, try to spend some time in nature or create a calm space at home. 🌿`,
+      `Your environment affects your baby's development. Consider adding some calming elements to your daily routine. 🏡`,
     ],
   }
 
-  // Select random message from appropriate category
   const categoryMessages = messages[selectedType as keyof typeof messages]
-  const selectedMessage = categoryMessages[Math.floor(Math.random() * categoryMessages.length)]
+  return categoryMessages[Math.floor(Math.random() * categoryMessages.length)]
+}
 
-  return selectedMessage
+async function generateFertilityMessage(profile: Profile): Promise<string> {
+  const messageTypes = [
+    { type: 'cycle', weight: 2 },
+    { type: 'lifestyle', weight: profile.lifestyle?.includes('active') ? 2 : 1 },
+    { type: 'mindset', weight: profile.interests?.includes('Mental health') ? 2 : 1 },
+    { type: 'environment', weight: 1 }
+  ]
+
+  // Weighted random selection
+  const totalWeight = messageTypes.reduce((sum, type) => sum + type.weight, 0)
+  let random = Math.random() * totalWeight
+  let selectedType = messageTypes[0].type
+  
+  for (const type of messageTypes) {
+    if (random <= type.weight) {
+      selectedType = type.type
+      break
+    }
+    random -= type.weight
+  }
+
+  const messages = {
+    cycle: [
+      `${profile.first_name}, tracking your cycle is key to understanding your fertility. Remember to note any changes in your body today. 📝`,
+      `Stay in tune with your body's natural rhythm. Every cycle brings new opportunities for conception. 🌙`,
+    ],
+    lifestyle: [
+      `Your ${profile.lifestyle} lifestyle choices support your fertility journey! Keep up the great work, ${profile.first_name}. 💪`,
+      `Small daily habits can make a big difference. Focus on nourishing your body with healthy foods and gentle movement today. 🥗`,
+    ],
+    mindset: [
+      `${profile.first_name}, maintain a positive mindset on your fertility journey. Each day is a step forward. ✨`,
+      `Take time for self-care today. Your emotional wellbeing is an important part of your fertility journey. 🫂`,
+    ],
+    environment: [
+      `Creating a supportive environment helps your fertility journey. Consider ways to reduce stress in your surroundings today. 🌿`,
+      `Your environment plays a role in fertility. Try to create moments of peace in your daily routine. 🏡`,
+    ],
+  }
+
+  const categoryMessages = messages[selectedType as keyof typeof messages]
+  return categoryMessages[Math.floor(Math.random() * categoryMessages.length)]
 }
