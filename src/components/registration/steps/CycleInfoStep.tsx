@@ -18,15 +18,13 @@ export function CycleInfoStep({
   onBack,
   onNext
 }: CycleInfoStepProps) {
-  // Calculate the date range for period selection (past 2 months)
+  // Allow selection of dates up to today
   const today = new Date();
-  const twoMonthsAgo = new Date();
-  twoMonthsAgo.setMonth(today.getMonth() - 2);
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-sage-800 mb-2">When was your last period?</h2>
+        <h2 className="text-2xl font-semibold text-sage-800 mb-2">When was the last day of your last period?</h2>
         <p className="text-sage-600 mb-6">This helps us predict your fertile window and provide personalized recommendations.</p>
       </div>
 
@@ -35,7 +33,7 @@ export function CycleInfoStep({
           mode="single"
           selected={lastPeriod}
           onSelect={setLastPeriod}
-          disabled={(date) => date > today || date < twoMonthsAgo || isLoading}
+          disabled={(date) => date > today || isLoading}
           className={cn(
             "rounded-md border border-sage-200",
             "[&_.rdp-day_focus]:bg-sage-50",
