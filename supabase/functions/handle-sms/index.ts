@@ -4,7 +4,7 @@ import { getAIResponse } from './openai.ts'
 import { medicalKeywords, systemPromptTemplate, corsHeaders } from './constants.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getConversationHistory, saveMessage } from './chat-history.ts'
-import { deductChatCredit } from './credit-system.ts'
+import { checkUserAccess } from './credit-system.ts'
 import { createTwiMLResponse, calculateGestationalAge } from './utils.ts'
 
 serve(async (req) => {
@@ -51,10 +51,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if user can send messages
-    const hasAccess = await deductChatCredit(supabase, from);
+    const hasAccess = await checkUserAccess(supabase, from);
     if (!hasAccess) {
       return new Response(createTwiMLResponse(
-        "Your trial period has ended. To continue receiving support from Mother Athena, please upgrade to our premium plan. Visit our website to upgrade and continue your journey with us."
+        "Your trial period has ended. To continue receiving support from Mother Athena, please upgrade to our premium plan at $9.99 per week. Visit our website to upgrade and continue your journey with us."
       ), {
         status: 200,
         headers: { 
