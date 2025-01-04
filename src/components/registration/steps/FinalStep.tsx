@@ -39,20 +39,6 @@ export function FinalStep({
         </label>
       </div>
 
-      <div className="bg-sage-50 p-4 rounded-lg space-y-2">
-        <p className="text-center text-sage-600">Join thousands of happy mothers who trust Mother Athena</p>
-        
-        <div className="text-center space-y-2">
-          <div className="font-semibold text-sage-700">Sarah</div>
-          <div className="flex justify-center text-peach-500">
-            {"★".repeat(5)}
-          </div>
-          <p className="text-sage-600 italic">
-            "Mother Athena has been incredible during my pregnancy journey. The daily tips and ability to ask questions anytime is so reassuring."
-          </p>
-        </div>
-      </div>
-
       <div className="flex gap-4">
         <Button
           variant="outline"
