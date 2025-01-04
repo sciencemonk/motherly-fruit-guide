@@ -1,194 +1,104 @@
-import { useState } from "react"
-import { StepIndicator } from "./registration/StepIndicator"
-import { RegistrationSteps } from "./registration/RegistrationSteps"
-import { Button } from "./ui/button"
-import { Loader2 } from "lucide-react"
-import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
-import { useSearchParams, useNavigate } from "react-router-dom"
-import { useRegistrationSubmit } from "./registration/RegistrationState"
-import { useToast } from "@/hooks/use-toast"
-import { DialogTitle } from "@/components/ui/dialog"
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { PregnancyReport } from "./PregnancyReport";
+import { FormFields } from "./registration/FormFields";
+import { ConsentCheckbox } from "./registration/ConsentCheckbox";
+import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
+import { useRegistrationState } from "./registration/RegistrationState";
+import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
+import { addMonths } from "date-fns";
 
 export function RegistrationForm() {
-  const [searchParams] = useSearchParams()
-  const registrationStatus = searchParams.get('registration')
-  const phoneFromParams = searchParams.get('phone')
-  const { toast } = useToast()
-  const navigate = useNavigate()
+  const {
+    firstName,
+    setFirstName,
+    phone,
+    setPhone,
+    dueDate,
+    setDueDate,
+    isSubmitted,
+    setIsSubmitted,
+    isLoading,
+    setIsLoading,
+    smsConsent,
+    setSmsConsent,
+    reportRef,
+    welcomeRef
+  } = useRegistrationState();
 
-  const [currentStep, setCurrentStep] = useState(0)
-  const [firstName, setFirstName] = useState("")
-  const [phone, setPhone] = useState("")
-  const [city, setCity] = useState("")
-  const [state, setState] = useState("")
-  const [dueDate, setDueDate] = useState<Date>()
-  const [interests, setInterests] = useState("")
-  const [lifestyle, setLifestyle] = useState("")
-  const [preferredTime, setPreferredTime] = useState("09:00")
-  const [smsConsent, setSmsConsent] = useState(false)
-  
-  const { isLoading, isSubmitted, handleSubmit } = useRegistrationSubmit()
+  const { handleSubmit } = useRegistrationSubmit();
 
-  const totalSteps = 7
+  // Calculate the date range for due date selection
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day
+  const maxDate = addMonths(today, 9);
 
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      console.log(`Moving to step ${currentStep + 1}`)
-      setCurrentStep(currentStep + 1)
-    }
-  }
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      console.log(`Moving back to step ${currentStep - 1}`)
-      setCurrentStep(currentStep - 1)
-    }
-  }
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!dueDate) {
-      toast({
-        variant: "destructive",
-        title: "Due date required",
-        description: "Please select your due date to continue.",
-      })
-      return
-    }
-
-    console.log('Starting registration submission with data:', {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleSubmit({
       firstName,
       phone,
-      city,
-      state,
-      dueDate: dueDate.toISOString(),
-      interests,
-      lifestyle,
-      preferredTime,
-      smsConsent
-    })
+      dueDate: dueDate!,
+      smsConsent,
+      setIsLoading,
+      setIsSubmitted
+    });
 
-    try {
-      await handleSubmit({
-        firstName,
-        phone,
-        city,
-        state,
-        dueDate,
-        interests,
-        lifestyle,
-        preferredTime,
-        smsConsent
-      })
-      
-      // Redirect to welcome page with necessary parameters
-      navigate(`/welcome?phone=${encodeURIComponent(phone)}&firstName=${encodeURIComponent(firstName)}&registration=success`)
-    } catch (error) {
-      console.error('Registration error:', error)
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "There was a problem with your registration. Please try again.",
-      })
-    }
-  }
+    // Scroll to the welcome message after a short delay to ensure it's rendered
+    setTimeout(() => {
+      welcomeRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // After showing the welcome message, scroll to the report
+      setTimeout(() => {
+        reportRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 2000);
+    }, 100);
+  };
 
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 0:
-        return firstName?.length > 0 && phone?.length > 0
-      case 1:
-        return city?.length > 0 && state?.length > 0
-      case 2:
-        return dueDate !== undefined
-      case 3:
-        return interests?.length > 0
-      case 4:
-        return lifestyle?.length > 0
-      case 5:
-        return preferredTime?.length > 0
-      case 6:
-        return smsConsent === true
-      default:
-        return false
-    }
-  }
-
-  if (isSubmitted || (registrationStatus === 'success' && phoneFromParams)) {
-    console.log('Registration completed successfully, showing welcome message')
-    return (
-      <div className="space-y-6">
-        <WelcomeMessage firstName={firstName} />
-      </div>
-    )
-  }
+  // Add effect to scroll to top on page load/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
-    <div className="registration-form">
-      <DialogTitle className="sr-only">Registration Form</DialogTitle>
-      <form onSubmit={handleFormSubmit} className="space-y-6" aria-describedby="registration-form-description">
-        <div id="registration-form-description" className="sr-only">
-          Multi-step registration form for Mother Athena pregnancy support service
-        </div>
-        <div className="form-content">
-          <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-          <div className="flex-1">
-            <RegistrationSteps
-              currentStep={currentStep}
-              firstName={firstName}
-              setFirstName={setFirstName}
-              phone={phone}
-              setPhone={setPhone}
-              city={city}
-              setCity={setCity}
-              state={state}
-              setState={setState}
-              dueDate={dueDate}
-              setDueDate={setDueDate}
-              interests={interests}
-              setInterests={setInterests}
-              lifestyle={lifestyle}
-              setLifestyle={setLifestyle}
-              preferredTime={preferredTime}
-              setPreferredTime={setPreferredTime}
-              smsConsent={smsConsent}
-              setSmsConsent={setSmsConsent}
-            />
+    <div>
+      {!isSubmitted ? (
+        <form onSubmit={onSubmit} className="space-y-8 w-full max-w-md mx-auto">
+          <FormFields
+            firstName={firstName}
+            setFirstName={setFirstName}
+            phone={phone}
+            setPhone={setPhone}
+            dueDate={dueDate}
+            setDueDate={setDueDate}
+            today={today}
+            maxDate={maxDate}
+            isLoading={isLoading}
+          />
+
+          <ConsentCheckbox
+            smsConsent={smsConsent}
+            setSmsConsent={setSmsConsent}
+            isLoading={isLoading}
+          />
+
+          <Button 
+            type="submit" 
+            className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+            disabled={isLoading}
+          >
+            {isLoading ? "Processing..." : "Start My Journey"}
+          </Button>
+        </form>
+      ) : (
+        <div>
+          <div ref={welcomeRef}>
+            <WelcomeMessage firstName={firstName} />
           </div>
-          <div className="flex justify-between mt-6">
-            {currentStep > 0 && (
-              <Button type="button" variant="outline" onClick={handleBack}>
-                Back
-              </Button>
-            )}
-            {currentStep < totalSteps - 1 ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                disabled={!isStepValid() || isLoading}
-                className={`${currentStep === 0 ? 'w-full' : 'ml-auto'}`}
-              >
-                Next
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                disabled={!isStepValid() || isLoading}
-                className="ml-auto bg-peach-500 hover:bg-peach-600"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  "Start Free Trial"
-                )}
-              </Button>
-            )}
+          <div ref={reportRef} className="mt-8">
+            <PregnancyReport dueDate={dueDate!} firstName={firstName} />
           </div>
         </div>
-      </form>
+      )}
     </div>
-  )
+  );
 }

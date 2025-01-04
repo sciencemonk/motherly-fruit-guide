@@ -2,18 +2,3 @@ project_id = "tjeukbooftbxulkgqljg"
 
 [handle-sms]
 verify_jwt = false
-
-[send-verification-code]
-verify_jwt = false
-
-[create-checkout]
-verify_jwt = false
-
-[generate-fruit-image]
-verify_jwt = false
-
-[send-daily-update]
-verify_jwt = false
-
-[send-trial-expiration]
-verify_jwt = false

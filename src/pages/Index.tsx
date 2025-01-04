@@ -1,117 +1,46 @@
 import { RegistrationForm } from "@/components/RegistrationForm"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { useState, useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { useSearchParams } from "react-router-dom"
-import { sendWelcomeMessage } from "@/components/registration/utils/welcomeMessage"
-import { PregnancyReport } from "@/components/PregnancyReport"
-import { WelcomeMessage } from "@/components/pregnancy-report/WelcomeMessage"
-import { supabase } from "@/integrations/supabase/client"
-import { Hero } from "@/components/landing/Hero"
-import { Features } from "@/components/landing/Features"
-import { Disclaimer } from "@/components/landing/Disclaimer"
 
 const Index = () => {
-  const [searchParams] = useSearchParams()
-  const { toast } = useToast()
-  const [profile, setProfile] = useState<{ firstName?: string; dueDate?: Date } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const registration = searchParams.get('registration')
-    const phone = searchParams.get('phone')
-    const firstName = searchParams.get('firstName')
-
-    if (registration === 'success' && phone) {
-      // Send welcome message
-      sendWelcomeMessage(phone, firstName || '')
-        .then(() => {
-          toast({
-            title: "Welcome to Mother Athena!",
-            description: "Check your phone for a welcome message. We're excited to be part of your journey!",
-          })
-        })
-        .catch((error) => {
-          console.error('Error sending welcome message:', error)
-          toast({
-            variant: "destructive",
-            title: "Welcome message error",
-            description: "There was a problem sending your welcome message. Our team has been notified.",
-          })
-        })
-
-      // Fetch profile data for the pregnancy report
-      const fetchProfile = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('first_name, due_date')
-            .eq('phone_number', phone)
-            .single()
-
-          if (error) throw error
-
-          if (data) {
-            setProfile({
-              firstName: data.first_name,
-              dueDate: data.due_date ? new Date(data.due_date) : undefined
-            })
-          }
-        } catch (error) {
-          console.error('Error fetching profile:', error)
-          toast({
-            variant: "destructive",
-            title: "Error loading your profile",
-            description: "We couldn't load your pregnancy report. Please try refreshing the page.",
-          })
-        } finally {
-          setIsLoading(false)
-        }
-      }
-
-      fetchProfile()
-    } else {
-      setIsLoading(false)
-    }
-  }, [searchParams, toast])
-
-  // Show pregnancy report if registration was successful
-  if (searchParams.get('registration') === 'success' && profile?.dueDate) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
-        <Navbar />
-        <main className="flex-grow container px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <WelcomeMessage firstName={profile.firstName || ''} />
-            <PregnancyReport 
-              dueDate={profile.dueDate} 
-              firstName={profile.firstName}
-            />
-          </div>
-        </main>
-        <Footer />
-      </div>
-    )
-  }
-
-  // Show loading state while fetching profile
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
-        <div className="animate-pulse text-sage-600">Loading...</div>
-      </div>
-    )
-  }
-
-  // Show landing page if no successful registration
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
       <Navbar />
-      <main className="flex-grow">
-        <Hero />
-        <Features />
-        <Disclaimer />
+      <main className="flex-grow pt-16">
+        <div className="container px-0 md:px-4 py-8 md:py-16 mx-auto">
+          <div className="max-w-3xl mx-auto space-y-8 md:space-y-12 px-4 md:px-0">
+            <div className="text-center mb-8 md:mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold text-sage-800 mb-4">
+                Your Best Friend During Pregnancy
+              </h1>
+              <p className="text-lg text-sage-700">
+                Your trusted companion throughout your pregnancy journey. Get weekly updates,
+                expert guidance, and peace of mind. Free of charge.
+              </p>
+            </div>
+            
+            <RegistrationForm />
+
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 md:p-8 shadow-lg">
+              <h3 className="text-xl font-semibold text-sage-700 mb-4">
+                How Mother Athena Works
+              </h3>
+              <p className="text-sage-700">
+                Mother Athena brings you 24/7 support and guidance throughout your pregnancy journey through personalized text messages. 
+                Our platform provides weekly updates about your baby's development, answers to your questions, and expert guidance 
+                right at your fingertips.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-12 md:mt-16 text-center text-sm text-sage-600 px-4">
+            <p className="max-w-2xl mx-auto">
+              * Mother Athena is not a replacement for professional medical care.
+              Always consult with your healthcare provider for medical advice and
+              emergency situations.
+            </p>
+          </div>
+        </div>
       </main>
       <Footer />
     </div>

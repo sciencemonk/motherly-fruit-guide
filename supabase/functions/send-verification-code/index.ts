@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import "https://deno.land/x/xhr@0.1.0/mod.ts"
-import { sendTwilioResponse } from './twilio.ts'
+import twilio from "npm:twilio"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -47,6 +46,22 @@ serve(async (req) => {
     const expiresAt = new Date()
     expiresAt.setMinutes(expiresAt.getMinutes() + 10)
 
+    // Initialize Twilio client
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
+    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+    
+    if (!accountSid || !authToken || !twilioNumber) {
+      console.error('Missing Twilio configuration')
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Store the verification code first
     try {
       const { error: dbError } = await supabaseClient
@@ -76,13 +91,17 @@ serve(async (req) => {
 
     // Send SMS using Twilio
     try {
-      const message = `Your Mother Athena verification code is: ${code}`
-      const messageSid = await sendTwilioResponse(message, phone_number)
+      const client = twilio(accountSid, authToken)
+      await client.messages.create({
+        body: `Your Mother Athena verification code is: ${code}`,
+        to: phone_number,
+        from: twilioNumber,
+      })
       
       console.log('SMS sent successfully')
 
       return new Response(
-        JSON.stringify({ message: 'Verification code sent successfully', messageSid }),
+        JSON.stringify({ message: 'Verification code sent successfully' }),
         { 
           status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

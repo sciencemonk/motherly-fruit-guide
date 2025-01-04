@@ -1,22 +1,26 @@
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface ConsentCheckboxProps {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
+  smsConsent: boolean;
+  setSmsConsent: (checked: boolean) => void;
+  isLoading: boolean;
 }
 
-export function ConsentCheckbox({ checked, onCheckedChange }: ConsentCheckboxProps) {
+export function ConsentCheckbox({ smsConsent, setSmsConsent, isLoading }: ConsentCheckboxProps) {
   return (
-    <div className="flex items-start space-x-3">
-      <Checkbox
-        id="consent"
-        checked={checked}
-        onCheckedChange={onCheckedChange}
+    <div className="flex items-start space-x-2">
+      <Checkbox 
+        id="sms-consent" 
+        checked={smsConsent}
+        onCheckedChange={(checked) => setSmsConsent(checked as boolean)}
+        disabled={isLoading}
         className="mt-1"
       />
-      <label htmlFor="consent" className="text-sm text-sage-600">
-        I agree to receive daily pregnancy tips and guidance via text message from Mother Athena.
-        Message frequency varies, message and data rates may apply. Reply STOP to cancel at any time.
+      <label
+        htmlFor="sms-consent"
+        className="text-xs peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sage-700"
+      >
+        I agree to the terms of service, privacy notice, and to receive text messages from Mother Athena to answer my pregnancy questions!
       </label>
     </div>
   );

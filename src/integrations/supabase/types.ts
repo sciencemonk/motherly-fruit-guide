@@ -41,7 +41,7 @@ export type Database = {
           },
         ]
       }
-      message_transactions: {
+      credit_transactions: {
         Row: {
           amount: number
           created_at: string | null
@@ -75,64 +75,37 @@ export type Database = {
       }
       profiles: {
         Row: {
-          city: string | null
+          chat_credits: number
           created_at: string
           due_date: string | null
           first_name: string | null
           id: string
-          interests: string | null
           is_premium: boolean | null
+          last_credits_reset: string | null
           last_sign_in: string | null
-          lifestyle: string | null
-          login_code: string
-          next_billing_date: string | null
           phone_number: string
-          preferred_notification_time: string | null
-          state: string | null
-          subscription_id: string | null
-          subscription_status: string | null
-          subscription_type: string | null
-          trial_ends_at: string | null
         }
         Insert: {
-          city?: string | null
+          chat_credits?: number
           created_at?: string
           due_date?: string | null
           first_name?: string | null
           id?: string
-          interests?: string | null
           is_premium?: boolean | null
+          last_credits_reset?: string | null
           last_sign_in?: string | null
-          lifestyle?: string | null
-          login_code: string
-          next_billing_date?: string | null
           phone_number: string
-          preferred_notification_time?: string | null
-          state?: string | null
-          subscription_id?: string | null
-          subscription_status?: string | null
-          subscription_type?: string | null
-          trial_ends_at?: string | null
         }
         Update: {
-          city?: string | null
+          chat_credits?: number
           created_at?: string
           due_date?: string | null
           first_name?: string | null
           id?: string
-          interests?: string | null
           is_premium?: boolean | null
+          last_credits_reset?: string | null
           last_sign_in?: string | null
-          lifestyle?: string | null
-          login_code?: string
-          next_billing_date?: string | null
           phone_number?: string
-          preferred_notification_time?: string | null
-          state?: string | null
-          subscription_id?: string | null
-          subscription_status?: string | null
-          subscription_type?: string | null
-          trial_ends_at?: string | null
         }
         Relationships: []
       }
@@ -189,11 +162,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_alphanumeric_code: {
-        Args: {
-          length: number
-        }
-        Returns: string
+      reset_monthly_credits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
