@@ -99,6 +99,20 @@ serve(async (req) => {
 
         console.log(`Successfully sent daily message to ${profile.phone_number}, SID: ${twilioResponse.sid}`);
         results.push({ phone: profile.phone_number, status: 'success', sid: twilioResponse.sid });
+
+        // Record the message in chat_history
+        const { error: chatError } = await supabaseClient
+          .from('chat_history')
+          .insert({
+            phone_number: profile.phone_number,
+            role: 'assistant',
+            content: message
+          });
+
+        if (chatError) {
+          console.error(`Error recording chat history for ${profile.phone_number}:`, chatError);
+        }
+
       } catch (error) {
         console.error(`Error processing profile ${profile.phone_number}:`, error);
         results.push({ phone: profile.phone_number, status: 'error', error: error.message });
