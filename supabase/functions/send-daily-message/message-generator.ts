@@ -11,9 +11,9 @@ export async function generatePregnancyMessage(profile: Profile, apiKey: string)
   
   Focus on evidence-based medical information and research about:
   1. Fetal development at this stage
-  2. Recommended lifestyle adjustments
-  3. Environmental considerations
-  4. Mental well-being and mindset
+  2. Recommended lifestyle adjustments based on their interests: ${profile.interests}
+  3. Environmental considerations relevant to their lifestyle: ${profile.lifestyle}
+  4. Mental well-being and mindset tips personalized to their situation
   
   Keep the message warm, supportive, and under 320 characters to fit in an SMS.
   Include one specific, actionable tip based on their interests and lifestyle.`;
@@ -25,7 +25,7 @@ export async function generatePregnancyMessage(profile: Profile, apiKey: string)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
         { role: 'user', content: prompt }
@@ -65,10 +65,10 @@ export async function generateFertilityMessage(profile: Profile, apiKey: string)
   Current fertility information: ${fertilityInfo}
   
   Focus on evidence-based medical information and research about:
-  1. Fertility optimization
-  2. Lifestyle factors that impact fertility
-  3. Environmental considerations
-  4. Mental well-being and stress management
+  1. Fertility optimization specific to their interests: ${profile.interests}
+  2. Lifestyle factors that impact fertility, considering their current lifestyle: ${profile.lifestyle}
+  3. Environmental considerations relevant to their situation
+  4. Mental well-being and stress management personalized to their needs
   
   Keep the message warm, supportive, and under 320 characters to fit in an SMS.
   Include one specific, actionable tip based on their interests and lifestyle.`;
@@ -80,7 +80,7 @@ export async function generateFertilityMessage(profile: Profile, apiKey: string)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
         { role: 'user', content: prompt }

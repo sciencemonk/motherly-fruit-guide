@@ -20,18 +20,21 @@ serve(async (req) => {
 
     // Get current time in UTC
     const now = new Date()
+    console.log(`Current UTC timestamp: ${now.toISOString()}`);
+    
+    // Format time for comparison (HH:MM)
     const currentHour = now.getUTCHours()
     const currentMinute = now.getUTCMinutes()
     const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`
     
-    console.log(`Current UTC time: ${currentTime}`);
+    console.log(`Current UTC time for comparison: ${currentTime}`);
 
     // Find users who should receive messages
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
       .select('*')
       .not('preferred_notification_time', 'is', null)
-      .or(`is_premium.eq.true,and(trial_ends_at.gt.${now.toISOString()})`) // Only get premium users or users in trial
+      .or(`is_premium.eq.true,and(trial_ends_at.gt.${now.toISOString()})`)
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError)
@@ -51,7 +54,12 @@ serve(async (req) => {
     // Filter profiles based on current time
     const profilesToNotify = profiles.filter(profile => {
       const preferredTime = profile.preferred_notification_time?.slice(0, 5); // Get HH:MM format
-      console.log(`Checking profile ${profile.phone_number}: preferred time ${preferredTime} vs current time ${currentTime}`);
+      console.log(`Profile ${profile.phone_number}:
+        - Preferred time: ${preferredTime}
+        - Current time: ${currentTime}
+        - Premium: ${profile.is_premium}
+        - Trial ends: ${profile.trial_ends_at}
+        - Match: ${preferredTime === currentTime}`);
       return preferredTime === currentTime;
     });
 
@@ -63,7 +71,7 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Found ${profilesToNotify.length} profiles to send messages to`);
+    console.log(`Found ${profilesToNotify.length} profiles to notify at ${currentTime}`);
 
     const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID');
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
@@ -80,7 +88,10 @@ serve(async (req) => {
     const results = [];
     for (const profile of profilesToNotify) {
       try {
-        console.log(`Processing profile for ${profile.phone_number}`);
+        console.log(`Processing profile for ${profile.phone_number}:
+          - Pregnancy status: ${profile.pregnancy_status}
+          - Interests: ${profile.interests}
+          - Lifestyle: ${profile.lifestyle}`);
         
         let message: string;
 
@@ -89,6 +100,8 @@ serve(async (req) => {
         } else {
           message = await generateFertilityMessage(profile as Profile, openAiKey);
         }
+
+        console.log(`Generated message for ${profile.phone_number}:`, message);
 
         // Send message via Twilio
         const twilioResponse = await twilioClient.messages.create({
