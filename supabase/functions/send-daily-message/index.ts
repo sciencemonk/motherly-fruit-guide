@@ -22,14 +22,15 @@ serve(async (req) => {
     const now = new Date()
     const currentHour = now.getUTCHours()
     const currentMinute = now.getUTCMinutes()
+    const currentTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`
     
-    console.log(`Current UTC time: ${currentHour}:${currentMinute}`);
+    console.log(`Current UTC time: ${currentTime}`);
 
     // Find users whose preferred notification time matches current UTC time
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
       .select('*')
-      .eq('preferred_notification_time', `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`)
+      .not('preferred_notification_time', 'is', null)
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError)
@@ -37,6 +38,23 @@ serve(async (req) => {
     }
 
     if (!profiles || profiles.length === 0) {
+      console.log('No profiles found with notification preferences');
+      return new Response(
+        JSON.stringify({ message: 'No profiles found with notification preferences' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log(`Found ${profiles.length} total profiles, checking notification times...`);
+
+    // Filter profiles based on current time
+    const profilesToNotify = profiles.filter(profile => {
+      const preferredTime = profile.preferred_notification_time?.slice(0, 5); // Get HH:MM format
+      console.log(`Checking profile ${profile.phone_number}: preferred time ${preferredTime} vs current time ${currentTime}`);
+      return preferredTime === currentTime;
+    });
+
+    if (profilesToNotify.length === 0) {
       console.log('No messages to send at this time');
       return new Response(
         JSON.stringify({ message: 'No messages to send at this time' }),
@@ -44,7 +62,7 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Found ${profiles.length} profiles to send messages to`);
+    console.log(`Found ${profilesToNotify.length} profiles to send messages to`);
 
     const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID');
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
@@ -58,38 +76,41 @@ serve(async (req) => {
     const twilioClient = new twilio.Twilio(accountSid, authToken);
 
     // Process each profile
-    for (const profile of profiles) {
+    const results = [];
+    for (const profile of profilesToNotify) {
       try {
         console.log(`Processing profile for ${profile.phone_number}`);
         
-        let message: string
+        let message: string;
 
         if (profile.pregnancy_status === 'expecting') {
-          message = await generatePregnancyMessage(profile, openAiKey)
+          message = await generatePregnancyMessage(profile as Profile, openAiKey);
         } else {
-          message = await generateFertilityMessage(profile, openAiKey)
+          message = await generateFertilityMessage(profile as Profile, openAiKey);
         }
 
         // Send message via Twilio
-        await twilioClient.messages.create({
+        const twilioResponse = await twilioClient.messages.create({
           body: message,
           to: profile.phone_number,
           messagingServiceSid
-        })
+        });
 
-        console.log(`Successfully sent daily message to ${profile.phone_number}`)
+        console.log(`Successfully sent daily message to ${profile.phone_number}, SID: ${twilioResponse.sid}`);
+        results.push({ phone: profile.phone_number, status: 'success', sid: twilioResponse.sid });
       } catch (error) {
-        console.error(`Error processing profile ${profile.phone_number}:`, error)
+        console.error(`Error processing profile ${profile.phone_number}:`, error);
+        results.push({ phone: profile.phone_number, status: 'error', error: error.message });
       }
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Daily messages sent successfully' }),
+      JSON.stringify({ success: true, results }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
-    console.error('Error in send-daily-message function:', error)
+    console.error('Error in send-daily-message function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
