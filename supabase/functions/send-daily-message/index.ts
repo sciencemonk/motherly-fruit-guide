@@ -26,11 +26,12 @@ serve(async (req) => {
     
     console.log(`Current UTC time: ${currentTime}`);
 
-    // Find users whose preferred notification time matches current UTC time
+    // Find users who should receive messages
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
       .select('*')
       .not('preferred_notification_time', 'is', null)
+      .or(`is_premium.eq.true,and(trial_ends_at.gt.${now.toISOString()})`) // Only get premium users or users in trial
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError)
