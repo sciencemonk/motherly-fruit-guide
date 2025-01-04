@@ -60,9 +60,9 @@ export function RegistrationForm() {
   }, []);
 
   return (
-    <div>
+    <div className="w-full max-w-md mx-auto">
       {!isSubmitted ? (
-        <form onSubmit={onSubmit} className="space-y-8 w-full max-w-md mx-auto">
+        <form onSubmit={onSubmit} className="space-y-6">
           <FormFields
             firstName={firstName}
             setFirstName={setFirstName}
@@ -83,7 +83,7 @@ export function RegistrationForm() {
 
           <Button 
             type="submit" 
-            className="w-full bg-peach-300 hover:bg-peach-400 text-peach-900 font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+            className="w-full bg-peach-500 hover:bg-peach-600 text-white font-semibold py-3 text-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
             disabled={isLoading}
           >
             {isLoading ? "Processing..." : "Start My Journey"}
