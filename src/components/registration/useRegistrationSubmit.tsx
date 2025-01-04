@@ -19,7 +19,7 @@ interface RegistrationData {
 export function useRegistrationSubmit() {
   const { toast } = useToast();
 
-  const sendWelcomeMessage = async (phoneNumber: string, firstName: string) => {
+  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, pregnancyStatus: string) => {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
@@ -131,7 +131,7 @@ export function useRegistrationSubmit() {
       }
 
       // Attempt to send welcome message but don't block on failure
-      const welcomeResult = await sendWelcomeMessage(phone, firstName);
+      const welcomeResult = await sendWelcomeMessage(phone, firstName, pregnancyStatus);
       if (!welcomeResult.success) {
         console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
       }
