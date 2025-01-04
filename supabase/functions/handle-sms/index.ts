@@ -11,7 +11,6 @@ serve(async (req) => {
   console.log('New SMS request received:', {
     method: req.method,
     url: req.url,
-    headers: Object.fromEntries(req.headers.entries())
   })
 
   // Handle CORS preflight requests
@@ -25,25 +24,39 @@ serve(async (req) => {
   try {
     const { From, To, Body } = await req.json()
     
+    if (!To || !Body) {
+      console.error('Missing required parameters:', { To, Body })
+      throw new Error('Missing required parameters: To and Body are required')
+    }
+
     console.log('Sending SMS with params:', {
       from: From,
       to: To,
-      body: Body?.substring(0, 50) + '...' // Log first 50 chars for privacy
+      bodyPreview: Body?.substring(0, 50) + '...' // Log first 50 chars for privacy
     })
 
     const messageSid = await sendTwilioResponse(Body, To)
     
     console.log('SMS sent successfully:', messageSid)
 
-    return new Response(JSON.stringify({ success: true, messageSid }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    return new Response(
+      JSON.stringify({ success: true, messageSid }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    )
   } catch (error) {
     console.error('Error sending SMS:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }), 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    )
   }
 })

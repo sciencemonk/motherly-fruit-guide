@@ -14,16 +14,21 @@ export async function sendTwilioResponse(message: string, to: string): Promise<s
     throw new Error('Missing Twilio credentials')
   }
 
-  console.log('Initializing Twilio client...')
-  const client = new twilio(accountSid, authToken)
-  
-  console.log('Sending Twilio message to:', to)
-  const twilioMessage = await client.messages.create({
-    body: message,
-    to: to,
-    messagingServiceSid: messagingServiceSid,
-  })
+  try {
+    console.log('Initializing Twilio client...')
+    const client = twilio(accountSid, authToken)
+    
+    console.log('Sending Twilio message to:', to)
+    const twilioMessage = await client.messages.create({
+      body: message,
+      to: to,
+      messagingServiceSid: messagingServiceSid,
+    })
 
-  console.log('Response sent successfully:', twilioMessage.sid)
-  return twilioMessage.sid
+    console.log('Response sent successfully:', twilioMessage.sid)
+    return twilioMessage.sid
+  } catch (error) {
+    console.error('Twilio error:', error)
+    throw new Error(`Failed to send SMS: ${error.message}`)
+  }
 }

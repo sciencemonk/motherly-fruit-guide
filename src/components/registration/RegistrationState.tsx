@@ -33,49 +33,73 @@ export function useRegistrationSubmit() {
     console.log('Starting registration process for:', { phone, firstName });
 
     try {
-      // Generate login code
-      console.log('Generating login code...');
-      const { data: loginCode, error: loginCodeError } = await supabase
-        .rpc('generate_alphanumeric_code', {
-          length: 6
-        });
-
-      if (loginCodeError) {
-        console.error('Login code generation error:', loginCodeError);
-        throw loginCodeError;
-      }
-
-      console.log('Generated login code successfully');
-
-      // Create new profile with trial status
-      console.log('Creating profile...');
-      const { error: insertError } = await supabase
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .insert({
-          phone_number: phone,
-          first_name: firstName,
-          city,
-          state,
-          due_date: dueDate.toISOString(),
-          interests,
-          lifestyle,
-          preferred_notification_time: preferredTime,
-          subscription_status: 'trial',
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          login_code: loginCode
-        });
+        .select('phone_number')
+        .eq('phone_number', phone)
+        .single();
 
-      if (insertError) {
-        console.error('Profile creation error:', insertError);
-        throw insertError;
+      if (existingProfile) {
+        console.log('Profile already exists, updating...');
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName,
+            city,
+            state,
+            due_date: dueDate.toISOString(),
+            interests,
+            lifestyle,
+            preferred_notification_time: preferredTime,
+          })
+          .eq('phone_number', phone);
+
+        if (updateError) throw updateError;
+      } else {
+        // Generate login code
+        console.log('Generating login code...');
+        const { data: loginCode, error: loginCodeError } = await supabase
+          .rpc('generate_alphanumeric_code', {
+            length: 6
+          });
+
+        if (loginCodeError) {
+          console.error('Login code generation error:', loginCodeError);
+          throw loginCodeError;
+        }
+
+        console.log('Generated login code successfully');
+
+        // Create new profile
+        console.log('Creating profile...');
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            phone_number: phone,
+            first_name: firstName,
+            city,
+            state,
+            due_date: dueDate.toISOString(),
+            interests,
+            lifestyle,
+            preferred_notification_time: preferredTime,
+            subscription_status: 'trial',
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            login_code: loginCode
+          });
+
+        if (insertError) {
+          console.error('Profile creation error:', insertError);
+          throw insertError;
+        }
       }
 
-      console.log('Profile created successfully, sending welcome message');
+      console.log('Profile created/updated successfully, sending welcome message');
 
       // Send welcome message using handle-sms function
       const { error: smsError } = await supabase.functions.invoke('handle-sms', {
         body: {
-          From: process.env.TWILIO_PHONE_NUMBER,
           To: phone,
           Body: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
         }
@@ -98,7 +122,7 @@ export function useRegistrationSubmit() {
         description: "There was a problem with your registration. Please try again.",
       });
       setIsLoading(false);
-      throw error; // Re-throw to be caught by the form handler
+      throw error;
     }
   };
 
