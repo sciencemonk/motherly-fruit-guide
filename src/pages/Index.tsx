@@ -16,17 +16,15 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <div 
-          className="relative min-h-[100vh] flex items-center" // Removed mt-16 and changed to 100vh for full coverage
+          className="relative min-h-[90vh] flex items-center mt-16" // Added mt-16 for navbar spacing
           style={{
             backgroundImage: 'url("/lovable-uploads/03089c7b-a507-445e-84d6-a90b874f6a80.png")',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            marginTop: '-64px', // Offset for navbar height to make it flush
-            paddingTop: '64px', // Add padding to prevent content from going under navbar
+            backgroundPosition: 'center'
           }}
         >
           {/* Dark Overlay */}
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-black/40" /> {/* Adjusted opacity from 10% to 40% */}
           
           {/* Content */}
           <div className="container relative z-10 px-4 md:px-6 py-16 md:py-24">
@@ -36,11 +34,11 @@ const Index = () => {
                 7-Day Free Trial
               </div>
               
-              <h1 className="text-5xl md:text-7xl font-bold text-white">
+              <h1 className="text-5xl md:text-7xl font-bold text-white"> {/* Changed text color to white */}
                 A new era of pregnancy
               </h1>
               
-              <p className="text-xl md:text-2xl text-white/90 max-w-2xl">
+              <p className="text-xl md:text-2xl text-white/90 max-w-2xl"> {/* Changed text color to white with slight transparency */}
                 The world's most advanced pregnancy support guide to help you grow a healthy baby.
               </p>
               
