@@ -5,6 +5,11 @@ interface RegistrationData {
   firstName: string;
   phone: string;
   dueDate: Date;
+  city: string;
+  state: string;
+  interests: string;
+  lifestyle: string;
+  preferredTime: string;
   smsConsent: boolean;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
@@ -43,6 +48,11 @@ export function useRegistrationSubmit() {
     firstName,
     phone,
     dueDate,
+    city,
+    state,
+    interests,
+    lifestyle,
+    preferredTime,
     smsConsent,
     setIsLoading,
     setIsSubmitted
@@ -99,14 +109,19 @@ export function useRegistrationSubmit() {
         throw loginCodeError;
       }
 
-      // Create new profile with the generated login code
+      // Create new profile with the generated login code and additional fields
       const { error: insertError } = await supabase
         .from('profiles')
         .insert({
           phone_number: phone,
           first_name: firstName,
           due_date: dueDate.toISOString().split('T')[0],
-          login_code: loginCodeData
+          login_code: loginCodeData,
+          city,
+          state,
+          interests,
+          lifestyle,
+          preferred_notification_time: preferredTime
         });
 
       if (insertError) {
