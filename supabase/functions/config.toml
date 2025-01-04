@@ -1,4 +1,4 @@
 project_id = "tjeukbooftbxulkgqljg"
 
-[handle-sms]
+[send-daily-message]
 verify_jwt = false
