@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 export async function deductChatCredit(supabase: any, phoneNumber: string): Promise<boolean> {
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('chat_credits')
+    .select('trial_ends_at')
     .eq('phone_number', phoneNumber)
     .single();
 
@@ -12,35 +12,18 @@ export async function deductChatCredit(supabase: any, phoneNumber: string): Prom
     return false;
   }
 
-  if (!profile || profile.chat_credits <= 0) {
-    console.log('User has no chat credits remaining');
-    return false;
+  // If trial_ends_at is in the future, allow the message
+  if (profile.trial_ends_at) {
+    const trialEndsAt = new Date(profile.trial_ends_at);
+    const now = new Date();
+    
+    if (trialEndsAt > now) {
+      console.log('User is within trial period, allowing message');
+      return true;
+    }
   }
 
-  const { error: updateError } = await supabase
-    .from('profiles')
-    .update({ chat_credits: profile.chat_credits - 1 })
-    .eq('phone_number', phoneNumber);
-
-  if (updateError) {
-    console.error('Error updating chat credits:', updateError);
-    return false;
-  }
-
-  // Log the credit transaction
-  const { error: transactionError } = await supabase
-    .from('credit_transactions')
-    .insert([
-      {
-        phone_number: phoneNumber,
-        amount: -1,
-        transaction_type: 'message_sent'
-      }
-    ]);
-
-  if (transactionError) {
-    console.error('Error logging credit transaction:', transactionError);
-  }
-
-  return true;
+  // Trial has ended, inform user they need to upgrade
+  console.log('Trial has ended, user needs to upgrade');
+  return false;
 }

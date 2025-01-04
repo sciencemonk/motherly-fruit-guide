@@ -50,11 +50,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check and deduct chat credit
-    const hasCredits = await deductChatCredit(supabase, from);
-    if (!hasCredits) {
+    // Check if user can send messages
+    const hasAccess = await deductChatCredit(supabase, from);
+    if (!hasAccess) {
       return new Response(createTwiMLResponse(
-        "I'm sorry, you've run out of chat credits. You'll receive 10 new credits at the start of next month, or you can upgrade to our premium plan for unlimited chats."
+        "Your trial period has ended. To continue receiving support from Mother Athena, please upgrade to our premium plan. Visit our website to upgrade and continue your journey with us."
       ), {
         status: 200,
         headers: { 
