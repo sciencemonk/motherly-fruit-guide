@@ -7,6 +7,7 @@ import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
 import { useSearchParams } from "react-router-dom"
 import { useRegistrationSubmit } from "./registration/RegistrationState"
 import { useToast } from "@/hooks/use-toast"
+import { DialogTitle } from "@/components/ui/dialog"
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams()
@@ -66,17 +67,26 @@ export function RegistrationForm() {
       smsConsent
     })
 
-    await handleSubmit({
-      firstName,
-      phone,
-      city,
-      state,
-      dueDate,
-      interests,
-      lifestyle,
-      preferredTime,
-      smsConsent
-    })
+    try {
+      await handleSubmit({
+        firstName,
+        phone,
+        city,
+        state,
+        dueDate,
+        interests,
+        lifestyle,
+        preferredTime,
+        smsConsent
+      })
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: "There was a problem with your registration. Please try again.",
+      })
+    }
   }
 
   const isStepValid = () => {
@@ -111,6 +121,7 @@ export function RegistrationForm() {
 
   return (
     <div className="registration-form">
+      <DialogTitle className="sr-only">Registration Form</DialogTitle>
       <form onSubmit={handleFormSubmit} className="space-y-6">
         <div className="form-content">
           <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />

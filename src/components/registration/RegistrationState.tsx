@@ -73,7 +73,7 @@ export function useRegistrationSubmit() {
       console.log('Profile created successfully, sending welcome message');
 
       // Send welcome message using handle-sms function
-      const response = await supabase.functions.invoke('handle-sms', {
+      const { error: smsError } = await supabase.functions.invoke('handle-sms', {
         body: {
           From: process.env.TWILIO_PHONE_NUMBER,
           To: phone,
@@ -81,9 +81,9 @@ export function useRegistrationSubmit() {
         }
       });
 
-      if (response.error) {
-        console.error('Welcome message error:', response.error);
-        throw response.error;
+      if (smsError) {
+        console.error('Welcome message error:', smsError);
+        throw smsError;
       }
 
       console.log('Welcome message sent successfully');
@@ -98,6 +98,7 @@ export function useRegistrationSubmit() {
         description: "There was a problem with your registration. Please try again.",
       });
       setIsLoading(false);
+      throw error; // Re-throw to be caught by the form handler
     }
   };
 
