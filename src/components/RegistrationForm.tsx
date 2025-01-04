@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { addMonths } from "date-fns";
 import { PregnancyReport } from "./PregnancyReport";
+import { FertilityReport } from "./FertilityReport";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useRegistrationState } from "./registration/RegistrationState";
 import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
 import { BasicInfoStep } from "./registration/steps/BasicInfoStep";
+import { PregnancyStatusStep } from "./registration/steps/PregnancyStatusStep";
 import { LocationStep } from "./registration/steps/LocationStep";
 import { DueDateStep } from "./registration/steps/DueDateStep";
 import { InterestsStep } from "./registration/steps/InterestsStep";
@@ -37,12 +39,14 @@ export function RegistrationForm() {
     setIsLoading,
     smsConsent,
     setSmsConsent,
+    pregnancyStatus,
+    setPregnancyStatus,
     reportRef,
     welcomeRef
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 7;
+  const totalSteps = 8; // Increased by 1 for the new pregnancy status step
 
   const { handleSubmit } = useRegistrationSubmit();
 
@@ -62,6 +66,7 @@ export function RegistrationForm() {
       lifestyle,
       preferredTime,
       smsConsent,
+      pregnancyStatus,
       setIsLoading,
       setIsSubmitted
     });
@@ -96,7 +101,11 @@ export function RegistrationForm() {
           <WelcomeMessage firstName={firstName} />
         </div>
         <div ref={reportRef} className="mt-8">
-          <PregnancyReport dueDate={dueDate!} firstName={firstName} />
+          {pregnancyStatus === 'expecting' ? (
+            <PregnancyReport dueDate={dueDate!} firstName={firstName} />
+          ) : (
+            <FertilityReport firstName={firstName} />
+          )}
         </div>
       </div>
     );
@@ -118,6 +127,16 @@ export function RegistrationForm() {
       )}
 
       {currentStep === 1 && (
+        <PregnancyStatusStep
+          pregnancyStatus={pregnancyStatus}
+          setPregnancyStatus={setPregnancyStatus}
+          isLoading={isLoading}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
+      )}
+
+      {currentStep === 2 && (
         <LocationStep
           city={city}
           setCity={setCity}
@@ -129,7 +148,7 @@ export function RegistrationForm() {
         />
       )}
 
-      {currentStep === 2 && (
+      {currentStep === 3 && pregnancyStatus === 'expecting' && (
         <DueDateStep
           dueDate={dueDate}
           setDueDate={setDueDate}
@@ -141,7 +160,7 @@ export function RegistrationForm() {
         />
       )}
 
-      {currentStep === 3 && (
+      {currentStep === 4 && (
         <InterestsStep
           interests={interests}
           setInterests={setInterests}
@@ -151,7 +170,7 @@ export function RegistrationForm() {
         />
       )}
 
-      {currentStep === 4 && (
+      {currentStep === 5 && (
         <LifestyleStep
           lifestyle={lifestyle}
           setLifestyle={setLifestyle}
@@ -161,7 +180,7 @@ export function RegistrationForm() {
         />
       )}
 
-      {currentStep === 5 && (
+      {currentStep === 6 && (
         <NotificationTimeStep
           preferredTime={preferredTime}
           setPreferredTime={setPreferredTime}
@@ -171,7 +190,7 @@ export function RegistrationForm() {
         />
       )}
 
-      {currentStep === 6 && (
+      {currentStep === 7 && (
         <FinalStep
           smsConsent={smsConsent}
           setSmsConsent={setSmsConsent}

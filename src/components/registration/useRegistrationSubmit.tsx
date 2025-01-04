@@ -11,6 +11,7 @@ interface RegistrationData {
   lifestyle: string;
   preferredTime: string;
   smsConsent: boolean;
+  pregnancyStatus: string;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
 }
@@ -25,13 +26,12 @@ export function useRegistrationSubmit() {
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
           to: phoneNumber,
-          message: `Hello ${firstName}! I'm Mother Athena. Each week I'll text you an update about your current stage of pregnancy. You can also text me 24/7 with any pregnancy related questions. If you have an emergency or you might be in danger consult your healthcare professional!`
+          message: `Hello ${firstName}! I'm Mother Athena. Each week I'll text you an update about your ${pregnancyStatus === 'expecting' ? 'pregnancy' : 'fertility journey'}. You can also text me 24/7 with any questions. If you have an emergency or you might be in danger consult your healthcare professional!`
         }
       });
 
       if (error) {
         console.error('Supabase function error:', error);
-        // Don't throw the error, just log it
         return { success: false, error };
       }
 
@@ -39,7 +39,6 @@ export function useRegistrationSubmit() {
       return { success: true, data };
     } catch (error) {
       console.error("Error sending welcome message:", error);
-      // Don't throw the error, just return failure
       return { success: false, error };
     }
   };
@@ -54,14 +53,15 @@ export function useRegistrationSubmit() {
     lifestyle,
     preferredTime,
     smsConsent,
+    pregnancyStatus,
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
-    if (!firstName || !phone || !dueDate) {
+    if (!firstName || !phone || !pregnancyStatus) {
       toast({
         variant: "destructive",
         title: "Please fill in all fields",
-        description: "We need this information to support you during your pregnancy journey.",
+        description: "We need this information to support you during your journey.",
       });
       return;
     }
@@ -115,13 +115,14 @@ export function useRegistrationSubmit() {
         .insert({
           phone_number: phone,
           first_name: firstName,
-          due_date: dueDate.toISOString().split('T')[0],
+          due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
           login_code: loginCodeData,
           city,
           state,
           interests,
           lifestyle,
-          preferred_notification_time: preferredTime
+          preferred_notification_time: preferredTime,
+          pregnancy_status: pregnancyStatus
         });
 
       if (insertError) {
@@ -133,15 +134,13 @@ export function useRegistrationSubmit() {
       const welcomeResult = await sendWelcomeMessage(phone, firstName);
       if (!welcomeResult.success) {
         console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
-        // Log the error but don't throw - we still want to complete registration
       }
 
       toast({
         title: "Welcome to Mother Athena!",
-        description: "We're excited to be part of your pregnancy journey.",
+        description: "We're excited to be part of your journey.",
       });
       
-      // Set submitted to true even if welcome message failed
       setIsSubmitted(true);
     } catch (error) {
       console.error('Registration error:', error);

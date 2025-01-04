@@ -12,6 +12,7 @@ export function useRegistrationState() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
+  const [pregnancyStatus, setPregnancyStatus] = useState("");
   const reportRef = useRef<HTMLDivElement>(null);
   const welcomeRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +39,8 @@ export function useRegistrationState() {
     setIsLoading,
     smsConsent,
     setSmsConsent,
+    pregnancyStatus,
+    setPregnancyStatus,
     reportRef,
     welcomeRef
   };

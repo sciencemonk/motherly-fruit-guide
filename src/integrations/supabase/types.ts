@@ -78,6 +78,7 @@ export type Database = {
           city: string | null
           created_at: string
           due_date: string | null
+          fertility_report_type: string | null
           first_name: string | null
           id: string
           interests: string | null
@@ -88,6 +89,7 @@ export type Database = {
           next_billing_date: string | null
           phone_number: string
           preferred_notification_time: string | null
+          pregnancy_status: string | null
           state: string | null
           subscription_id: string | null
           subscription_status: string | null
@@ -98,6 +100,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           due_date?: string | null
+          fertility_report_type?: string | null
           first_name?: string | null
           id?: string
           interests?: string | null
@@ -108,6 +111,7 @@ export type Database = {
           next_billing_date?: string | null
           phone_number: string
           preferred_notification_time?: string | null
+          pregnancy_status?: string | null
           state?: string | null
           subscription_id?: string | null
           subscription_status?: string | null
@@ -118,6 +122,7 @@ export type Database = {
           city?: string | null
           created_at?: string
           due_date?: string | null
+          fertility_report_type?: string | null
           first_name?: string | null
           id?: string
           interests?: string | null
@@ -128,6 +133,7 @@ export type Database = {
           next_billing_date?: string | null
           phone_number?: string
           preferred_notification_time?: string | null
+          pregnancy_status?: string | null
           state?: string | null
           subscription_id?: string | null
           subscription_status?: string | null
