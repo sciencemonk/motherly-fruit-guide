@@ -11,10 +11,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
       <main className="flex-grow">
         {/* Hero Section */}
         <div 
-          className="absolute inset-0 flex items-center w-full" 
+          className="relative min-h-screen flex items-center w-full" 
           style={{
             backgroundImage: 'url("/lovable-uploads/697b5151-7c43-45fa-983b-768bffef969e.png")',
             backgroundSize: 'cover',
@@ -54,7 +56,6 @@ const Index = () => {
         </div>
       </main>
 
-      <Navbar />
       <Footer />
 
       {/* Registration Modal */}
