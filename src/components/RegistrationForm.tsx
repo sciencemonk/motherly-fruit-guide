@@ -82,7 +82,7 @@ export function RegistrationForm() {
 
   if (isSubmitted) {
     return (
-      <div className="w-full px-4 sm:px-6 md:px-8">
+      <div className="w-full px-4 sm:px-6 md:px-8 overflow-y-auto max-h-[calc(100vh-4rem)]">
         <div ref={welcomeRef}>
           <WelcomeMessage firstName={firstName} />
         </div>
