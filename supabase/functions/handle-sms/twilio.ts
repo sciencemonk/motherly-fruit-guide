@@ -17,7 +17,7 @@ export async function sendTwilioResponse(message: string, to: string): Promise<s
   }
 
   try {
-    console.log('Creating Twilio client...')
+    console.log('Creating Twilio client with A2P Account SID...')
     const client = twilio(accountSid, authToken)
     
     // Ensure phone number is in E.164 format
