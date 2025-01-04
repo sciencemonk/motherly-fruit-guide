@@ -21,6 +21,11 @@ const Index = () => {
 
     setIsLoading(true)
     try {
+      console.log('Sending question to handle-sms function:', {
+        message: question,
+        isPregnancyQuestion: true
+      })
+
       const { data, error } = await supabase.functions.invoke('handle-sms', {
         body: {
           message: question,
@@ -28,7 +33,12 @@ const Index = () => {
         }
       })
 
-      if (error) throw error
+      console.log('Response from handle-sms function:', { data, error })
+
+      if (error) {
+        console.error('Error from edge function:', error)
+        throw error
+      }
 
       setResponse(data.message)
       setQuestion("")
