@@ -24,10 +24,14 @@ export function useRegistrationSubmit() {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
+      const welcomeMessage = pregnancyStatus === 'expecting' 
+        ? `Hello ${firstName}! I'm Mother Athena. Each day I'll text you with helpful information to help you grow a healthy baby. You can text me 24/7 with any pregnancy related questions you might have. Remember to always verify any information with a healthcare professional and seek help from a medical professional if you're ever in distress. Ps. You're amazing!`
+        : `Hello ${firstName}! I'm Mother Athena. Each day I'll text you with helpful information to help get pregnant. You can text me 24/7 with any fertility related questions you might have. Remember to always verify any information with a healthcare professional and seek help from a medical professional if you're ever in distress. Ps. You're amazing!`;
+
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
           to: phoneNumber,
-          message: `Hello ${firstName}! I'm Mother Athena. Each week I'll text you an update about your ${pregnancyStatus === 'expecting' ? 'pregnancy' : 'fertility journey'}. You can also text me 24/7 with any questions. If you have an emergency or you might be in danger consult your healthcare professional!`
+          message: welcomeMessage
         }
       });
 
