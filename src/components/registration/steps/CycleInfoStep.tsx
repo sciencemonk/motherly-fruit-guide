@@ -18,7 +18,7 @@ export function CycleInfoStep({
   onBack,
   onNext
 }: CycleInfoStepProps) {
-  // Only prevent selection of future dates
+  // Allow selection of dates up to today
   const today = new Date();
 
   return (
