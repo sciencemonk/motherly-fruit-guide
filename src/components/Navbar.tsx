@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { LoginModal } from "./LoginModal"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { supabase } from "@/integrations/supabase/client"
 
 const Navbar = () => {
   const isMobile = useIsMobile()
@@ -40,6 +39,13 @@ const Navbar = () => {
               className="text-sage-700 hover:text-sage-900"
             >
               Features
+            </a>
+            <a 
+              href="#science" 
+              onClick={(e) => scrollToSection(e, 'science')} 
+              className="text-sage-700 hover:text-sage-900"
+            >
+              The Science
             </a>
             <a 
               href="#about-us" 
