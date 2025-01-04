@@ -63,106 +63,110 @@ export function RegistrationSteps({
   twoMonthsAgo.setMonth(today.getMonth() - 2);
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <ProgressIndicator totalSteps={totalSteps} currentStep={currentStep} />
+    <div className="w-full">
+      <div className="mb-6">
+        <ProgressIndicator totalSteps={totalSteps} currentStep={currentStep} />
+      </div>
       
-      {currentStep === 0 && (
-        <BasicInfoStep
-          firstName={formData.firstName}
-          setFirstName={setters.setFirstName}
-          phone={formData.phone}
-          setPhone={setters.setPhone}
-          isLoading={isLoading}
-          onNext={onNext}
-        />
-      )}
+      <div className="space-y-6 bg-white/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 md:p-8">
+        {currentStep === 0 && (
+          <BasicInfoStep
+            firstName={formData.firstName}
+            setFirstName={setters.setFirstName}
+            phone={formData.phone}
+            setPhone={setters.setPhone}
+            isLoading={isLoading}
+            onNext={onNext}
+          />
+        )}
 
-      {currentStep === 1 && (
-        <PregnancyStatusStep
-          pregnancyStatus={formData.pregnancyStatus}
-          setPregnancyStatus={setters.setPregnancyStatus}
-          isLoading={isLoading}
-          onBack={onBack}
-          onNext={onNext}
-        />
-      )}
+        {currentStep === 1 && (
+          <PregnancyStatusStep
+            pregnancyStatus={formData.pregnancyStatus}
+            setPregnancyStatus={setters.setPregnancyStatus}
+            isLoading={isLoading}
+            onBack={onBack}
+            onNext={onNext}
+          />
+        )}
 
-      {currentStep === 2 && (
-        <LocationStep
-          city={formData.city}
-          setCity={setters.setCity}
-          state={formData.state}
-          setState={setters.setState}
-          isLoading={isLoading}
-          onBack={onBack}
-          onNext={onNext}
-        />
-      )}
+        {currentStep === 2 && (
+          <LocationStep
+            city={formData.city}
+            setCity={setters.setCity}
+            state={formData.state}
+            setState={setters.setState}
+            isLoading={isLoading}
+            onBack={onBack}
+            onNext={onNext}
+          />
+        )}
 
-      {currentStep === 3 && (
-        <>
-          {formData.pregnancyStatus === 'expecting' ? (
-            <DueDateStep
-              dueDate={formData.dueDate}
-              setDueDate={setters.setDueDate}
-              today={today}
-              maxDate={maxDate}
-              isLoading={isLoading}
-              onBack={onBack}
-              onNext={onNext}
-            />
-          ) : (
-            <CycleInfoStep
-              lastPeriod={formData.lastPeriod}
-              setLastPeriod={setters.setLastPeriod}
-              isLoading={isLoading}
-              onBack={onBack}
-              onNext={onNext}
-            />
-          )}
-        </>
-      )}
+        {currentStep === 3 && (
+          <>
+            {formData.pregnancyStatus === 'expecting' ? (
+              <DueDateStep
+                dueDate={formData.dueDate}
+                setDueDate={setters.setDueDate}
+                today={today}
+                maxDate={maxDate}
+                isLoading={isLoading}
+                onBack={onBack}
+                onNext={onNext}
+              />
+            ) : (
+              <CycleInfoStep
+                lastPeriod={formData.lastPeriod}
+                setLastPeriod={setters.setLastPeriod}
+                isLoading={isLoading}
+                onBack={onBack}
+                onNext={onNext}
+              />
+            )}
+          </>
+        )}
 
-      {currentStep === 4 && (
-        <InterestsStep
-          interests={formData.interests}
-          setInterests={setters.setInterests}
-          isLoading={isLoading}
-          onBack={onBack}
-          onNext={onNext}
-          pregnancyStatus={formData.pregnancyStatus}
-        />
-      )}
+        {currentStep === 4 && (
+          <InterestsStep
+            interests={formData.interests}
+            setInterests={setters.setInterests}
+            isLoading={isLoading}
+            onBack={onBack}
+            onNext={onNext}
+            pregnancyStatus={formData.pregnancyStatus}
+          />
+        )}
 
-      {currentStep === 5 && (
-        <LifestyleStep
-          lifestyle={formData.lifestyle}
-          setLifestyle={setters.setLifestyle}
-          isLoading={isLoading}
-          onBack={onBack}
-          onNext={onNext}
-        />
-      )}
+        {currentStep === 5 && (
+          <LifestyleStep
+            lifestyle={formData.lifestyle}
+            setLifestyle={setters.setLifestyle}
+            isLoading={isLoading}
+            onBack={onBack}
+            onNext={onNext}
+          />
+        )}
 
-      {currentStep === 6 && (
-        <NotificationTimeStep
-          preferredTime={formData.preferredTime}
-          setPreferredTime={setters.setPreferredTime}
-          isLoading={isLoading}
-          onBack={onBack}
-          onNext={onNext}
-        />
-      )}
+        {currentStep === 6 && (
+          <NotificationTimeStep
+            preferredTime={formData.preferredTime}
+            setPreferredTime={setters.setPreferredTime}
+            isLoading={isLoading}
+            onBack={onBack}
+            onNext={onNext}
+          />
+        )}
 
-      {currentStep === 7 && (
-        <FinalStep
-          smsConsent={formData.smsConsent}
-          setSmsConsent={setters.setSmsConsent}
-          isLoading={isLoading}
-          onBack={onBack}
-          onSubmit={onSubmit}
-        />
-      )}
+        {currentStep === 7 && (
+          <FinalStep
+            smsConsent={formData.smsConsent}
+            setSmsConsent={setters.setSmsConsent}
+            isLoading={isLoading}
+            onBack={onBack}
+            onSubmit={onSubmit}
+          />
+        )}
+      </div>
     </div>
   );
 }

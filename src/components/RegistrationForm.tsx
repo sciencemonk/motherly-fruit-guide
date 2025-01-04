@@ -82,7 +82,7 @@ export function RegistrationForm() {
 
   if (isSubmitted) {
     return (
-      <div>
+      <div className="w-full px-4 sm:px-6 md:px-8">
         <div ref={welcomeRef}>
           <WelcomeMessage firstName={firstName} />
         </div>
@@ -98,39 +98,41 @@ export function RegistrationForm() {
   }
 
   return (
-    <RegistrationSteps
-      currentStep={currentStep}
-      totalSteps={totalSteps}
-      formData={{
-        firstName,
-        phone,
-        dueDate,
-        lastPeriod,
-        city,
-        state,
-        interests,
-        lifestyle,
-        preferredTime,
-        smsConsent,
-        pregnancyStatus
-      }}
-      setters={{
-        setFirstName,
-        setPhone,
-        setDueDate,
-        setLastPeriod,
-        setCity,
-        setState,
-        setInterests,
-        setLifestyle,
-        setPreferredTime,
-        setSmsConsent,
-        setPregnancyStatus
-      }}
-      isLoading={isLoading}
-      onNext={handleNext}
-      onBack={handleBack}
-      onSubmit={onSubmit}
-    />
+    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 md:px-8">
+      <RegistrationSteps
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        formData={{
+          firstName,
+          phone,
+          dueDate,
+          lastPeriod,
+          city,
+          state,
+          interests,
+          lifestyle,
+          preferredTime,
+          smsConsent,
+          pregnancyStatus
+        }}
+        setters={{
+          setFirstName,
+          setPhone,
+          setDueDate,
+          setLastPeriod,
+          setCity,
+          setState,
+          setInterests,
+          setLifestyle,
+          setPreferredTime,
+          setSmsConsent,
+          setPregnancyStatus
+        }}
+        isLoading={isLoading}
+        onNext={handleNext}
+        onBack={handleBack}
+        onSubmit={onSubmit}
+      />
+    </div>
   );
 }

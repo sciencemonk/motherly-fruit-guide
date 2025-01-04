@@ -29,7 +29,7 @@ export function FormFields({
   isLoading
 }: FormFieldsProps) {
   return (
-    <>
+    <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="firstName" className="text-sage-700 text-lg">First Name</Label>
         <Input
@@ -57,15 +57,14 @@ export function FormFields({
       <div className="space-y-2">
         <Label className="text-sage-700 text-lg">Due Date</Label>
         <div className="flex justify-center">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-sage-200">
+          <div className="w-full max-w-[300px] bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-4 border border-sage-200">
             <Calendar
               mode="single"
               selected={dueDate}
               onSelect={setDueDate}
               disabled={(date) => date < today || date > maxDate || isLoading}
               className={cn(
-                "mx-auto",
-                "rounded-md",
+                "w-full",
                 "[&_.rdp-day_focus]:bg-sage-50",
                 "[&_.rdp-day_hover]:bg-sage-100",
                 "[&_.rdp-day_active]:bg-sage-500",
@@ -75,13 +74,18 @@ export function FormFields({
                 "[&_.rdp-head_cell]:text-sage-600",
                 "[&_.rdp-caption_label]:text-sage-700",
                 "[&_.rdp-nav_button]:hover:bg-sage-100",
-                "[&_.rdp-nav_button]:active:bg-sage-200"
+                "[&_.rdp-nav_button]:active:bg-sage-200",
+                "[&_.rdp-table]:w-full",
+                "[&_.rdp-cell]:p-0",
+                "[&_.rdp-button]:w-full",
+                "[&_.rdp-button]:h-9",
+                "[&_.rdp-button]:text-sm"
               )}
               initialFocus
             />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
