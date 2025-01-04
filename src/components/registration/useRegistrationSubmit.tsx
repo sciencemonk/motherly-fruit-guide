@@ -5,6 +5,7 @@ interface RegistrationData {
   firstName: string;
   phone: string;
   dueDate: Date;
+  lastPeriod?: Date;
   city: string;
   state: string;
   interests: string;
@@ -47,6 +48,7 @@ export function useRegistrationSubmit() {
     firstName,
     phone,
     dueDate,
+    lastPeriod,
     city,
     state,
     interests,
@@ -116,6 +118,7 @@ export function useRegistrationSubmit() {
           phone_number: phone,
           first_name: firstName,
           due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
+          last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
           login_code: loginCodeData,
           city,
           state,
