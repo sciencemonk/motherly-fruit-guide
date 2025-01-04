@@ -1,9 +1,8 @@
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ConsentCheckboxProps {
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
 }
 
 export function ConsentCheckbox({ checked, onCheckedChange }: ConsentCheckboxProps) {
@@ -15,10 +14,10 @@ export function ConsentCheckbox({ checked, onCheckedChange }: ConsentCheckboxPro
         onCheckedChange={onCheckedChange}
         className="mt-1"
       />
-      <Label htmlFor="consent" className="text-sm text-sage-700 leading-relaxed">
-        I agree to receive daily pregnancy tips and guidance via text message from Mother Athena. 
+      <label htmlFor="consent" className="text-sm text-sage-600">
+        I agree to receive daily pregnancy tips and guidance via text message from Mother Athena.
         Message frequency varies, message and data rates may apply. Reply STOP to cancel at any time.
-      </Label>
+      </label>
     </div>
-  )
+  );
 }
