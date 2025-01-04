@@ -90,16 +90,24 @@ export function useRegistrationSubmit() {
         return;
       }
 
-      // Create new profile
+      // Generate a login code using the database function
+      const { data: loginCodeData, error: loginCodeError } = await supabase
+        .rpc('generate_alphanumeric_code', { length: 6 });
+
+      if (loginCodeError) {
+        console.error('Error generating login code:', loginCodeError);
+        throw loginCodeError;
+      }
+
+      // Create new profile with the generated login code
       const { error: insertError } = await supabase
         .from('profiles')
-        .insert([
-          {
-            phone_number: phone,
-            first_name: firstName,
-            due_date: dueDate.toISOString().split('T')[0],
-          }
-        ]);
+        .insert({
+          phone_number: phone,
+          first_name: firstName,
+          due_date: dueDate.toISOString().split('T')[0],
+          login_code: loginCodeData
+        });
 
       if (insertError) {
         console.error('Error storing profile:', insertError);
