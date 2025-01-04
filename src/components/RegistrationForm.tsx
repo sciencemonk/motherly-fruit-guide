@@ -28,7 +28,7 @@ export function RegistrationForm() {
   
   const { isLoading, isSubmitted, handleSubmit } = useRegistrationSubmit()
 
-  const totalSteps = 7 // Updated to include lifestyle step
+  const totalSteps = 7
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -122,7 +122,10 @@ export function RegistrationForm() {
   return (
     <div className="registration-form">
       <DialogTitle className="sr-only">Registration Form</DialogTitle>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6" aria-describedby="registration-form-description">
+        <div id="registration-form-description" className="sr-only">
+          Multi-step registration form for Mother Athena pregnancy support service
+        </div>
         <div className="form-content">
           <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
           <div className="flex-1">
