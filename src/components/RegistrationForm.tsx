@@ -21,12 +21,13 @@ export function RegistrationForm() {
   const [state, setState] = useState("")
   const [dueDate, setDueDate] = useState<Date>()
   const [interests, setInterests] = useState("")
+  const [lifestyle, setLifestyle] = useState("")
   const [preferredTime, setPreferredTime] = useState("09:00")
   const [smsConsent, setSmsConsent] = useState(false)
   
   const { isLoading, isSubmitted, handleSubmit } = useRegistrationSubmit()
 
-  const totalSteps = 6
+  const totalSteps = 7 // Updated to include lifestyle step
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -60,6 +61,7 @@ export function RegistrationForm() {
       state,
       dueDate: dueDate.toISOString(),
       interests,
+      lifestyle,
       preferredTime,
       smsConsent
     })
@@ -71,6 +73,7 @@ export function RegistrationForm() {
       state,
       dueDate,
       interests,
+      lifestyle,
       preferredTime,
       smsConsent
     })
@@ -87,8 +90,10 @@ export function RegistrationForm() {
       case 3:
         return interests?.length > 0
       case 4:
-        return preferredTime?.length > 0
+        return lifestyle?.length > 0
       case 5:
+        return preferredTime?.length > 0
+      case 6:
         return smsConsent === true
       default:
         return false
@@ -124,6 +129,8 @@ export function RegistrationForm() {
               setDueDate={setDueDate}
               interests={interests}
               setInterests={setInterests}
+              lifestyle={lifestyle}
+              setLifestyle={setLifestyle}
               preferredTime={preferredTime}
               setPreferredTime={setPreferredTime}
               smsConsent={smsConsent}

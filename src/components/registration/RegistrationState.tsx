@@ -14,10 +14,11 @@ export function useRegistrationSubmit() {
     state: string;
     dueDate: Date;
     interests: string;
+    lifestyle: string;
     preferredTime: string;
     smsConsent: boolean;
   }) => {
-    const { firstName, phone, city, state, dueDate, interests, preferredTime, smsConsent } = formData;
+    const { firstName, phone, city, state, dueDate, interests, lifestyle, preferredTime, smsConsent } = formData;
     
     if (!smsConsent) {
       toast({
@@ -57,6 +58,7 @@ export function useRegistrationSubmit() {
           state,
           due_date: dueDate.toISOString(),
           interests,
+          lifestyle,
           preferred_notification_time: preferredTime,
           subscription_status: 'trial',
           trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),

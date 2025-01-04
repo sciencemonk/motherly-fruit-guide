@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { LifestyleField } from "./LifestyleField"
 
 interface RegistrationStepsProps {
   currentStep: number
@@ -21,6 +22,8 @@ interface RegistrationStepsProps {
   setDueDate: (value: Date | undefined) => void
   interests: string
   setInterests: (value: string) => void
+  lifestyle: string
+  setLifestyle: (value: string) => void
   preferredTime: string
   setPreferredTime: (value: string) => void
   smsConsent: boolean
@@ -41,6 +44,8 @@ export function RegistrationSteps({
   setDueDate,
   interests,
   setInterests,
+  lifestyle,
+  setLifestyle,
   preferredTime,
   setPreferredTime,
   smsConsent,
@@ -129,13 +134,21 @@ export function RegistrationSteps({
       )
     case 4:
       return (
+        <LifestyleField
+          lifestyle={lifestyle}
+          setLifestyle={setLifestyle}
+          isLoading={false}
+        />
+      )
+    case 5:
+      return (
         <TimePickerField
           preferredTime={preferredTime}
           setPreferredTime={setPreferredTime}
           city={city}
         />
       )
-    case 5:
+    case 6:
       return (
         <TrialConsentStep
           smsConsent={smsConsent}
