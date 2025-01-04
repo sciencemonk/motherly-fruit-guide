@@ -9,6 +9,14 @@ const Navbar = () => {
   const isMobile = useIsMobile()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
+  const scrollToAbout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const aboutSection = document.getElementById('about-us')
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-16 items-center">
@@ -26,7 +34,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-6">
           <nav className="hidden md:flex space-x-4">
             <Link to="/" className="text-sage-700 hover:text-sage-900">Home</Link>
-            <Link to="/about-us" className="text-sage-700 hover:text-sage-900">About Us</Link>
+            <a href="#about-us" onClick={scrollToAbout} className="text-sage-700 hover:text-sage-900">About Us</a>
             <Link to="/contact" className="text-sage-700 hover:text-sage-900">Contact Us</Link>
           </nav>
 
