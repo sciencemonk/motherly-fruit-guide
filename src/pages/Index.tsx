@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Sparkles, MessageCircle, Brain, Heart, Baby } from "lucide-react"
+import { Sparkles, MessageCircle, Brain, Heart, Baby, Video } from "lucide-react"
 
 const Index = () => {
   const [showRegistration, setShowRegistration] = useState(false)
@@ -24,6 +24,11 @@ const Index = () => {
       icon: <Brain className="w-6 h-6 text-peach-500" />,
       title: "Expert Guidance",
       description: "Get evidence-based advice tailored to your journey"
+    },
+    {
+      icon: <Video className="w-6 h-6 text-peach-500" />,
+      title: "Community Events",
+      description: "Join monthly expert-led sessions on fertility and motherhood"
     },
     {
       icon: <Heart className="w-6 h-6 text-peach-500" />,
