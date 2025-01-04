@@ -1,6 +1,5 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { createCheckoutSession } from "./utils/stripeCheckout";
 
 interface RegistrationData {
   firstName: string;
@@ -53,75 +52,49 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // First check if profile exists
-      const { data: existingProfile } = await supabase
+      // Generate login code
+      const { data: loginCode, error: loginCodeError } = await supabase
+        .rpc('generate_alphanumeric_code', {
+          length: 6
+        });
+
+      if (loginCodeError) throw loginCodeError;
+
+      // Create new profile with trial status
+      const { error: insertError } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('phone_number', phone)
-        .maybeSingle();
+        .insert({
+          phone_number: phone,
+          first_name: firstName,
+          city,
+          state,
+          due_date: dueDate.toISOString(),
+          interests,
+          lifestyle,
+          preferred_notification_time: preferredTime,
+          subscription_status: 'trial',
+          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          login_code: loginCode
+        });
 
-      if (existingProfile) {
-        // Update existing profile
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({
-            first_name: firstName,
-            city,
-            state,
-            due_date: dueDate.toISOString(),
-            interests,
-            lifestyle,
-            preferred_notification_time: preferredTime,
-          })
-          .eq('phone_number', phone);
+      if (insertError) throw insertError;
 
-        if (updateError) throw updateError;
-      } else {
-        // Generate login code
-        const { data: loginCode, error: loginCodeError } = await supabase
-          .rpc('generate_alphanumeric_code', {
-            length: 6
-          });
-
-        if (loginCodeError) throw loginCodeError;
-
-        // Create new profile
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            phone_number: phone,
-            first_name: firstName,
-            city,
-            state,
-            due_date: dueDate.toISOString(),
-            interests,
-            lifestyle,
-            preferred_notification_time: preferredTime,
-            subscription_status: 'trial',
-            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            login_code: loginCode
-          });
-
-        if (insertError) throw insertError;
-      }
-
-      // Get the current origin for success/cancel URLs
-      const origin = window.location.origin;
-      const successUrl = `${origin}/welcome`;
-      const cancelUrl = `${origin}/?registration=cancelled`;
-
-      const checkoutData = await createCheckoutSession({
-        phoneNumber: phone,
-        trial: true,
-        successUrl,
-        cancelUrl
+      // Send welcome message using handle-sms function
+      const response = await supabase.functions.invoke('handle-sms', {
+        body: {
+          From: process.env.TWILIO_PHONE_NUMBER,
+          To: phone,
+          Body: `Hi ${firstName}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+        }
       });
 
-      if (checkoutData?.url) {
-        window.location.href = checkoutData.url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
+      if (response.error) throw response.error;
+
+      // Set registration as completed
+      setIsSubmitted(true);
+      
+      // Redirect to welcome page with phone number
+      window.location.href = `/welcome?phone=${encodeURIComponent(phone)}&firstName=${encodeURIComponent(firstName)}&registration=success`;
 
     } catch (error) {
       console.error('Registration error:', error);

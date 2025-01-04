@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { sendWelcomeMessage } from "./registration/utils/welcomeMessage"
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams()
@@ -87,7 +86,7 @@ export function RegistrationForm() {
     fetchProfile()
   }, [registrationStatus, phoneFromParams, toast])
 
-  const totalSteps = 7
+  const totalSteps = 6 // Reduced from 7 since we removed Stripe step
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -133,8 +132,6 @@ export function RegistrationForm() {
       case 4:
         return lifestyle?.length > 0
       case 5:
-        return preferredTime?.length > 0
-      case 6:
         return smsConsent === true
       default:
         return false
@@ -233,33 +230,18 @@ export function RegistrationForm() {
         )
       case 4:
         return (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Tell Mother Athena more about yourself and your lifestyle</h2>
-              <p className="text-sage-600">This helps us provide more personalized support.</p>
-            </div>
-            <textarea
-              value={lifestyle}
-              onChange={(e) => setLifestyle(e.target.value)}
-              className="w-full p-2 border rounded-md h-32"
-              placeholder="Share details about your daily routine, exercise habits, diet preferences, work life, and any specific concerns you have about your pregnancy journey..."
-            />
-          </div>
-        )
-      case 5:
-        return (
           <TimePickerField
             preferredTime={preferredTime}
             setPreferredTime={setPreferredTime}
             city={city}
           />
         )
-      case 6:
+      case 5:
         return (
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-semibold text-sage-800 mb-2">Start Your Free Trial</h2>
-              <p className="text-sage-600">7 days free, then $9.99/month. Cancel anytime</p>
+              <p className="text-sage-600">7 days free, then $9.99/week</p>
             </div>
             <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
             <SocialProof />

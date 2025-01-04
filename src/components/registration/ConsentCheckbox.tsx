@@ -16,6 +16,8 @@ export function ConsentCheckbox({ checked, onCheckedChange }: ConsentCheckboxPro
       />
       <label htmlFor="consent" className="text-sm text-sage-600">
         I agree to receive daily pregnancy tips and guidance via text message from Mother Athena.
+        You'll get 7 days of unlimited support for free. After your trial ends, you'll receive a text message
+        with a link to continue receiving unlimited support for $9.99 per week.
         Message frequency varies, message and data rates may apply. Reply STOP to cancel at any time.
       </label>
     </div>
