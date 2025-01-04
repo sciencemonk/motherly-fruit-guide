@@ -1,4 +1,4 @@
-import { Profile } from './types';
+import { Profile } from './types.ts';
 
 export async function generatePregnancyMessage(profile: Profile, apiKey: string): Promise<string> {
   const dueDate = new Date(profile.due_date);
