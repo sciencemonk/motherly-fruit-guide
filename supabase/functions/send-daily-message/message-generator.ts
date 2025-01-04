@@ -25,7 +25,7 @@ export async function generatePregnancyMessage(profile: Profile, apiKey: string)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
         { role: 'user', content: prompt }
@@ -80,7 +80,7 @@ export async function generateFertilityMessage(profile: Profile, apiKey: string)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
         { role: 'user', content: prompt }
