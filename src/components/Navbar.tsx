@@ -3,6 +3,13 @@ import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { LoginModal } from "./LoginModal"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Menu } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const Navbar = () => {
   const isMobile = useIsMobile()
@@ -15,6 +22,33 @@ const Navbar = () => {
       section.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
+  const NavLinks = () => (
+    <>
+      <Link to="/" className="text-sage-700 hover:text-sage-900">Home</Link>
+      <a 
+        href="#features" 
+        onClick={(e) => scrollToSection(e, 'features')} 
+        className="text-sage-700 hover:text-sage-900"
+      >
+        Features
+      </a>
+      <a 
+        href="#science" 
+        onClick={(e) => scrollToSection(e, 'science')} 
+        className="text-sage-700 hover:text-sage-900"
+      >
+        The Science
+      </a>
+      <a 
+        href="#about-us" 
+        onClick={(e) => scrollToSection(e, 'about-us')} 
+        className="text-sage-700 hover:text-sage-900"
+      >
+        About Us
+      </a>
+    </>
+  )
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -31,30 +65,51 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center space-x-6">
-          <nav className="hidden md:flex space-x-4">
-            <Link to="/" className="text-sage-700 hover:text-sage-900">Home</Link>
-            <a 
-              href="#features" 
-              onClick={(e) => scrollToSection(e, 'features')} 
-              className="text-sage-700 hover:text-sage-900"
-            >
-              Features
-            </a>
-            <a 
-              href="#science" 
-              onClick={(e) => scrollToSection(e, 'science')} 
-              className="text-sage-700 hover:text-sage-900"
-            >
-              The Science
-            </a>
-            <a 
-              href="#about-us" 
-              onClick={(e) => scrollToSection(e, 'about-us')} 
-              className="text-sage-700 hover:text-sage-900"
-            >
-              About Us
-            </a>
-          </nav>
+          {isMobile ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/" className="w-full">Home</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a 
+                    href="#features" 
+                    onClick={(e) => scrollToSection(e, 'features')}
+                    className="w-full"
+                  >
+                    Features
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a 
+                    href="#science" 
+                    onClick={(e) => scrollToSection(e, 'science')}
+                    className="w-full"
+                  >
+                    The Science
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a 
+                    href="#about-us" 
+                    onClick={(e) => scrollToSection(e, 'about-us')}
+                    className="w-full"
+                  >
+                    About Us
+                  </a>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <nav className="hidden md:flex space-x-4">
+              <NavLinks />
+            </nav>
+          )}
 
           <Button
             variant="outline"
