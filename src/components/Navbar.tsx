@@ -35,6 +35,13 @@ const Navbar = () => {
           <nav className="hidden md:flex space-x-4">
             <Link to="/" className="text-sage-700 hover:text-sage-900">Home</Link>
             <a 
+              href="#features" 
+              onClick={(e) => scrollToSection(e, 'features')} 
+              className="text-sage-700 hover:text-sage-900"
+            >
+              Features
+            </a>
+            <a 
               href="#about-us" 
               onClick={(e) => scrollToSection(e, 'about-us')} 
               className="text-sage-700 hover:text-sage-900"
