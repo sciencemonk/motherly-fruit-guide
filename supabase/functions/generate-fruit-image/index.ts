@@ -18,7 +18,17 @@ serve(async (req) => {
     const RUNWARE_API_KEY = Deno.env.get('RUNWARE_API_KEY')
 
     if (!RUNWARE_API_KEY) {
-      throw new Error('RUNWARE_API_KEY is not set')
+      console.error('RUNWARE_API_KEY is not set')
+      return new Response(
+        JSON.stringify({ 
+          error: 'API key not configured',
+          imageURL: null 
+        }), 
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     const ws = new WebSocket(API_ENDPOINT)
@@ -41,7 +51,8 @@ serve(async (req) => {
         console.log("Received message:", response)
 
         if (response.error || response.errors) {
-          reject(new Error(response.errorMessage || response.errors?.[0]?.message || "An error occurred"))
+          console.error("Runware API error:", response)
+          resolve({ error: response.errorMessage || response.errors?.[0]?.message || "An error occurred" })
           return
         }
 
@@ -77,18 +88,19 @@ serve(async (req) => {
 
       ws.onerror = (error) => {
         console.error("WebSocket error:", error)
-        reject(error)
+        resolve({ error: "Failed to connect to image generation service" })
       }
     })
 
     const result = await imagePromise
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200 // Always return 200 to handle errors gracefully in the frontend
     })
   } catch (error) {
-    console.error("Error:", error)
+    console.error("Error in generate-fruit-image function:", error)
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+      status: 200, // Return 200 even for errors to handle them gracefully in frontend
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }

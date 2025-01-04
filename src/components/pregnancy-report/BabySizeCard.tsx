@@ -14,6 +14,7 @@ interface BabySizeCardProps {
 export function BabySizeCard({ gestationalAge, weeksLeft, progressPercentage, trimester }: BabySizeCardProps) {
   const [fruitImage, setFruitImage] = useState<string>("");
   const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const getFruitSize = (weeks: number) => {
     const fruitSizes: { [key: number]: [string, string] } = {
@@ -64,16 +65,32 @@ export function BabySizeCard({ gestationalAge, weeksLeft, progressPercentage, tr
     const generateFruitImage = async () => {
       try {
         setIsLoadingImage(true);
+        setImageError(false);
+        
         const { data, error } = await supabase.functions.invoke('generate-fruit-image', {
           body: { fruitName }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase function error:', error);
+          setImageError(true);
+          return;
+        }
+
+        if (data.error) {
+          console.error('Image generation error:', data.error);
+          setImageError(true);
+          return;
+        }
+
         if (data.imageURL) {
           setFruitImage(data.imageURL);
+        } else {
+          setImageError(true);
         }
       } catch (error) {
         console.error('Error generating fruit image:', error);
+        setImageError(true);
       } finally {
         setIsLoadingImage(false);
       }
@@ -95,7 +112,7 @@ export function BabySizeCard({ gestationalAge, weeksLeft, progressPercentage, tr
         <div className="flex flex-col items-center gap-4">
           {isLoadingImage ? (
             <div className="w-32 h-32 animate-pulse bg-gray-200 rounded-full" />
-          ) : fruitImage ? (
+          ) : !imageError && fruitImage ? (
             <img src={fruitImage} alt={fruitName} className="w-32 h-32 object-contain" />
           ) : (
             <span className="text-7xl">{fruitEmoji}</span>
