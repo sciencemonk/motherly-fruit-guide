@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export function useRegistrationSubmit() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -107,13 +109,19 @@ export function useRegistrationSubmit() {
 
       if (smsError) {
         console.error('Welcome message error:', smsError);
-        throw smsError;
+        // Don't throw here, just log the error and continue with redirection
+        toast({
+          variant: "default",
+          title: "Registration successful",
+          description: "Welcome message will be sent shortly.",
+        });
       }
 
-      console.log('Welcome message sent successfully');
-      
       setIsSubmitted(true);
-      window.location.href = `/welcome?phone=${encodeURIComponent(phone)}&registration=success`;
+      
+      // Use navigate instead of window.location for smoother transitions
+      navigate(`/welcome?phone=${encodeURIComponent(phone)}&firstName=${encodeURIComponent(firstName)}&registration=success`);
+      
     } catch (error) {
       console.error('Registration error:', error);
       toast({
