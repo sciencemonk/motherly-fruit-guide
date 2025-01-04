@@ -59,6 +59,7 @@ serve(async (req) => {
     )
 
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
+    const openAiKey = Deno.env.get('OPENAI_API_KEY')
 
     // Process each profile
     for (const profile of profiles) {
@@ -66,15 +67,9 @@ serve(async (req) => {
         let message: string
 
         if (profile.pregnancy_status === 'expecting') {
-          // Calculate weeks of pregnancy
-          const dueDate = new Date(profile.due_date)
-          const today = new Date()
-          const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7))
-          
-          message = await generatePregnancyMessage(profile, gestationalAge)
+          message = await generatePregnancyMessage(profile, openAiKey!)
         } else {
-          // For users trying to conceive
-          message = await generateFertilityMessage(profile)
+          message = await generateFertilityMessage(profile, openAiKey!)
         }
 
         // Send message via Twilio
@@ -107,91 +102,97 @@ serve(async (req) => {
   }
 })
 
-async function generatePregnancyMessage(profile: Profile, gestationalAge: number): Promise<string> {
-  const messageTypes = [
-    { type: 'development', weight: profile.interests?.includes("Baby's development") ? 2 : 1 },
-    { type: 'lifestyle', weight: profile.lifestyle?.includes('active') ? 2 : 1 },
-    { type: 'mindset', weight: profile.interests?.includes('Mental health') ? 2 : 1 },
-    { type: 'environment', weight: 1 }
-  ]
+async function generatePregnancyMessage(profile: Profile, apiKey: string): Promise<string> {
+  const dueDate = new Date(profile.due_date)
+  const today = new Date()
+  const gestationalAge = 40 - Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7))
 
-  // Weighted random selection of message type
-  const totalWeight = messageTypes.reduce((sum, type) => sum + type.weight, 0)
-  let random = Math.random() * totalWeight
-  let selectedType = messageTypes[0].type
+  const prompt = `You are Mother Athena, a knowledgeable and caring AI assistant for pregnant women. 
+  Create a personalized daily message for ${profile.first_name} who is ${gestationalAge} weeks pregnant.
+  Their interests include ${profile.interests} and their lifestyle is described as ${profile.lifestyle}.
   
-  for (const type of messageTypes) {
-    if (random <= type.weight) {
-      selectedType = type.type
-      break
-    }
-    random -= type.weight
-  }
+  Focus on evidence-based medical information and research about:
+  1. Fetal development at this stage
+  2. Recommended lifestyle adjustments
+  3. Environmental considerations
+  4. Mental well-being and mindset
+  
+  Keep the message warm, supportive, and under 320 characters to fit in an SMS.
+  Include one specific, actionable tip based on their interests and lifestyle.`
 
-  // Message templates based on type and pregnancy stage
-  const messages = {
-    development: [
-      `Hey ${profile.first_name}! At week ${gestationalAge}, your baby is developing their ${gestationalAge < 13 ? 'vital organs' : gestationalAge < 27 ? 'senses' : 'final features'}. Keep taking good care of yourself! 🌱`,
-      `Your little one is growing steadily! This week (${gestationalAge}), they're about the size of a ${gestationalAge < 13 ? 'lime' : gestationalAge < 27 ? 'mango' : 'watermelon'}. 🍎`,
-    ],
-    lifestyle: [
-      `${profile.first_name}, maintaining an ${profile.lifestyle} lifestyle is great for your baby! Remember to stay hydrated and get some gentle movement today. 💪`,
-      `Your healthy choices matter! Consider trying some prenatal yoga or a short walk to support your wellbeing today. 🧘‍♀️`,
-    ],
-    mindset: [
-      `Take a moment for yourself today, ${profile.first_name}. A positive mindset supports both you and your baby's development. ✨`,
-      `Remember to breathe deeply and connect with your baby today. Your emotional wellbeing is just as important as physical health. 🫂`,
-    ],
-    environment: [
-      `Creating a nurturing environment is key! Today, try to spend some time in nature or create a calm space at home. 🌿`,
-      `Your environment affects your baby's development. Consider adding some calming elements to your daily routine. 🏡`,
-    ],
-  }
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    }),
+  })
 
-  const categoryMessages = messages[selectedType as keyof typeof messages]
-  return categoryMessages[Math.floor(Math.random() * categoryMessages.length)]
+  const data = await response.json()
+  return data.choices[0].message.content.trim()
 }
 
-async function generateFertilityMessage(profile: Profile): Promise<string> {
-  const messageTypes = [
-    { type: 'cycle', weight: 2 },
-    { type: 'lifestyle', weight: profile.lifestyle?.includes('active') ? 2 : 1 },
-    { type: 'mindset', weight: profile.interests?.includes('Mental health') ? 2 : 1 },
-    { type: 'environment', weight: 1 }
-  ]
-
-  // Weighted random selection
-  const totalWeight = messageTypes.reduce((sum, type) => sum + type.weight, 0)
-  let random = Math.random() * totalWeight
-  let selectedType = messageTypes[0].type
+async function generateFertilityMessage(profile: Profile, apiKey: string): Promise<string> {
+  let fertilityInfo = ""
   
-  for (const type of messageTypes) {
-    if (random <= type.weight) {
-      selectedType = type.type
-      break
-    }
-    random -= type.weight
+  if (profile.last_period) {
+    const lastPeriod = new Date(profile.last_period)
+    const today = new Date()
+    const daysSinceLastPeriod = Math.ceil((today.getTime() - lastPeriod.getTime()) / (1000 * 60 * 60 * 24))
+    const cycleDay = (daysSinceLastPeriod % 28) + 1
+    
+    // Calculate fertility window (assuming a 28-day cycle)
+    const isFertileWindow = cycleDay >= 11 && cycleDay <= 17
+    const isOvulation = cycleDay === 14
+    
+    fertilityInfo = `Based on your last period, you're on day ${cycleDay} of your cycle. ${
+      isFertileWindow ? "You're in your fertile window! This is an optimal time for conception." :
+      isOvulation ? "You're likely ovulating today! This is the peak time for conception." :
+      "Continue tracking your cycle and maintaining healthy habits."
+    }`
   }
 
-  const messages = {
-    cycle: [
-      `${profile.first_name}, tracking your cycle is key to understanding your fertility. Remember to note any changes in your body today. 📝`,
-      `Stay in tune with your body's natural rhythm. Every cycle brings new opportunities for conception. 🌙`,
-    ],
-    lifestyle: [
-      `Your ${profile.lifestyle} lifestyle choices support your fertility journey! Keep up the great work, ${profile.first_name}. 💪`,
-      `Small daily habits can make a big difference. Focus on nourishing your body with healthy foods and gentle movement today. 🥗`,
-    ],
-    mindset: [
-      `${profile.first_name}, maintain a positive mindset on your fertility journey. Each day is a step forward. ✨`,
-      `Take time for self-care today. Your emotional wellbeing is an important part of your fertility journey. 🫂`,
-    ],
-    environment: [
-      `Creating a supportive environment helps your fertility journey. Consider ways to reduce stress in your surroundings today. 🌿`,
-      `Your environment plays a role in fertility. Try to create moments of peace in your daily routine. 🏡`,
-    ],
-  }
+  const prompt = `You are Mother Athena, a knowledgeable and caring AI assistant for women trying to conceive.
+  Create a personalized daily message for ${profile.first_name} who is trying to get pregnant.
+  Their interests include ${profile.interests} and their lifestyle is described as ${profile.lifestyle}.
+  
+  Current fertility information: ${fertilityInfo}
+  
+  Focus on evidence-based medical information and research about:
+  1. Fertility optimization
+  2. Lifestyle factors that impact fertility
+  3. Environmental considerations
+  4. Mental well-being and stress management
+  
+  Keep the message warm, supportive, and under 320 characters to fit in an SMS.
+  Include one specific, actionable tip based on their interests and lifestyle.`
 
-  const categoryMessages = messages[selectedType as keyof typeof messages]
-  return categoryMessages[Math.floor(Math.random() * categoryMessages.length)]
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are Mother Athena, a knowledgeable and caring AI assistant.' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    }),
+  })
+
+  const data = await response.json()
+  return data.choices[0].message.content.trim()
 }
