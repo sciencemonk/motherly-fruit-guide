@@ -103,21 +103,31 @@ const Navbar = () => {
                     About Us
                   </a>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsLoginModalOpen(true)}
+                    className="w-full justify-start hover:bg-sage-50"
+                  >
+                    Contact Us
+                  </Button>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <nav className="hidden md:flex space-x-4">
-              <NavLinks />
-            </nav>
+            <>
+              <nav className="hidden md:flex space-x-4">
+                <NavLinks />
+              </nav>
+              <Button
+                variant="outline"
+                onClick={() => setIsLoginModalOpen(true)}
+                className="hover:bg-sage-50"
+              >
+                Contact Us
+              </Button>
+            </>
           )}
-
-          <Button
-            variant="outline"
-            onClick={() => setIsLoginModalOpen(true)}
-            className="hover:bg-sage-50"
-          >
-            Contact Us
-          </Button>
         </div>
 
         <LoginModal
