@@ -2,8 +2,56 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { Share2, Twitter, Facebook } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { PregnancyReport } from "@/components/PregnancyReport"
+import { useEffect, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 const Welcome = () => {
+  const [searchParams] = useSearchParams()
+  const { toast } = useToast()
+  const [profile, setProfile] = useState<{ firstName?: string; dueDate?: Date } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const phone = searchParams.get('phone')
+    
+    if (phone) {
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('first_name, due_date')
+            .eq('phone_number', phone)
+            .single()
+
+          if (error) throw error
+
+          if (data) {
+            setProfile({
+              firstName: data.first_name,
+              dueDate: data.due_date ? new Date(data.due_date) : undefined
+            })
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error)
+          toast({
+            variant: "destructive",
+            title: "Error loading your profile",
+            description: "We couldn't load your pregnancy report. Please try refreshing the page.",
+          })
+        } finally {
+          setIsLoading(false)
+        }
+      }
+
+      fetchProfile()
+    } else {
+      setIsLoading(false)
+    }
+  }, [searchParams, toast])
+
   const handleShare = (platform: 'twitter' | 'facebook') => {
     const text = encodeURIComponent("I just started my pregnancy journey with Mother Athena - the most advanced AI pregnancy guide! 🤰✨")
     const url = encodeURIComponent("https://motherathena.com")
@@ -14,6 +62,14 @@ const Welcome = () => {
     }
 
     window.open(shareUrls[platform], '_blank', 'width=600,height=400')
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
+        <div className="animate-pulse text-sage-600">Loading your pregnancy report...</div>
+      </div>
+    )
   }
 
   return (
@@ -31,20 +87,16 @@ const Welcome = () => {
             </div>
           </div>
 
-          {/* Helpful Information */}
-          <div className="bg-white p-8 md:p-12 rounded-lg shadow-md space-y-8">
-            <h2 className="text-3xl font-semibold text-sage-800">What to Expect</h2>
-            <div className="space-y-6 text-sage-700">
-              <p className="text-lg">Mother Athena will be your trusted companion throughout your pregnancy journey, providing:</p>
-              <ul className="list-disc list-inside space-y-4 text-lg ml-4">
-                <li>Daily personalized tips and advice</li>
-                <li>Weekly updates about your baby's development</li>
-                <li>Nutrition and exercise recommendations</li>
-                <li>Important milestones and reminders</li>
-                <li>24/7 support for your pregnancy questions</li>
-              </ul>
+          {/* Pregnancy Report */}
+          {profile?.dueDate && (
+            <div className="space-y-6">
+              <h2 className="text-3xl font-semibold text-sage-800 text-center">Your Pregnancy Report</h2>
+              <PregnancyReport 
+                dueDate={profile.dueDate}
+                firstName={profile.firstName}
+              />
             </div>
-          </div>
+          )}
 
           {/* Social Sharing */}
           <div className="bg-white p-8 md:p-12 rounded-lg shadow-md">
