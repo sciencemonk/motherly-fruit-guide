@@ -54,13 +54,6 @@ const Navbar = () => {
             >
               About Us
             </a>
-            <a 
-              href="#contact" 
-              onClick={(e) => scrollToSection(e, 'contact')} 
-              className="text-sage-700 hover:text-sage-900"
-            >
-              Contact Us
-            </a>
           </nav>
 
           <Button
@@ -68,7 +61,7 @@ const Navbar = () => {
             onClick={() => setIsLoginModalOpen(true)}
             className="hover:bg-sage-50"
           >
-            Log In
+            Contact Us
           </Button>
         </div>
 

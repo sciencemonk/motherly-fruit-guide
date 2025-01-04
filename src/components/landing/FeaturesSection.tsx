@@ -20,7 +20,7 @@ export const FeaturesSection = () => {
     {
       icon: <Video className="w-6 h-6 text-peach-500" />,
       title: "Community Events",
-      description: "Join monthly expert-led sessions on fertility and motherhood"
+      description: "Join expert-led sessions on fertility and motherhood"
     },
     {
       icon: <Heart className="w-6 h-6 text-peach-500" />,
