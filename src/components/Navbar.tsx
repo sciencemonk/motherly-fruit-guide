@@ -9,11 +9,11 @@ const Navbar = () => {
   const isMobile = useIsMobile()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
-  const scrollToAbout = (e: React.MouseEvent) => {
+  const scrollToSection = (e: React.MouseEvent, sectionId: string) => {
     e.preventDefault()
-    const aboutSection = document.getElementById('about-us')
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: 'smooth' })
+    const section = document.getElementById(sectionId)
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
@@ -34,8 +34,20 @@ const Navbar = () => {
         <div className="flex items-center space-x-6">
           <nav className="hidden md:flex space-x-4">
             <Link to="/" className="text-sage-700 hover:text-sage-900">Home</Link>
-            <a href="#about-us" onClick={scrollToAbout} className="text-sage-700 hover:text-sage-900">About Us</a>
-            <Link to="/contact" className="text-sage-700 hover:text-sage-900">Contact Us</Link>
+            <a 
+              href="#about-us" 
+              onClick={(e) => scrollToSection(e, 'about-us')} 
+              className="text-sage-700 hover:text-sage-900"
+            >
+              About Us
+            </a>
+            <a 
+              href="#contact" 
+              onClick={(e) => scrollToSection(e, 'contact')} 
+              className="text-sage-700 hover:text-sage-900"
+            >
+              Contact Us
+            </a>
           </nav>
 
           <Button
