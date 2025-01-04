@@ -14,3 +14,6 @@ verify_jwt = false
 
 [send-daily-update]
 verify_jwt = false
+
+[send-trial-expiration]
+verify_jwt = false

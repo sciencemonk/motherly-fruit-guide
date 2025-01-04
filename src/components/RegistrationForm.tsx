@@ -1,21 +1,12 @@
 import { useState, useEffect } from "react"
 import { StepIndicator } from "./registration/StepIndicator"
-import { FormFields } from "./registration/FormFields"
-import { useRegistrationSubmit } from "./registration/useRegistrationSubmit"
+import { RegistrationSteps } from "./registration/RegistrationSteps"
 import { Button } from "./ui/button"
 import { Loader2 } from "lucide-react"
-import { ConsentCheckbox } from "./registration/ConsentCheckbox"
-import { SocialProof } from "./registration/SocialProof"
-import { StateSelector } from "./registration/StateSelector"
-import { TimePickerField } from "./registration/TimePickerField"
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage"
 import { useSearchParams } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Calendar } from "@/components/ui/calendar"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export function RegistrationForm() {
   const [searchParams] = useSearchParams()
@@ -30,13 +21,10 @@ export function RegistrationForm() {
   const [state, setState] = useState("")
   const [dueDate, setDueDate] = useState<Date>()
   const [interests, setInterests] = useState("")
-  const [lifestyle, setLifestyle] = useState("")
   const [preferredTime, setPreferredTime] = useState("09:00")
   const [smsConsent, setSmsConsent] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-
-  const { handleSubmit } = useRegistrationSubmit()
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -54,30 +42,27 @@ export function RegistrationForm() {
           setDueDate(new Date(data.due_date))
           setIsSubmitted(true)
 
-          // Send welcome message
-          await sendWelcomeMessage(
-            decodeURIComponent(phoneFromParams),
-            data.first_name
-          ).then(() => {
-            toast({
-              title: "Welcome to Mother Athena!",
-              description: "Please check your phone for your first message.",
-            })
-          }).catch((error) => {
-            console.error('Error sending welcome message:', error)
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "There was a problem sending your welcome message.",
-            })
+          // Send welcome message using handle-sms function
+          const response = await supabase.functions.invoke('handle-sms', {
+            body: {
+              From: process.env.TWILIO_PHONE_NUMBER,
+              To: decodeURIComponent(phoneFromParams),
+              Body: `Hi ${data.first_name}! I'm Mother Athena and I'm here to help you grow a healthy baby. I'll send you a message each day along this magical journey. If you ever have a question, like can I eat this?!, just send me a message!\n\nA big part of having a successful pregnancy is to relax... so right now take a deep breath in and slowly exhale. You've got this! ❤️`
+            }
           })
 
+          if (response.error) throw response.error
+
+          toast({
+            title: "Welcome to Mother Athena!",
+            description: "Please check your phone for your first message.",
+          })
         } catch (error) {
-          console.error('Error fetching profile:', error)
+          console.error('Error:', error)
           toast({
             variant: "destructive",
             title: "Error",
-            description: "There was a problem loading your profile.",
+            description: "There was a problem sending your welcome message.",
           })
         }
       }
@@ -86,7 +71,7 @@ export function RegistrationForm() {
     fetchProfile()
   }, [registrationStatus, phoneFromParams, toast])
 
-  const totalSteps = 6 // Reduced from 7 since we removed Stripe step
+  const totalSteps = 6
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -100,23 +85,40 @@ export function RegistrationForm() {
     }
   }
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!dueDate) return
+    setIsLoading(true)
 
-    await handleSubmit({
-      firstName,
-      phone,
-      city,
-      state,
-      dueDate,
-      interests,
-      lifestyle,
-      preferredTime,
-      smsConsent,
-      setIsLoading,
-      setIsSubmitted,
-    })
+    try {
+      // Create new profile with trial status
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          phone_number: phone,
+          first_name: firstName,
+          city,
+          state,
+          due_date: dueDate.toISOString(),
+          interests,
+          preferred_notification_time: preferredTime,
+          subscription_status: 'trial',
+          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        })
+
+      if (insertError) throw insertError
+
+      // Redirect to welcome page with phone parameter
+      window.location.href = `/welcome?phone=${encodeURIComponent(phone)}&registration=success`
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast({
+        variant: "destructive",
+        title: "Registration error",
+        description: "There was a problem with your registration. Please try again.",
+      })
+      setIsLoading(false)
+    }
   }
 
   const isStepValid = () => {
@@ -130,7 +132,7 @@ export function RegistrationForm() {
       case 3:
         return interests?.length > 0
       case 4:
-        return lifestyle?.length > 0
+        return preferredTime?.length > 0
       case 5:
         return smsConsent === true
       default:
@@ -146,119 +148,31 @@ export function RegistrationForm() {
     )
   }
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <FormFields
-            firstName={firstName}
-            setFirstName={setFirstName}
-            phone={phone}
-            setPhone={setPhone}
-          />
-        )
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Where are you located?</h2>
-              <p className="text-sage-600">We'll use this to provide local resources and connect you with nearby moms.</p>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Enter your city"
-                />
-              </div>
-              <StateSelector state={state} setState={setState} />
-            </div>
-          </div>
-        )
-      case 2:
-        return (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-sage-800 mb-2">When is your baby due?</h2>
-              <p className="text-sage-600">We'll customize your experience based on your stage of pregnancy.</p>
-            </div>
-            <div className="flex justify-center">
-              <div className="bg-white rounded-lg shadow p-4">
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  className="rounded-md border"
-                />
-              </div>
-            </div>
-          </div>
-        )
-      case 3:
-        return (
-          <div className="space-y-4">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-sage-800 mb-2">What interests you most about having a healthy baby?</h2>
-              <p className="text-sage-600">This helps us personalize your experience.</p>
-            </div>
-            <RadioGroup value={interests} onValueChange={setInterests} className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="nutrition" id="nutrition" />
-                <Label htmlFor="nutrition">Nutrition and diet during pregnancy</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="exercise" id="exercise" />
-                <Label htmlFor="exercise">Safe exercise and staying active</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="development" id="development" />
-                <Label htmlFor="development">Baby's development and milestones</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="mental" id="mental" />
-                <Label htmlFor="mental">Mental health and emotional wellbeing</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="preparation" id="preparation" />
-                <Label htmlFor="preparation">Birth preparation and labor</Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )
-      case 4:
-        return (
-          <TimePickerField
-            preferredTime={preferredTime}
-            setPreferredTime={setPreferredTime}
-            city={city}
-          />
-        )
-      case 5:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-sage-800 mb-2">Start Your Free Trial</h2>
-              <p className="text-sage-600">7 days free, then $9.99/week</p>
-            </div>
-            <ConsentCheckbox checked={smsConsent} onCheckedChange={setSmsConsent} />
-            <SocialProof />
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
   return (
     <div className="registration-form">
-      <form onSubmit={handleFormSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="form-content">
           <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
           <div className="flex-1">
-            {renderStep()}
+            <RegistrationSteps
+              currentStep={currentStep}
+              firstName={firstName}
+              setFirstName={setFirstName}
+              phone={phone}
+              setPhone={setPhone}
+              city={city}
+              setCity={setCity}
+              state={state}
+              setState={setState}
+              dueDate={dueDate}
+              setDueDate={setDueDate}
+              interests={interests}
+              setInterests={setInterests}
+              preferredTime={preferredTime}
+              setPreferredTime={setPreferredTime}
+              smsConsent={smsConsent}
+              setSmsConsent={setSmsConsent}
+            />
           </div>
           <div className="flex justify-between mt-6">
             {currentStep > 0 && (
