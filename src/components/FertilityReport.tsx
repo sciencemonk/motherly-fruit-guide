@@ -26,17 +26,6 @@ export function FertilityReport({ firstName = "" }: FertilityReportProps) {
           </div>
         </div>
       </div>
-
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 border border-sage-200">
-        <h3 className="text-xl font-semibold text-sage-800 mb-4">Next Steps</h3>
-        <ul className="list-disc list-inside space-y-2 text-sage-600">
-          <li>Enter your last period date to start tracking your fertility window</li>
-          <li>Receive personalized notifications about your fertile days</li>
-          <li>Chat with Mother Athena about fertility optimization</li>
-          <li>Schedule a preconception checkup with your healthcare provider</li>
-          <li>Join our community of women on similar fertility journeys</li>
-        </ul>
-      </div>
     </div>
   );
 }
