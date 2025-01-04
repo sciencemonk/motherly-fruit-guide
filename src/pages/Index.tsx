@@ -1,119 +1,117 @@
-import { useState } from "react"
+import { RegistrationForm } from "@/components/RegistrationForm"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Info } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useSearchParams } from "react-router-dom"
+import { sendWelcomeMessage } from "@/components/registration/utils/welcomeMessage"
+import { PregnancyReport } from "@/components/PregnancyReport"
+import { WelcomeMessage } from "@/components/pregnancy-report/WelcomeMessage"
 import { supabase } from "@/integrations/supabase/client"
+import { Hero } from "@/components/landing/Hero"
+import { Features } from "@/components/landing/Features"
+import { Disclaimer } from "@/components/landing/Disclaimer"
 
 const Index = () => {
-  const [question, setQuestion] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [response, setResponse] = useState("")
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
-  const maxChars = 200
-  const maxQuestions = 10
+  const [profile, setProfile] = useState<{ firstName?: string; dueDate?: Date } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!question.trim()) return
+  useEffect(() => {
+    const registration = searchParams.get('registration')
+    const phone = searchParams.get('phone')
+    const firstName = searchParams.get('firstName')
 
-    setIsLoading(true)
-    try {
-      console.log('Sending question to handle-sms function:', {
-        message: question,
-        isPregnancyQuestion: true
-      })
+    if (registration === 'success' && phone) {
+      // Send welcome message
+      sendWelcomeMessage(phone, firstName || '')
+        .then(() => {
+          toast({
+            title: "Welcome to Mother Athena!",
+            description: "Check your phone for a welcome message. We're excited to be part of your journey!",
+          })
+        })
+        .catch((error) => {
+          console.error('Error sending welcome message:', error)
+          toast({
+            variant: "destructive",
+            title: "Welcome message error",
+            description: "There was a problem sending your welcome message. Our team has been notified.",
+          })
+        })
 
-      const { data, error } = await supabase.functions.invoke('handle-sms', {
-        body: {
-          message: question,
-          isPregnancyQuestion: true
+      // Fetch profile data for the pregnancy report
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('first_name, due_date')
+            .eq('phone_number', phone)
+            .single()
+
+          if (error) throw error
+
+          if (data) {
+            setProfile({
+              firstName: data.first_name,
+              dueDate: data.due_date ? new Date(data.due_date) : undefined
+            })
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error)
+          toast({
+            variant: "destructive",
+            title: "Error loading your profile",
+            description: "We couldn't load your pregnancy report. Please try refreshing the page.",
+          })
+        } finally {
+          setIsLoading(false)
         }
-      })
-
-      console.log('Response from handle-sms function:', { data, error })
-
-      if (error) {
-        console.error('Error from edge function:', error)
-        throw error
       }
 
-      setResponse(data.message)
-      setQuestion("")
-    } catch (error) {
-      console.error('Error getting response:', error)
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to get a response. Please try again.",
-      })
-    } finally {
+      fetchProfile()
+    } else {
       setIsLoading(false)
     }
+  }, [searchParams, toast])
+
+  // Show pregnancy report if registration was successful
+  if (searchParams.get('registration') === 'success' && profile?.dueDate) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
+        <Navbar />
+        <main className="flex-grow container px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <WelcomeMessage firstName={profile.firstName || ''} />
+            <PregnancyReport 
+              dueDate={profile.dueDate} 
+              firstName={profile.firstName}
+            />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
+  // Show loading state while fetching profile
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
+        <div className="animate-pulse text-sage-600">Loading...</div>
+      </div>
+    )
+  }
+
+  // Show landing page if no successful registration
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      <main className="flex-grow container max-w-4xl mx-auto px-4 py-24">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Where <span className="text-blue-500">Questions</span> Meet Mother AI
-          </h1>
-          <p className="text-lg text-gray-600">
-            Get instant educational insights about your pregnancy concerns
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="relative">
-            <Textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Enter your pregnancy questions one at a time..."
-              className="min-h-[100px] p-4 text-lg"
-              maxLength={maxChars}
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-2">
-              <span>0 of {maxQuestions} questions asked</span>
-              <span>{question.length} of {maxChars} characters used</span>
-            </div>
-          </div>
-
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-            <Info className="h-5 w-5 text-amber-500 mt-0.5" />
-            <p className="text-sm text-amber-800">
-              For educational purposes only. Consult healthcare professionals for medical advice.
-            </p>
-          </div>
-
-          <Button 
-            type="submit" 
-            className="w-full md:w-auto"
-            disabled={isLoading || !question.trim()}
-          >
-            {isLoading ? "Generating Response..." : "Get Answer"}
-          </Button>
-        </form>
-
-        {response && (
-          <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Response:</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{response}</p>
-          </div>
-        )}
-
-        <div className="mt-12 bg-blue-50 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Best Practices</h2>
-          <ul className="space-y-2 text-blue-800">
-            <li>• Be specific about your symptoms or concerns</li>
-            <li>• Include relevant details about your pregnancy stage</li>
-            <li>• Mention any specific worries or complications</li>
-            <li>• Remember this is for educational purposes only</li>
-          </ul>
-        </div>
+      <main className="flex-grow">
+        <Hero />
+        <Features />
+        <Disclaimer />
       </main>
       <Footer />
     </div>

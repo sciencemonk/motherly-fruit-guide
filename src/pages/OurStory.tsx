@@ -2,14 +2,14 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { Heart, Baby, Flower, LeafyGreen, Users } from "lucide-react"
 
-const AboutUs = () => {
+const OurStory = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
         <div 
-          className="relative h-[50vh] pt-24 flex items-center"
+          className="relative h-[50vh] pt-24 flex items-center" // Added pt-24 for more padding above
           style={{
             backgroundImage: 'url("/lovable-uploads/4e1d9a07-eb10-4bd0-a20d-59eea66c2289.png")',
             backgroundSize: 'cover',
@@ -18,7 +18,7 @@ const AboutUs = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent" />
           <div className="relative container mx-auto px-4">
-            <h1 className="text-5xl font-bold text-sage-800 mb-4">About Us</h1>
+            <h1 className="text-5xl font-bold text-sage-800 mb-4">Our Vision</h1>
             <p className="text-xl text-sage-700 max-w-2xl">
               Empowering mothers to nurture the next generation through personalized support and cutting-edge technology.
             </p>
@@ -64,4 +64,4 @@ const AboutUs = () => {
   )
 }
 
-export default AboutUs
+export default OurStory
