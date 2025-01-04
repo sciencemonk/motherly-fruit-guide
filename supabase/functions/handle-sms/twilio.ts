@@ -20,11 +20,14 @@ export async function sendTwilioResponse(message: string, to: string): Promise<s
     console.log('Creating Twilio client...')
     const client = twilio(accountSid, authToken)
     
-    console.log('Sending message to:', to)
+    // Ensure phone number is in E.164 format
+    const formattedPhone = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`
+    console.log('Sending message to:', formattedPhone)
+    
     const twilioMessage = await client.messages.create({
       body: message,
       messagingServiceSid,
-      to: to
+      to: formattedPhone
     })
 
     console.log('Message sent successfully:', twilioMessage.sid)
