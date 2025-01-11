@@ -41,6 +41,57 @@ export type Database = {
           },
         ]
       }
+      dreams: {
+        Row: {
+          ai_analysis: Json | null
+          content: string
+          created_at: string | null
+          dream_date: string
+          emotions: string[] | null
+          id: string
+          lucidity_level: number | null
+          phone_number: string
+          themes: string[] | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          content: string
+          created_at?: string | null
+          dream_date?: string
+          emotions?: string[] | null
+          id?: string
+          lucidity_level?: number | null
+          phone_number: string
+          themes?: string[] | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          content?: string
+          created_at?: string | null
+          dream_date?: string
+          emotions?: string[] | null
+          id?: string
+          lucidity_level?: number | null
+          phone_number?: string
+          themes?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dreams_phone_number_fkey"
+            columns: ["phone_number"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["phone_number"]
+          },
+          {
+            foreignKeyName: "fk_profile"
+            columns: ["phone_number"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["phone_number"]
+          },
+        ]
+      }
       message_transactions: {
         Row: {
           amount: number
@@ -86,11 +137,17 @@ export type Database = {
           last_period: string | null
           last_sign_in: string | null
           lifestyle: string | null
+          local_timezone: string | null
           login_code: string
+          meditation_preference: string | null
           next_billing_date: string | null
           phone_number: string
           preferred_notification_time: string | null
           pregnancy_status: string | null
+          reality_check_end_time: string | null
+          reality_check_interval: number | null
+          reality_check_start_time: string | null
+          reality_check_type: string | null
           state: string | null
           subscription_id: string | null
           subscription_status: string | null
@@ -109,11 +166,17 @@ export type Database = {
           last_period?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
+          local_timezone?: string | null
           login_code: string
+          meditation_preference?: string | null
           next_billing_date?: string | null
           phone_number: string
           preferred_notification_time?: string | null
           pregnancy_status?: string | null
+          reality_check_end_time?: string | null
+          reality_check_interval?: number | null
+          reality_check_start_time?: string | null
+          reality_check_type?: string | null
           state?: string | null
           subscription_id?: string | null
           subscription_status?: string | null
@@ -132,16 +195,43 @@ export type Database = {
           last_period?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
+          local_timezone?: string | null
           login_code?: string
+          meditation_preference?: string | null
           next_billing_date?: string | null
           phone_number?: string
           preferred_notification_time?: string | null
           pregnancy_status?: string | null
+          reality_check_end_time?: string | null
+          reality_check_interval?: number | null
+          reality_check_start_time?: string | null
+          reality_check_type?: string | null
           state?: string | null
           subscription_id?: string | null
           subscription_status?: string | null
           subscription_type?: string | null
           trial_ends_at?: string | null
+        }
+        Relationships: []
+      }
+      reality_checks: {
+        Row: {
+          check_type: string
+          description: string
+          id: string
+          instructions: string
+        }
+        Insert: {
+          check_type: string
+          description: string
+          id?: string
+          instructions: string
+        }
+        Update: {
+          check_type?: string
+          description?: string
+          id?: string
+          instructions?: string
         }
         Relationships: []
       }

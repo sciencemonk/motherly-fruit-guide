@@ -19,24 +19,24 @@ export const HeroSection = ({ onStartTrial }: HeroSectionProps) => {
       
       <div className="container relative z-10 px-4 md:px-6 py-16 md:py-24">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 bg-peach-100/90 text-peach-700 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 bg-sage-100/90 text-sage-700 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-sm">
             <Sparkles className="w-4 h-4" />
             7-Day Free Trial
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-white">
-            A new era of pregnancy
+            Master the Art of Lucid Dreaming
           </h1>
           
           <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto">
-            The world's most advanced pregnancy support guide to help you grow a healthy baby.
+            Unlock your mind's potential with Ducil's proven framework for conscious dreaming.
           </p>
           
           <Button 
             onClick={onStartTrial}
-            className="bg-peach-500 hover:bg-peach-600 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+            className="bg-sage-500 hover:bg-sage-600 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            Start Your Free Trial
+            Start Your Journey
           </Button>
         </div>
       </div>

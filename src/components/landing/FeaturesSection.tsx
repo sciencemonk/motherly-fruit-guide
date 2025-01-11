@@ -1,36 +1,36 @@
-import { Baby, MessageCircle, Brain, Heart, Video, Sparkles } from "lucide-react"
+import { Brain, Moon, Check, Sparkles, Meditation, BookOpen } from "lucide-react"
 
 export const FeaturesSection = () => {
   const features = [
     {
-      icon: <Baby className="w-6 h-6 text-peach-500" />,
-      title: "Daily Updates",
-      description: "Receive daily messages about your baby's development"
+      icon: <BookOpen className="w-6 h-6 text-sage-500" />,
+      title: "Dream Journal",
+      description: "Record and analyze your dreams with AI-powered insights"
     },
     {
-      icon: <MessageCircle className="w-6 h-6 text-peach-500" />,
-      title: "24/7 Support",
-      description: "Chat anytime with Mother Athena about your pregnancy"
+      icon: <Check className="w-6 h-6 text-sage-500" />,
+      title: "Reality Checks",
+      description: "Regular reminders to build dream awareness throughout the day"
     },
     {
-      icon: <Brain className="w-6 h-6 text-peach-500" />,
-      title: "Expert Guidance",
-      description: "Get evidence-based advice tailored to your journey"
+      icon: <Meditation className="w-6 h-6 text-sage-500" />,
+      title: "Pre-sleep Meditation",
+      description: "Guided sessions to enhance dream recall and lucidity"
     },
     {
-      icon: <Video className="w-6 h-6 text-peach-500" />,
-      title: "Community Events",
-      description: "Join expert-led sessions on fertility and motherhood"
+      icon: <Brain className="w-6 h-6 text-sage-500" />,
+      title: "Awareness",
+      description: "Learn to recognize dream signs and maintain consciousness"
     },
     {
-      icon: <Heart className="w-6 h-6 text-peach-500" />,
-      title: "Personalized Care",
-      description: "Receive support focused on your specific interests"
+      icon: <Moon className="w-6 h-6 text-sage-500" />,
+      title: "Stabilization",
+      description: "Master techniques to stay in lucid dreams longer"
     },
     {
-      icon: <Sparkles className="w-6 h-6 text-peach-500" />,
-      title: "Fertility Support",
-      description: "Whether you're expecting or trying to conceive, we're here for you"
+      icon: <Sparkles className="w-6 h-6 text-sage-500" />,
+      title: "Control & Exploration",
+      description: "Shape your dreams and unlock limitless possibilities"
     }
   ]
 
@@ -39,10 +39,10 @@ export const FeaturesSection = () => {
       <div className="container px-4 md:px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-sage-800 mb-4">
-            Comprehensive Support for Your Journey
+            The Ducil Framework
           </h2>
           <p className="text-lg text-sage-600 max-w-2xl mx-auto">
-            From fertility to pregnancy and beyond, we're here to support you every step of the way
+            Our comprehensive approach combines ancient wisdom with modern technology to help you achieve lucidity
           </p>
         </div>
         
@@ -52,7 +52,7 @@ export const FeaturesSection = () => {
               key={index}
               className="flex flex-col items-center text-center p-6 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              <div className="w-14 h-14 rounded-full bg-peach-50 flex items-center justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-sage-50 flex items-center justify-center mb-4">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold text-sage-800 mb-2">
