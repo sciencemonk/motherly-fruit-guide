@@ -42,6 +42,7 @@ const Dashboard = () => {
         .insert({
           phone_number: phoneNumber,
           first_name: firstName,
+          login_code: 'TEST123', // Adding the required login_code
           reality_check_start_time: '08:00:00',
           reality_check_end_time: '20:00:00',
           reality_check_interval: 120
