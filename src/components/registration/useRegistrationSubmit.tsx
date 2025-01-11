@@ -86,6 +86,13 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('phone_number', phone)
+        .single();
+
       // Generate a login code using the database function
       const { data: loginCodeData, error: loginCodeError } = await supabase
         .rpc('generate_alphanumeric_code', { length: 6 });
@@ -95,29 +102,56 @@ export function useRegistrationSubmit() {
         throw loginCodeError;
       }
 
-      // Create new profile
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          phone_number: phone,
-          first_name: firstName,
-          due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
-          last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
-          login_code: loginCodeData,
-          city,
-          state,
-          interests,
-          lifestyle,
-          preferred_notification_time: preferredTime,
-          pregnancy_status: pregnancyStatus,
-          reality_check_start_time: wakeTime,
-          reality_check_end_time: sleepTime,
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        });
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName,
+            due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
+            last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
+            login_code: loginCodeData,
+            city,
+            state,
+            interests,
+            lifestyle,
+            preferred_notification_time: preferredTime,
+            pregnancy_status: pregnancyStatus,
+            reality_check_start_time: wakeTime,
+            reality_check_end_time: sleepTime,
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          })
+          .eq('phone_number', phone);
 
-      if (insertError) {
-        console.error('Error storing profile:', insertError);
-        throw insertError;
+        if (updateError) {
+          console.error('Error updating profile:', updateError);
+          throw updateError;
+        }
+      } else {
+        // Create new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            phone_number: phone,
+            first_name: firstName,
+            due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
+            last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
+            login_code: loginCodeData,
+            city,
+            state,
+            interests,
+            lifestyle,
+            preferred_notification_time: preferredTime,
+            pregnancy_status: pregnancyStatus,
+            reality_check_start_time: wakeTime,
+            reality_check_end_time: sleepTime,
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          });
+
+        if (insertError) {
+          console.error('Error storing profile:', insertError);
+          throw insertError;
+        }
       }
 
       // Send welcome message with login code
