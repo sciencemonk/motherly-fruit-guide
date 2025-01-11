@@ -111,7 +111,7 @@ const Navbar = () => {
                     onClick={() => setIsLoginModalOpen(true)}
                     className="w-full justify-start hover:bg-sage-50"
                   >
-                    Contact Us
+                    Log In
                   </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -126,7 +126,7 @@ const Navbar = () => {
                 onClick={() => setIsLoginModalOpen(true)}
                 className="hover:bg-sage-50"
               >
-                Contact Us
+                Log In
               </Button>
             </>
           )}
