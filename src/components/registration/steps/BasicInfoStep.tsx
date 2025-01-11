@@ -1,7 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { Clock } from "lucide-react";
 
 interface BasicInfoStepProps {
   firstName: string;
@@ -23,8 +25,8 @@ export function BasicInfoStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-sage-800 mb-2">Let's get to know you</h2>
-        <p className="text-sage-600 mb-6">We'll use this information to personalize your experience.</p>
+        <h2 className="text-2xl font-semibold text-sage-800 mb-2">Welcome to Ducil</h2>
+        <p className="text-sage-600 mb-6">Enter your details to begin your lucid dreaming journey.</p>
       </div>
 
       <div className="space-y-4">

@@ -1,12 +1,7 @@
 import { ReactNode } from "react";
 import { BasicInfoStep } from "./steps/BasicInfoStep";
-import { PregnancyStatusStep } from "./steps/PregnancyStatusStep";
-import { LocationStep } from "./steps/LocationStep";
-import { DueDateStep } from "./steps/DueDateStep";
-import { CycleInfoStep } from "./steps/CycleInfoStep";
-import { InterestsStep } from "./steps/InterestsStep";
-import { LifestyleStep } from "./steps/LifestyleStep";
-import { NotificationTimeStep } from "./steps/NotificationTimeStep";
+import { TimePreferenceStep } from "./steps/TimePreferenceStep";
+import { FrameworkStep } from "./steps/FrameworkStep";
 import { FinalStep } from "./steps/FinalStep";
 import { ProgressIndicator } from "./ProgressIndicator";
 
@@ -16,28 +11,16 @@ interface RegistrationStepsProps {
   formData: {
     firstName: string;
     phone: string;
-    dueDate?: Date;
-    lastPeriod?: Date;
-    city: string;
-    state: string;
-    interests: string;
-    lifestyle: string;
-    preferredTime: string;
+    wakeTime: string;
+    sleepTime: string;
     smsConsent: boolean;
-    pregnancyStatus: string;
   };
   setters: {
     setFirstName: (value: string) => void;
-    setPhone: (value: string) => void;
-    setDueDate: (date: Date | undefined) => void;
-    setLastPeriod: (date: Date | undefined) => void;
-    setCity: (value: string) => void;
-    setState: (value: string) => void;
-    setInterests: (value: string) => void;
-    setLifestyle: (value: string) => void;
-    setPreferredTime: (value: string) => void;
+    setPhone: (value: string | undefined) => void;
+    setWakeTime: (value: string) => void;
+    setSleepTime: (value: string) => void;
     setSmsConsent: (value: boolean) => void;
-    setPregnancyStatus: (value: string) => void;
   };
   isLoading: boolean;
   onNext: () => void;
@@ -55,13 +38,6 @@ export function RegistrationSteps({
   onBack,
   onSubmit
 }: RegistrationStepsProps) {
-  const today = new Date();
-  const maxDate = new Date();
-  maxDate.setMonth(today.getMonth() + 9);
-
-  const twoMonthsAgo = new Date();
-  twoMonthsAgo.setMonth(today.getMonth() - 2);
-
   return (
     <div className="w-full">
       <div className="mb-6">
@@ -81,9 +57,11 @@ export function RegistrationSteps({
         )}
 
         {currentStep === 1 && (
-          <PregnancyStatusStep
-            pregnancyStatus={formData.pregnancyStatus}
-            setPregnancyStatus={setters.setPregnancyStatus}
+          <TimePreferenceStep
+            wakeTime={formData.wakeTime}
+            setWakeTime={setters.setWakeTime}
+            sleepTime={formData.sleepTime}
+            setSleepTime={setters.setSleepTime}
             isLoading={isLoading}
             onBack={onBack}
             onNext={onNext}
@@ -91,11 +69,7 @@ export function RegistrationSteps({
         )}
 
         {currentStep === 2 && (
-          <LocationStep
-            city={formData.city}
-            setCity={setters.setCity}
-            state={formData.state}
-            setState={setters.setState}
+          <FrameworkStep
             isLoading={isLoading}
             onBack={onBack}
             onNext={onNext}
@@ -103,61 +77,6 @@ export function RegistrationSteps({
         )}
 
         {currentStep === 3 && (
-          <>
-            {formData.pregnancyStatus === 'expecting' ? (
-              <DueDateStep
-                dueDate={formData.dueDate}
-                setDueDate={setters.setDueDate}
-                today={today}
-                maxDate={maxDate}
-                isLoading={isLoading}
-                onBack={onBack}
-                onNext={onNext}
-              />
-            ) : (
-              <CycleInfoStep
-                lastPeriod={formData.lastPeriod}
-                setLastPeriod={setters.setLastPeriod}
-                isLoading={isLoading}
-                onBack={onBack}
-                onNext={onNext}
-              />
-            )}
-          </>
-        )}
-
-        {currentStep === 4 && (
-          <InterestsStep
-            interests={formData.interests}
-            setInterests={setters.setInterests}
-            isLoading={isLoading}
-            onBack={onBack}
-            onNext={onNext}
-            pregnancyStatus={formData.pregnancyStatus}
-          />
-        )}
-
-        {currentStep === 5 && (
-          <LifestyleStep
-            lifestyle={formData.lifestyle}
-            setLifestyle={setters.setLifestyle}
-            isLoading={isLoading}
-            onBack={onBack}
-            onNext={onNext}
-          />
-        )}
-
-        {currentStep === 6 && (
-          <NotificationTimeStep
-            preferredTime={formData.preferredTime}
-            setPreferredTime={setters.setPreferredTime}
-            isLoading={isLoading}
-            onBack={onBack}
-            onNext={onNext}
-          />
-        )}
-
-        {currentStep === 7 && (
           <FinalStep
             smsConsent={formData.smsConsent}
             setSmsConsent={setters.setSmsConsent}

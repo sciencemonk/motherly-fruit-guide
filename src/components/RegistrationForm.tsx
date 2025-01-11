@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { PregnancyReport } from "./PregnancyReport";
-import { FertilityReport } from "./FertilityReport";
 import { WelcomeMessage } from "./pregnancy-report/WelcomeMessage";
 import { useRegistrationState } from "./registration/RegistrationState";
 import { useRegistrationSubmit } from "./registration/useRegistrationSubmit";
@@ -12,34 +10,22 @@ export function RegistrationForm() {
     setFirstName,
     phone,
     setPhone,
-    dueDate,
-    setDueDate,
-    lastPeriod,
-    setLastPeriod,
-    city,
-    setCity,
-    state,
-    setState,
-    interests,
-    setInterests,
-    lifestyle,
-    setLifestyle,
-    preferredTime,
-    setPreferredTime,
+    wakeTime,
+    setWakeTime,
+    sleepTime,
+    setSleepTime,
     isSubmitted,
     setIsSubmitted,
     isLoading,
     setIsLoading,
     smsConsent,
     setSmsConsent,
-    pregnancyStatus,
-    setPregnancyStatus,
     reportRef,
     welcomeRef
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 8;
+  const totalSteps = 4;
 
   const { handleSubmit } = useRegistrationSubmit();
 
@@ -47,15 +33,9 @@ export function RegistrationForm() {
     await handleSubmit({
       firstName,
       phone,
-      dueDate: dueDate!,
-      lastPeriod,
-      city,
-      state,
-      interests,
-      lifestyle,
-      preferredTime,
+      wakeTime,
+      sleepTime,
       smsConsent,
-      pregnancyStatus,
       setIsLoading,
       setIsSubmitted
     });
@@ -86,13 +66,6 @@ export function RegistrationForm() {
         <div ref={welcomeRef}>
           <WelcomeMessage firstName={firstName} />
         </div>
-        <div ref={reportRef} className="mt-8">
-          {pregnancyStatus === 'expecting' ? (
-            <PregnancyReport dueDate={dueDate!} firstName={firstName} />
-          ) : (
-            <FertilityReport firstName={firstName} />
-          )}
-        </div>
       </div>
     );
   }
@@ -105,28 +78,16 @@ export function RegistrationForm() {
         formData={{
           firstName,
           phone,
-          dueDate,
-          lastPeriod,
-          city,
-          state,
-          interests,
-          lifestyle,
-          preferredTime,
-          smsConsent,
-          pregnancyStatus
+          wakeTime,
+          sleepTime,
+          smsConsent
         }}
         setters={{
           setFirstName,
           setPhone,
-          setDueDate,
-          setLastPeriod,
-          setCity,
-          setState,
-          setInterests,
-          setLifestyle,
-          setPreferredTime,
-          setSmsConsent,
-          setPregnancyStatus
+          setWakeTime,
+          setSleepTime,
+          setSmsConsent
         }}
         isLoading={isLoading}
         onNext={handleNext}
