@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
@@ -7,55 +6,69 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import Navbar from "@/components/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CreditCard, Gift, User } from "lucide-react"
+import { Brain, Moon, Bell } from "lucide-react"
 
 const Dashboard = () => {
-  const navigate = useNavigate()
   const { toast } = useToast()
   const [profile, setProfile] = useState<any>(null)
-  const [firstName, setFirstName] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [dueDate, setDueDate] = useState<Date>()
+  const [dreams, setDreams] = useState<any[]>([])
+  const [firstName, setFirstName] = useState("Test")
+  const [phoneNumber, setPhoneNumber] = useState("+1234567890")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    checkAuth()
     fetchProfile()
+    fetchDreams()
   }, [])
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      navigate('/')
-    }
-  }
 
   const fetchProfile = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
-
+      // For development, we'll use a test profile
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('phone_number', session.user.phone)
+        .eq('phone_number', phoneNumber)
         .single()
 
       if (error) throw error
 
       setProfile(data)
-      setFirstName(data.first_name || '')
-      setPhoneNumber(data.phone_number || '')
-      setDueDate(data.due_date ? new Date(data.due_date) : undefined)
+      setFirstName(data?.first_name || 'Test')
     } catch (error) {
       console.error('Error fetching profile:', error)
-      toast({
-        title: "Error",
-        description: "Failed to load profile",
-        variant: "destructive"
-      })
+      // Create a test profile if none exists
+      const { data, error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          phone_number: phoneNumber,
+          first_name: firstName,
+          reality_check_start_time: '08:00:00',
+          reality_check_end_time: '20:00:00',
+          reality_check_interval: 120
+        })
+        .select()
+        .single()
+
+      if (!insertError) {
+        setProfile(data)
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchDreams = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('dreams')
+        .select('*')
+        .eq('phone_number', phoneNumber)
+        .order('dream_date', { ascending: false })
+
+      if (error) throw error
+      setDreams(data || [])
+    } catch (error) {
+      console.error('Error fetching dreams:', error)
     }
   }
 
@@ -65,7 +78,9 @@ const Dashboard = () => {
         .from('profiles')
         .update({
           first_name: firstName,
-          due_date: dueDate?.toISOString().split('T')[0]
+          reality_check_start_time: profile.reality_check_start_time,
+          reality_check_end_time: profile.reality_check_end_time,
+          reality_check_interval: profile.reality_check_interval
         })
         .eq('phone_number', phoneNumber)
 
@@ -82,11 +97,6 @@ const Dashboard = () => {
         variant: "destructive"
       })
     }
-  }
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/')
   }
 
   if (loading) {
@@ -107,102 +117,63 @@ const Dashboard = () => {
       <Navbar />
       <div className="container max-w-4xl mx-auto px-4 py-8">
         <div className="grid gap-6">
-          {/* Profile Section */}
+          {/* Welcome Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Your Profile
+                <Brain className="h-5 w-5" />
+                Welcome back, {firstName}
               </CardTitle>
-              <CardDescription>Update your personal information</CardDescription>
+              <CardDescription>Your lucid dreaming journey awaits</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">First Name</label>
-                <Input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Enter your first name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Phone Number</label>
-                <Input
-                  value={phoneNumber}
-                  disabled
-                  className="bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Due Date</label>
-                <Calendar
-                  mode="single"
-                  selected={dueDate}
-                  onSelect={setDueDate}
-                  className="rounded-md border"
-                />
-              </div>
-            </CardContent>
           </Card>
 
-          {/* Credits Section */}
+          {/* Dreams Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5" />
-                Chat Credits
+                <Moon className="h-5 w-5" />
+                Dream Journal
               </CardTitle>
-              <CardDescription>Your available chat credits and usage</CardDescription>
+              <CardDescription>Your recent dreams and insights</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">Available Credits</p>
-                    <p className="text-2xl font-bold">{profile?.chat_credits || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Next reset on {new Date(profile?.last_credits_reset).toLocaleDateString()}</p>
-                  </div>
-                </div>
+                {dreams.length === 0 ? (
+                  <p className="text-muted-foreground">
+                    No dreams recorded yet. Text your dreams to our number to start your journal.
+                  </p>
+                ) : (
+                  dreams.map((dream) => (
+                    <div key={dream.id} className="border rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(dream.dream_date).toLocaleDateString()}
+                      </p>
+                      <p className="mt-2">{dream.content}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Premium Section */}
+          {/* Reality Checks Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Premium Membership
+                <Bell className="h-5 w-5" />
+                Reality Checks
               </CardTitle>
-              <CardDescription>Access unlimited chat credits and exclusive features</CardDescription>
+              <CardDescription>
+                You'll receive reality check prompts every {profile?.reality_check_interval} minutes
+                between {profile?.reality_check_start_time} and {profile?.reality_check_end_time}
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              {profile?.is_premium ? (
-                <div className="bg-green-50 text-green-700 p-4 rounded-lg">
-                  <p className="font-medium">Active Premium Member</p>
-                  <p className="text-sm">You have access to all premium features</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Upgrade to premium for unlimited chat credits and exclusive features
-                  </p>
-                  <Button variant="outline" className="w-full">
-                    Upgrade to Premium ($29/month)
-                  </Button>
-                </div>
-              )}
-            </CardContent>
           </Card>
 
           <div className="flex gap-4">
             <Button onClick={handleUpdate} className="flex-1">
               Save Changes
-            </Button>
-            <Button onClick={handleLogout} variant="outline" className="flex-1">
-              Log Out
             </Button>
           </div>
         </div>
