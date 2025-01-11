@@ -22,13 +22,11 @@ interface RegistrationData {
 export function useRegistrationSubmit() {
   const { toast } = useToast();
 
-  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, pregnancyStatus: string) => {
+  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, loginCode: string) => {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
-      const welcomeMessage = pregnancyStatus === 'expecting' 
-        ? `Hello ${firstName}! I'm Mother Athena. Each day I'll text you with helpful information to help you grow a healthy baby. You can text me 24/7 with any pregnancy related questions you might have. Remember to always verify any information with a healthcare professional and seek help from a medical professional if you're ever in distress. Do you have any questions?`
-        : `Hello ${firstName}! I'm Mother Athena. Each day I'll text you with helpful fertility information. You can text me 24/7 with any fertility related questions you might have. Remember to always verify any information with a healthcare professional and seek help from a medical professional if you're ever in distress. Do you have any questions?`;
+      const welcomeMessage = `Welcome to Ducil, ${firstName}! Your login code is ${loginCode}. You can use this code to access your dashboard. Your free trial will last for 7 days. Text RESET to get a new code if needed.`;
 
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
@@ -88,28 +86,6 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Check for existing profile
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('phone_number')
-        .eq('phone_number', phone)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Error checking existing profile:', fetchError);
-        throw fetchError;
-      }
-
-      if (existingProfile) {
-        toast({
-          variant: "destructive",
-          title: "Phone number already registered",
-          description: "This phone number is already registered. Please use a different phone number or log in to your existing account.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
       // Generate a login code using the database function
       const { data: loginCodeData, error: loginCodeError } = await supabase
         .rpc('generate_alphanumeric_code', { length: 6 });
@@ -119,7 +95,7 @@ export function useRegistrationSubmit() {
         throw loginCodeError;
       }
 
-      // Create new profile with the generated login code and additional fields
+      // Create new profile
       const { error: insertError } = await supabase
         .from('profiles')
         .insert({
@@ -135,7 +111,8 @@ export function useRegistrationSubmit() {
           preferred_notification_time: preferredTime,
           pregnancy_status: pregnancyStatus,
           reality_check_start_time: wakeTime,
-          reality_check_end_time: sleepTime
+          reality_check_end_time: sleepTime,
+          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         });
 
       if (insertError) {
@@ -143,15 +120,15 @@ export function useRegistrationSubmit() {
         throw insertError;
       }
 
-      // Attempt to send welcome message but don't block on failure
-      const welcomeResult = await sendWelcomeMessage(phone, firstName, pregnancyStatus);
+      // Send welcome message with login code
+      const welcomeResult = await sendWelcomeMessage(phone, firstName, loginCodeData);
       if (!welcomeResult.success) {
         console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
       }
 
       toast({
-        title: "Welcome to Mother Athena!",
-        description: "We're excited to be part of your journey.",
+        title: "Welcome to Ducil!",
+        description: "Check your phone for your login code.",
       });
       
       setIsSubmitted(true);
