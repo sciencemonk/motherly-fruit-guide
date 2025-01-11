@@ -5,7 +5,6 @@ import Footer from "@/components/Footer"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { HeroSection } from "@/components/landing/HeroSection"
 import { FeaturesSection } from "@/components/landing/FeaturesSection"
-import { ScienceSection } from "@/components/landing/ScienceSection"
 import { AboutSection } from "@/components/landing/AboutSection"
 import { ContactSection } from "@/components/landing/ContactSection"
 
@@ -18,7 +17,6 @@ const Index = () => {
       
       <HeroSection onStartTrial={() => setShowRegistration(true)} />
       <FeaturesSection />
-      <ScienceSection />
       <AboutSection />
       <ContactSection />
 

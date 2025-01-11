@@ -37,9 +37,26 @@ export const FeaturesSection = () => {
   return (
     <section id="features" className="py-24 bg-cream">
       <div className="container px-4 md:px-6">
+        <div className="text-center mb-16 max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-sage-800 mb-6">
+            Why Lucid Dreaming Matters
+          </h2>
+          <p className="text-lg text-sage-600 mb-8 leading-relaxed">
+            Lucid dreaming is more than just an fascinating phenomenon—it's a gateway to exploring the depths of human consciousness. 
+            By becoming aware within your dreams, you gain the extraordinary ability to explore the vast landscape of your mind from within. 
+            This unique state of consciousness allows you to directly experience and interact with your subconscious mind, offering 
+            unprecedented opportunities for personal growth, creativity enhancement, and deep self-discovery.
+          </p>
+          <p className="text-lg text-sage-600 leading-relaxed">
+            Whether you're seeking to overcome nightmares, enhance problem-solving abilities, or simply curious about the nature of 
+            consciousness itself, lucid dreaming provides a powerful platform for exploration. It's a natural, safe way to expand 
+            your awareness and understand the remarkable capabilities of your mind.
+          </p>
+        </div>
+        
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-sage-800 mb-4">
-            The Ducil Framework
+            Features
           </h2>
           <p className="text-lg text-sage-600 max-w-2xl mx-auto">
             Our comprehensive approach combines ancient wisdom with modern technology to help you achieve lucidity
