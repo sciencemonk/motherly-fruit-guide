@@ -31,7 +31,7 @@ const Navbar = () => {
         onClick={(e) => scrollToSection(e, 'features')} 
         className="text-sage-700 hover:text-sage-900"
       >
-        Features
+        Framework
       </a>
       <a 
         href="#science" 
@@ -57,11 +57,11 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2">
             <img 
               src="/lovable-uploads/083f2b6d-1d79-4672-9c90-f99eb0fffdcf.png" 
-              alt="Mother Athena Icon" 
+              alt="Ducil Icon" 
               className="h-8 w-8 rounded-full object-cover"
             />
             <span className="text-xl font-medium text-sage-800" style={{ fontFamily: 'Futura, sans-serif' }}>
-              Mother Athena
+              Ducil
             </span>
           </Link>
         </div>
@@ -84,7 +84,7 @@ const Navbar = () => {
                     onClick={(e) => scrollToSection(e, 'features')}
                     className="w-full"
                   >
-                    Features
+                    Framework
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

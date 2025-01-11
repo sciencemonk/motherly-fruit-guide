@@ -10,7 +10,7 @@ export const HeroSection = ({ onStartTrial }: HeroSectionProps) => {
     <div 
       className="relative min-h-[90vh] flex items-center mt-16"
       style={{
-        backgroundImage: 'url("/lovable-uploads/03089c7b-a507-445e-84d6-a90b874f6a80.png")',
+        backgroundImage: 'url("/lovable-uploads/776c3baf-06f6-45af-b3c7-91ed7804bd25.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }}
