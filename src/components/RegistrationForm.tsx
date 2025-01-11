@@ -36,6 +36,15 @@ export function RegistrationForm() {
       wakeTime,
       sleepTime,
       smsConsent,
+      // Add default values for required fields
+      dueDate: new Date(),
+      lastPeriod: undefined,
+      city: "",
+      state: "",
+      interests: "",
+      lifestyle: "",
+      preferredTime: "09:00",
+      pregnancyStatus: "expecting",
       setIsLoading,
       setIsSubmitted
     });
