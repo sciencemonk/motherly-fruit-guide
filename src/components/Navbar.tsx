@@ -56,9 +56,9 @@ const Navbar = () => {
         <div className="flex flex-1 items-center">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="/lovable-uploads/083f2b6d-1d79-4672-9c90-f99eb0fffdcf.png" 
-              alt="Ducil Icon" 
-              className="h-8 w-8 rounded-full object-cover"
+              src="/lovable-uploads/063703bb-798d-46e2-a020-062b7e4eb22c.png" 
+              alt="Ducil Brain Icon" 
+              className="h-8 w-8"
             />
             <span className="text-xl font-medium text-sage-800" style={{ fontFamily: 'Futura, sans-serif' }}>
               Ducil

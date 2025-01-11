@@ -1,4 +1,4 @@
-import { Heart, Baby } from "lucide-react"
+import { Brain, Sparkles } from "lucide-react"
 
 export const AboutSection = () => {
   return (
@@ -12,28 +12,30 @@ export const AboutSection = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               <div className="flex flex-col items-center text-center p-8 bg-sage-50/50 rounded-xl transition-all duration-300 hover:shadow-md">
-                <Heart className="w-12 h-12 text-sage-600 mb-6" />
+                <Brain className="w-12 h-12 text-sage-600 mb-6" />
                 <p className="text-sage-700 leading-relaxed">
-                  Mother Athena was born from a personal journey. Our founder, an engineer, and his wife were expecting 
-                  their first child when they realized the need for better pregnancy support.
+                  Ducil was born from a neuroscientist's fascination with consciousness and the untapped potential 
+                  of the dreaming mind. Our founder's research into the nature of reality and consciousness led to 
+                  groundbreaking insights about lucid dreaming.
                 </p>
               </div>
               
               <div className="flex flex-col items-center text-center p-8 bg-sage-50/50 rounded-xl transition-all duration-300 hover:shadow-md">
-                <Heart className="w-12 h-12 text-peach-400 mb-6" />
+                <Sparkles className="w-12 h-12 text-sage-600 mb-6" />
                 <p className="text-sage-700 leading-relaxed">
-                  Combining their technical expertise with their firsthand experience of pregnancy, they created Mother Athena 
-                  to ensure that all expecting parents have access to reliable information and support whenever they need it.
+                  By combining scientific rigor with practical techniques and modern technology, we've created a 
+                  platform that makes lucid dreaming accessible to everyone, opening new frontiers in consciousness 
+                  exploration.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col items-center text-center p-8 bg-cream/50 rounded-xl transition-all duration-300 hover:shadow-md">
-              <Baby className="w-12 h-12 text-sage-500 mb-6" />
+              <Brain className="w-12 h-12 text-sage-500 mb-6" />
               <p className="text-sage-700 leading-relaxed max-w-2xl">
-                Today, Mother Athena continues to grow and evolve, guided by feedback from our community of parents 
-                and healthcare professionals. We're committed to providing evidence-based guidance and emotional support 
-                throughout every step of the pregnancy journey.
+                Today, Ducil continues to evolve through ongoing research and user feedback. We're committed to 
+                advancing our understanding of consciousness while helping people unlock their mind's potential 
+                through lucid dreaming. Join us in exploring the frontiers of human consciousness.
               </p>
             </div>
           </div>
