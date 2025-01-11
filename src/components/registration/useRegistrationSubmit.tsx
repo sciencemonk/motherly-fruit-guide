@@ -13,6 +13,8 @@ interface RegistrationData {
   preferredTime: string;
   smsConsent: boolean;
   pregnancyStatus: string;
+  wakeTime: string;
+  sleepTime: string;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
 }
@@ -60,6 +62,8 @@ export function useRegistrationSubmit() {
     preferredTime,
     smsConsent,
     pregnancyStatus,
+    wakeTime,
+    sleepTime,
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
@@ -129,7 +133,9 @@ export function useRegistrationSubmit() {
           interests,
           lifestyle,
           preferred_notification_time: preferredTime,
-          pregnancy_status: pregnancyStatus
+          pregnancy_status: pregnancyStatus,
+          reality_check_start_time: wakeTime,
+          reality_check_end_time: sleepTime
         });
 
       if (insertError) {

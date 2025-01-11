@@ -10,6 +10,8 @@ export interface RegistrationData {
   preferredTime: string;
   smsConsent: boolean;
   pregnancyStatus: string;
+  wakeTime: string;
+  sleepTime: string;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
 }
