@@ -25,7 +25,7 @@ export function RegistrationForm() {
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 4;
+  const totalSteps = 3; // Updated from 4 to 3 since we removed the framework step
 
   const { handleSubmit } = useRegistrationSubmit();
 

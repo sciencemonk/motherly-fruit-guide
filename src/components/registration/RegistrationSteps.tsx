@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { TimePreferenceStep } from "./steps/TimePreferenceStep";
-import { FrameworkStep } from "./steps/FrameworkStep";
 import { FinalStep } from "./steps/FinalStep";
 import { ProgressIndicator } from "./ProgressIndicator";
 
@@ -69,14 +68,6 @@ export function RegistrationSteps({
         )}
 
         {currentStep === 2 && (
-          <FrameworkStep
-            isLoading={isLoading}
-            onBack={onBack}
-            onNext={onNext}
-          />
-        )}
-
-        {currentStep === 3 && (
           <FinalStep
             smsConsent={formData.smsConsent}
             setSmsConsent={setters.setSmsConsent}
