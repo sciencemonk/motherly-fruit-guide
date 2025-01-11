@@ -1,4 +1,4 @@
-import { Brain, Moon, Check, Sparkles, Meditation, BookOpen } from "lucide-react"
+import { Brain, Moon, Check, Sparkles, Lotus, BookOpen } from "lucide-react"
 
 export const FeaturesSection = () => {
   const features = [
@@ -13,7 +13,7 @@ export const FeaturesSection = () => {
       description: "Regular reminders to build dream awareness throughout the day"
     },
     {
-      icon: <Meditation className="w-6 h-6 text-sage-500" />,
+      icon: <Lotus className="w-6 h-6 text-sage-500" />,
       title: "Pre-sleep Meditation",
       description: "Guided sessions to enhance dream recall and lucidity"
     },
