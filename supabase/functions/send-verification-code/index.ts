@@ -47,12 +47,16 @@ serve(async (req) => {
     expiresAt.setMinutes(expiresAt.getMinutes() + 10)
 
     // Initialize Twilio client
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
+    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
     
-    if (!accountSid || !authToken || !twilioNumber) {
-      console.error('Missing Twilio configuration')
+    if (!accountSid || !authToken || !messagingServiceSid) {
+      console.error('Missing Twilio configuration:', {
+        hasAccountSid: !!accountSid,
+        hasAuthToken: !!authToken,
+        hasMessagingServiceSid: !!messagingServiceSid
+      })
       return new Response(
         JSON.stringify({ error: 'Server configuration error' }), 
         { 
@@ -95,7 +99,7 @@ serve(async (req) => {
       await client.messages.create({
         body: `Your Mother Athena verification code is: ${code}`,
         to: phone_number,
-        from: twilioNumber,
+        messagingServiceSid: messagingServiceSid,
       })
       
       console.log('SMS sent successfully')
