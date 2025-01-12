@@ -49,21 +49,21 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       // First, verify if the phone and login code combination exists
-      const { data: profiles, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('phone_number', phone)
         .eq('login_code', loginCode)
         .maybeSingle();
 
-      console.log("Profile lookup result:", profiles);
+      console.log("Profile lookup result:", profile);
 
       if (profileError) {
         console.error('Profile lookup error:', profileError);
         throw new Error("Failed to verify credentials");
       }
 
-      if (!profiles) {
+      if (!profile) {
         toast({
           variant: "destructive",
           title: "Invalid Credentials",
@@ -79,39 +79,21 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         password: loginCode,
       });
 
+      console.log("Sign in result:", signInData);
+
       if (signInError) {
-        // If user doesn't exist in auth, create one
-        if (signInError.message.includes("Invalid login credentials")) {
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: `${phone.replace(/\+/g, '')}@morpheus.app`,
-            password: loginCode,
-            options: {
-              data: {
-                phone_number: phone,
-              },
-            },
-          });
+        console.error('Sign in error:', signInError);
+        throw signInError;
+      }
 
-          if (signUpError) {
-            throw signUpError;
-          }
-
-          if (signUpData.session) {
-            onClose();
-            navigate("/dashboard");
-          }
-        } else {
-          throw signInError;
-        }
-      } else if (signInData.session) {
+      if (signInData.session) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome to Morpheus!",
+        });
         onClose();
         navigate("/dashboard");
       }
-
-      toast({
-        title: "Login Successful",
-        description: "Welcome to Morpheus!",
-      });
 
     } catch (error: any) {
       console.error("Login error:", error);
@@ -127,10 +109,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]" aria-describedby="login-form-description">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Login to Morpheus</DialogTitle>
-          <DialogDescription id="login-form-description">
+          <DialogDescription>
             Enter your phone number and login code to access your dashboard.
           </DialogDescription>
         </DialogHeader>
