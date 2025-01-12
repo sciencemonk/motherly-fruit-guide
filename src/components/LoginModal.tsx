@@ -48,19 +48,19 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      // Format phone number consistently by removing the '+' symbol and any non-digit characters
+      // Format phone number consistently by removing all non-digit characters
       const formattedPhone = phone.replace(/\D/g, '');
       console.log("Attempting login with formatted phone:", formattedPhone);
 
       // First, verify if the phone and login code combination exists
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError, status } = await supabase
         .from('profiles')
         .select('*')
         .eq('phone_number', formattedPhone)
         .eq('login_code', loginCode)
         .maybeSingle();
 
-      console.log("Profile lookup result:", profile);
+      console.log("Profile lookup response:", { profile, error: profileError, status });
 
       if (profileError) {
         console.error('Profile lookup error:', profileError);
@@ -68,6 +68,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       if (!profile) {
+        console.log("No profile found for phone:", formattedPhone, "and code:", loginCode);
         toast({
           variant: "destructive",
           title: "Invalid Credentials",
