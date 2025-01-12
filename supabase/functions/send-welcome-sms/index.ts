@@ -28,24 +28,14 @@ serve(async (req) => {
       throw new Error('Missing required fields: to and message')
     }
 
-    // Get Twilio credentials - using A2P account for better deliverability
-    const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
+    // Get Twilio credentials
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
+    const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID') || 'MG1fa945c66e3013f6a9b3ad77bf8a05e4'
 
-    if (!accountSid || !authToken || !messagingServiceSid) {
-      console.error('Missing Twilio credentials:', {
-        hasAccountSid: !!accountSid,
-        hasAuthToken: !!authToken,
-        hasMessagingServiceSid: !!messagingServiceSid
-      })
+    if (!accountSid || !authToken) {
+      console.error('Missing Twilio credentials')
       throw new Error('Missing Twilio credentials')
-    }
-
-    // Validate Account SID format
-    if (!accountSid.startsWith('AC')) {
-      console.error('Invalid Account SID format:', accountSid)
-      throw new Error('Invalid Twilio Account SID format - must start with AC')
     }
 
     console.log('Initializing Twilio client...')
@@ -58,7 +48,7 @@ serve(async (req) => {
     console.log('Formatted phone number:', e164Phone)
 
     // Send the message using Messaging Service SID
-    console.log('Attempting to send SMS using Messaging Service SID:', messagingServiceSid)
+    console.log('Attempting to send SMS...')
     const twilioMessage = await client.messages.create({
       body: message,
       to: e164Phone,

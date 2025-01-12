@@ -14,6 +14,32 @@ interface RegistrationData {
 export function useRegistrationSubmit() {
   const { toast } = useToast();
 
+  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, loginCode: string) => {
+    try {
+      console.log('Sending welcome message to:', phoneNumber);
+      
+      const welcomeMessage = `Welcome to Morpheus, ${firstName}! Your login code is ${loginCode}. You can use this code to access your dashboard. Your free trial will last for 7 days. Text RESET to get a new code if needed.`;
+
+      const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
+        body: {
+          to: phoneNumber,
+          message: welcomeMessage
+        }
+      });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        return { success: false, error };
+      }
+
+      console.log('Welcome message response:', data);
+      return { success: true, data };
+    } catch (error) {
+      console.error("Error sending welcome message:", error);
+      return { success: false, error };
+    }
+  };
+
   const handleSubmit = async ({
     firstName,
     phone,
@@ -44,24 +70,20 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Generate a 6-digit numeric code
-      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Format phone number by removing non-digit characters and ensuring + prefix
-      const formattedPhone = phone.startsWith('+') ? phone : `+${phone.replace(/\D/g, '')}`;
-      console.log('Formatted phone number:', formattedPhone);
-
-      // Check for existing profile
+      // Check if profile exists using maybeSingle() instead of single()
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('phone_number', formattedPhone)
+        .eq('phone_number', phone)
         .maybeSingle();
 
       if (profileError) {
         console.error('Error checking profile:', profileError);
         throw profileError;
       }
+
+      // Generate a 6-digit numeric code
+      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
 
       if (existingProfile) {
         // Update existing profile
@@ -74,7 +96,7 @@ export function useRegistrationSubmit() {
             reality_check_end_time: sleepTime,
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           })
-          .eq('phone_number', formattedPhone);
+          .eq('phone_number', phone);
 
         if (updateError) {
           console.error('Error updating profile:', updateError);
@@ -85,7 +107,7 @@ export function useRegistrationSubmit() {
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
-            phone_number: formattedPhone,
+            phone_number: phone,
             first_name: firstName,
             login_code: loginCode,
             reality_check_start_time: wakeTime,
@@ -94,28 +116,15 @@ export function useRegistrationSubmit() {
           });
 
         if (insertError) {
-          console.error('Error creating profile:', insertError);
+          console.error('Error storing profile:', insertError);
           throw insertError;
         }
       }
 
-      // Send welcome message using handle-sms endpoint
-      const welcomeResponse = await fetch('https://tjeukbooftbxulkgqljg.supabase.co/functions/v1/handle-sms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          From: formattedPhone,
-          Body: 'Hello'
-        }).toString()
-      });
-
-      if (!welcomeResponse.ok) {
-        console.error('Welcome message failed:', await welcomeResponse.text());
-        throw new Error('Failed to send welcome message');
-      } else {
-        console.log('Welcome message sent successfully');
+      // Send welcome message with login code
+      const welcomeResult = await sendWelcomeMessage(phone, firstName, loginCode);
+      if (!welcomeResult.success) {
+        console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
       }
 
       toast({
@@ -124,12 +133,12 @@ export function useRegistrationSubmit() {
       });
       
       setIsSubmitted(true);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
       toast({
         variant: "destructive",
         title: "Registration error",
-        description: error.message || "There was a problem with your registration. Please try again.",
+        description: "There was a problem with your registration. Please try again.",
       });
     } finally {
       setIsLoading(false);

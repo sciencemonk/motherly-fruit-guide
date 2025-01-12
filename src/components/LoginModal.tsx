@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -21,68 +21,82 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        onClose();
+        navigate("/dashboard");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, onClose]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (!phone || !loginCode) {
-        toast({
-          variant: "destructive",
-          title: "Missing Information",
-          description: "Please enter both your phone number and login code.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Format phone number consistently by removing all non-digit characters
-      const formattedPhone = phone.replace(/\D/g, '');
-      console.log("Attempting login with formatted phone:", formattedPhone);
-
-      // Verify if the phone and login code combination exists
+      // First, verify if the phone and login code combination exists
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('phone_number', formattedPhone)
-        .eq('login_code', loginCode)
+        .from("profiles")
+        .select("*")
+        .eq("phone_number", phone)
+        .eq("login_code", loginCode)
         .maybeSingle();
 
-      console.log("Profile lookup response:", { profile, error: profileError });
-
       if (profileError) {
-        console.error('Profile lookup error:', profileError);
-        throw new Error("Failed to verify credentials");
+        throw profileError;
       }
 
       if (!profile) {
-        console.log("No profile found for phone:", formattedPhone, "and code:", loginCode);
         toast({
           variant: "destructive",
-          title: "Invalid Credentials",
-          description: "The phone number or login code you entered is incorrect. Please try again.",
+          title: "Invalid credentials",
+          description: "The phone number or login code you entered is incorrect.",
         });
         setIsLoading(false);
         return;
       }
 
-      // Store the phone number in localStorage for dashboard access
-      localStorage.setItem('userPhoneNumber', formattedPhone);
-      
+      // Sign in with phone number as email (since Supabase requires email format)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: `${phone.replace(/\+/g, '')}@morpheus.app`,
+        password: loginCode,
+      });
+
+      if (signInError) {
+        // If user doesn't exist in auth, create one
+        if (signInError.message.includes("Invalid login credentials")) {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email: `${phone.replace(/\+/g, '')}@morpheus.app`,
+            password: loginCode,
+            options: {
+              data: {
+                phone_number: phone,
+              },
+            },
+          });
+
+          if (signUpError) {
+            throw signUpError;
+          }
+        } else {
+          throw signInError;
+        }
+      }
+
       toast({
-        title: "Login Successful",
+        title: "Login successful",
         description: "Welcome to Morpheus!",
       });
-      
-      onClose();
-      navigate("/dashboard");
 
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        title: "Error",
+        description: error.message || "An error occurred during login.",
       });
     } finally {
       setIsLoading(false);
@@ -102,7 +116,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <PhoneInput
-              id="phone"
               international
               defaultCountry="US"
               value={phone}
@@ -119,7 +132,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               onChange={(e) => setLoginCode(e.target.value)}
               placeholder="Enter your 6-digit code"
               maxLength={6}
-              autoComplete="one-time-code"
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
