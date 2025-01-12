@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 interface LoginModalProps {
   isOpen: boolean
@@ -18,6 +18,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [verificationCode, setVerificationCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const handleVerifyCode = async () => {
     if (!phoneNumber) {
@@ -40,6 +41,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true)
     try {
+      // First verify the login code
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('phone_number')
@@ -58,19 +60,42 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
         return
       }
 
+      // Create a session using phone number authentication
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        phone: phoneNumber,
+        password: verificationCode // Using the verification code as the password
+      })
+
+      if (signInError) {
+        // If sign in fails, try signing up the user
+        const { error: signUpError } = await supabase.auth.signUp({
+          phone: phoneNumber,
+          password: verificationCode,
+          options: {
+            data: {
+              phone_number: phoneNumber
+            }
+          }
+        })
+
+        if (signUpError) throw signUpError
+      }
+
       // Store the phone number in localStorage for dashboard access
       localStorage.setItem('userPhoneNumber', phoneNumber)
+      
       toast({
         title: "Success",
         description: "You have been logged in successfully"
       })
+      
       onClose()
-      window.location.href = '/dashboard'
+      navigate('/dashboard')
     } catch (error) {
-      console.error('Error verifying code:', error)
+      console.error('Error during login:', error)
       toast({
         title: "Error",
-        description: "Failed to verify code. Please try again.",
+        description: "Failed to log in. Please try again.",
         variant: "destructive"
       })
     } finally {
@@ -135,7 +160,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               disabled={isLoading}
               className="w-full"
             >
-              {isLoading ? "Verifying..." : "Log In"}
+              {isLoading ? "Logging in..." : "Log In"}
             </Button>
           </div>
         </div>
