@@ -56,10 +56,10 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   }
 
   const handleVerifyCode = async () => {
-    if (!verificationCode) {
+    if (!verificationCode || verificationCode.length !== 6 || !/^\d+$/.test(verificationCode)) {
       toast({
         title: "Error",
-        description: "Please enter the verification code",
+        description: "Please enter a valid 6-digit code",
         variant: "destructive"
       })
       return
@@ -67,34 +67,37 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('verify-code', {
-        body: { 
-          phone_number: phoneNumber,
-          code: verificationCode
-        }
-      })
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('phone_number')
+        .eq('phone_number', phoneNumber)
+        .eq('login_code', verificationCode)
+        .maybeSingle()
 
-      if (error) throw error
+      if (profileError) throw profileError
 
-      if (data?.token) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          phone: phoneNumber,
-          password: data.token
-        })
-
-        if (signInError) throw signInError
-
+      if (!profile) {
         toast({
-          title: "Success",
-          description: "You have been logged in successfully"
+          title: "Error",
+          description: "Invalid phone number or verification code",
+          variant: "destructive"
         })
-        onClose()
+        return
       }
+
+      // Store the phone number in localStorage for dashboard access
+      localStorage.setItem('userPhoneNumber', phoneNumber)
+      toast({
+        title: "Success",
+        description: "You have been logged in successfully"
+      })
+      onClose()
+      window.location.href = '/dashboard'
     } catch (error) {
       console.error('Error verifying code:', error)
       toast({
         title: "Error",
-        description: "Invalid verification code. Please try again.",
+        description: "Failed to verify code. Please try again.",
         variant: "destructive"
       })
     } finally {
@@ -139,9 +142,17 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           ) : (
             <div className="grid gap-2">
               <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="Enter 6-digit code"
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '')
+                  if (value.length <= 6) {
+                    setVerificationCode(value)
+                  }
+                }}
                 maxLength={6}
                 disabled={isLoading}
               />

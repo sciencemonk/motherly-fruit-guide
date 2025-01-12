@@ -1,47 +1,36 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import twilio from "npm:twilio"
+import { Twilio } from 'npm:twilio'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: corsHeaders 
-    })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('Starting verification code process')
-    
-    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Parse request body
     const { phone_number } = await req.json()
-    
+
     if (!phone_number) {
-      console.error('No phone number provided')
       return new Response(
-        JSON.stringify({ error: 'Phone number is required' }), 
+        JSON.stringify({ error: 'Phone number is required' }),
         { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
         }
       )
     }
 
-    console.log('Generating verification code for:', phone_number)
-
-    // Generate verification code
+    // Generate a random 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString()
     const expiresAt = new Date()
     expiresAt.setMinutes(expiresAt.getMinutes() + 10)
@@ -60,44 +49,47 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Server configuration error' }), 
         { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
         }
       )
     }
 
-    // Store the verification code first
+    const client = new Twilio(accountSid, authToken)
+
     try {
-      const { error: dbError } = await supabaseClient
+      // Store the verification code
+      const { error: insertError } = await supabaseClient
         .from('verification_codes')
         .insert({
           phone_number,
           code,
-          expires_at: expiresAt.toISOString(),
+          expires_at: expiresAt.toISOString()
         })
 
-      if (dbError) {
-        console.error('Database error:', dbError)
-        throw dbError
-      }
-      
-      console.log('Verification code stored successfully')
-    } catch (dbError) {
-      console.error('Error storing verification code:', dbError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to store verification code' }), 
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
+      if (insertError) throw insertError
 
-    // Send SMS using Twilio
-    try {
-      const client = twilio(accountSid, authToken)
+      // Update the profile's login code
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .update({ login_code: code })
+        .eq('phone_number', phone_number)
+
+      if (updateError) {
+        // If no profile exists, create one
+        const { error: createError } = await supabaseClient
+          .from('profiles')
+          .insert({
+            phone_number,
+            login_code: code
+          })
+        
+        if (createError) throw createError
+      }
+
+      // Send SMS
       await client.messages.create({
-        body: `Your Mother Athena verification code is: ${code}`,
+        body: `Your Ducil verification code is: ${code}`,
         to: phone_number,
         messagingServiceSid: messagingServiceSid,
       })
@@ -105,35 +97,29 @@ serve(async (req) => {
       console.log('SMS sent successfully')
 
       return new Response(
-        JSON.stringify({ message: 'Verification code sent successfully' }),
+        JSON.stringify({ success: true }), 
         { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
         }
       )
-    } catch (twilioError) {
-      console.error('Twilio error:', twilioError)
+    } catch (error) {
+      console.error('Error:', error)
       return new Response(
-        JSON.stringify({ 
-          error: 'Failed to send SMS',
-          details: twilioError.message 
-        }),
+        JSON.stringify({ error: 'Failed to send SMS', details: error.message }), 
         { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
         }
       )
     }
   } catch (error) {
-    console.error('Unexpected error:', error)
+    console.error('Error:', error)
     return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        details: error.message 
-      }),
+      JSON.stringify({ error: 'Internal server error', details: error.message }), 
       { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
       }
     )
   }
