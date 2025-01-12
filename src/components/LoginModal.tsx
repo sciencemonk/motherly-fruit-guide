@@ -48,19 +48,18 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       // First, verify if the phone and login code combination exists
-      const { data: profile, error: profileError } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("phone_number", phone)
-        .eq("login_code", loginCode)
-        .maybeSingle();
+        .eq("login_code", loginCode);
 
       if (profileError) {
         console.error("Profile lookup error:", profileError);
         throw new Error("Failed to verify credentials");
       }
 
-      if (!profile) {
+      if (!profiles || profiles.length === 0) {
         toast({
           variant: "destructive",
           title: "Invalid Credentials",
@@ -116,10 +115,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" aria-describedby="login-form-description">
         <DialogHeader>
           <DialogTitle>Login to Morpheus</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="login-form-description">
             Enter your phone number and login code to access your dashboard.
           </DialogDescription>
         </DialogHeader>
