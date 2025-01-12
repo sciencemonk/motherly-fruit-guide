@@ -2,7 +2,7 @@ import { Brain } from "lucide-react"
 
 export const AboutSection = () => {
   return (
-    <section id="about-us" className="py-24 bg-gradient-to-br from-sage-50 via-[#e0f2f1] to-sage-100">
+    <section id="about-us" className="py-24 bg-white">
       <div className="container px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-xl">

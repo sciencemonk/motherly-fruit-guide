@@ -2,7 +2,7 @@ import { ContactForm } from "@/components/ContactForm"
 
 export const ContactSection = () => {
   return (
-    <section id="contact" className="py-24 bg-cream">
+    <section id="contact" className="py-24 bg-white">
       <div className="container px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
