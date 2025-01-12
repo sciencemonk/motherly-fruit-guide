@@ -25,7 +25,7 @@ export function RegistrationForm() {
   } = useRegistrationState();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 3; // Updated from 4 to 3 since we removed the framework step
+  const totalSteps = 3;
 
   const { handleSubmit } = useRegistrationSubmit();
 
@@ -36,15 +36,6 @@ export function RegistrationForm() {
       wakeTime,
       sleepTime,
       smsConsent,
-      // Add default values for required fields
-      dueDate: new Date(),
-      lastPeriod: undefined,
-      city: "",
-      state: "",
-      interests: "",
-      lifestyle: "",
-      preferredTime: "09:00",
-      pregnancyStatus: "expecting",
       setIsLoading,
       setIsSubmitted
     });
