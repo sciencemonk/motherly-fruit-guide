@@ -7,7 +7,7 @@ interface AboutSectionProps {
 
 export const AboutSection = ({ onStartTrial }: AboutSectionProps) => {
   return (
-    <section className="py-16 bg-white">
+    <section className="py-20 bg-white">
       <div className="container px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="bg-sage-50/50 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-xl text-center">

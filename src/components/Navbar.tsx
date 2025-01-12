@@ -31,21 +31,21 @@ const Navbar = () => {
         onClick={(e) => scrollToSection(e, 'features')} 
         className="text-sage-700 hover:text-sage-900"
       >
-        Framework
+        Features
       </a>
       <a 
-        href="#science" 
-        onClick={(e) => scrollToSection(e, 'science')} 
+        href="#method" 
+        onClick={(e) => scrollToSection(e, 'method')} 
         className="text-sage-700 hover:text-sage-900"
       >
-        The Science
+        Our Method
       </a>
       <a 
-        href="#about-us" 
-        onClick={(e) => scrollToSection(e, 'about-us')} 
+        href="#contact" 
+        onClick={(e) => scrollToSection(e, 'contact')} 
         className="text-sage-700 hover:text-sage-900"
       >
-        About Us
+        Contact
       </a>
     </>
   )
@@ -84,25 +84,25 @@ const Navbar = () => {
                     onClick={(e) => scrollToSection(e, 'features')}
                     className="w-full"
                   >
-                    Framework
+                    Features
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a 
-                    href="#science" 
-                    onClick={(e) => scrollToSection(e, 'science')}
+                    href="#method" 
+                    onClick={(e) => scrollToSection(e, 'method')}
                     className="w-full"
                   >
-                    The Science
+                    Our Method
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a 
-                    href="#about-us" 
-                    onClick={(e) => scrollToSection(e, 'about-us')}
+                    href="#contact" 
+                    onClick={(e) => scrollToSection(e, 'contact')}
                     className="w-full"
                   >
-                    About Us
+                    Contact
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

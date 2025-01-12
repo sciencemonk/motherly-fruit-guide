@@ -39,7 +39,7 @@ export const FeaturesSection = () => {
   ]
 
   return (
-    <section id="features" className="py-24 bg-white">
+    <section id="features" className="py-20 bg-white">
       <div className="container px-4 md:px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-sage-800 mb-6">
@@ -70,7 +70,7 @@ export const FeaturesSection = () => {
           ))}
         </div>
 
-        <div className="bg-sage-50 rounded-2xl p-8 md:p-12 max-w-4xl mx-auto mb-24">
+        <div className="bg-sage-50 rounded-2xl p-8 md:p-12 max-w-4xl mx-auto my-20">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
@@ -97,8 +97,8 @@ export const FeaturesSection = () => {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <h2 className="text-4xl font-bold text-sage-800 mb-8">
+        <div id="method" className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-sage-800 mb-8 text-center">
             The Morpheus Method
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
