@@ -59,7 +59,7 @@ export function WelcomeMessage({ firstName }: WelcomeMessageProps) {
 
   return (
     <div className="text-center text-sage-600 p-4 bg-sage-50 rounded-lg mb-6">
-      <p className="text-xl mb-8">📱 Hello {firstName}, check your phone for a welcome message from Ducil!</p>
+      <p className="text-xl mb-8">📱 Hello {firstName}, check your phone for a welcome message from Morpheus!</p>
       
       <div className="max-w-sm mx-auto space-y-6">
         <div>

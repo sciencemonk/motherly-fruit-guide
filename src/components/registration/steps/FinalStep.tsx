@@ -21,7 +21,7 @@ export function FinalStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold text-sage-800 mb-2">Ready to Begin Your Journey</h2>
-        <p className="text-sage-600 mb-6">Here's how Ducil will help you master lucid dreaming:</p>
+        <p className="text-sage-600 mb-6">Here's how Morpheus will help you master lucid dreaming:</p>
       </div>
 
       <div className="space-y-6">
@@ -68,7 +68,7 @@ export function FinalStep({
           htmlFor="sms-consent"
           className="text-sm text-sage-700"
         >
-          I agree to receive SMS messages from Ducil for dream journaling and reality checks. Message frequency varies, message and data rates may apply. Reply STOP to cancel at any time.
+          I agree to receive SMS messages from Morpheus for dream journaling and reality checks. Message frequency varies, message and data rates may apply. Reply STOP to cancel at any time.
         </label>
       </div>
 
