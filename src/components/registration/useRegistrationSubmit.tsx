@@ -51,7 +51,7 @@ export function useRegistrationSubmit() {
       const formattedPhone = phone.startsWith('+') ? phone : `+${phone.replace(/\D/g, '')}`;
       console.log('Formatted phone number:', formattedPhone);
 
-      // Try to update existing profile first
+      // Check for existing profile
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -99,26 +99,23 @@ export function useRegistrationSubmit() {
         }
       }
 
-      // Send first message using handle-sms endpoint
-      try {
-        const response = await fetch('https://tjeukbooftbxulkgqljg.supabase.co/functions/v1/handle-sms', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            From: formattedPhone,
-            Body: 'Hello'
-          }).toString()
-        });
+      // Send welcome message using handle-sms endpoint
+      const welcomeResponse = await fetch('https://tjeukbooftbxulkgqljg.supabase.co/functions/v1/handle-sms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          From: formattedPhone,
+          Body: 'Hello'
+        }).toString()
+      });
 
-        if (!response.ok) {
-          console.error('Welcome message failed:', await response.text());
-        } else {
-          console.log('Welcome message sent successfully');
-        }
-      } catch (error) {
-        console.error('Error sending welcome message:', error);
+      if (!welcomeResponse.ok) {
+        console.error('Welcome message failed:', await welcomeResponse.text());
+        throw new Error('Failed to send welcome message');
+      } else {
+        console.log('Welcome message sent successfully');
       }
 
       toast({
