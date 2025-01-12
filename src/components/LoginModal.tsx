@@ -48,11 +48,15 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
+      // Format phone number consistently by removing the '+' symbol
+      const formattedPhone = phone.replace(/\+/g, '');
+      console.log("Formatted phone:", formattedPhone);
+
       // First, verify if the phone and login code combination exists
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('phone_number', phone)
+        .eq('phone_number', phone) // Keep original phone format for profile lookup
         .eq('login_code', loginCode)
         .maybeSingle();
 
@@ -73,9 +77,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      // Sign in with phone number as email
+      // Sign in with formatted phone number as email
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${phone.replace(/\+/g, '')}@morpheus.app`,
+        email: `${formattedPhone}@morpheus.app`,
         password: loginCode,
       });
 
