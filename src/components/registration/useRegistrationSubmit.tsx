@@ -86,12 +86,17 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Check if profile exists
-      const { data: existingProfile } = await supabase
+      // Check if profile exists using maybeSingle() instead of single()
+      const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('phone_number', phone)
-        .single();
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error checking profile:', profileError);
+        throw profileError;
+      }
 
       // Generate a login code using the database function
       const { data: loginCodeData, error: loginCodeError } = await supabase
