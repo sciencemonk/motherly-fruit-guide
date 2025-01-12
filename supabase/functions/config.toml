@@ -1,4 +1,4 @@
 project_id = "tjeukbooftbxulkgqljg"
 
-[send-daily-message]
+[send-verification-code]
 verify_jwt = false
