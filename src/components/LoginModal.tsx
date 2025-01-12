@@ -24,13 +24,17 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Morpheus!",
+        });
         onClose();
         navigate("/dashboard");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, onClose]);
+  }, [navigate, onClose, toast]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,11 +96,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           throw signInError;
         }
       }
-
-      toast({
-        title: "Login successful",
-        description: "Welcome to Morpheus!",
-      });
 
     } catch (error: any) {
       console.error("Login error:", error);
