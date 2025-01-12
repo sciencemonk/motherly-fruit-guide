@@ -37,6 +37,16 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setIsLoading(true);
 
     try {
+      if (!phone || !loginCode) {
+        toast({
+          variant: "destructive",
+          title: "Missing Information",
+          description: "Please enter both your phone number and login code.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       // First, verify if the phone and login code combination exists
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -46,20 +56,21 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         .maybeSingle();
 
       if (profileError) {
-        throw profileError;
+        console.error("Profile lookup error:", profileError);
+        throw new Error("Failed to verify credentials");
       }
 
       if (!profile) {
         toast({
           variant: "destructive",
-          title: "Invalid credentials",
-          description: "The phone number or login code you entered is incorrect.",
+          title: "Invalid Credentials",
+          description: "The phone number or login code you entered is incorrect. Please try again.",
         });
         setIsLoading(false);
         return;
       }
 
-      // Sign in with phone number as email (since Supabase requires email format)
+      // Sign in with phone number as email
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: `${phone.replace(/\+/g, '')}@morpheus.app`,
         password: loginCode,
@@ -87,7 +98,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       toast({
-        title: "Login successful",
+        title: "Login Successful",
         description: "Welcome to Morpheus!",
       });
 
@@ -95,8 +106,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message || "An error occurred during login.",
+        title: "Login Failed",
+        description: error.message || "An unexpected error occurred. Please try again.",
       });
     } finally {
       setIsLoading(false);
