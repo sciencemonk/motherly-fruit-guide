@@ -7,63 +7,64 @@ import { supabase } from "@/integrations/supabase/client"
 import Navbar from "@/components/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Brain, Moon, Bell } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const Dashboard = () => {
   const { toast } = useToast()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<any>(null)
   const [dreams, setDreams] = useState<any[]>([])
   const [firstName, setFirstName] = useState("Test")
-  const [phoneNumber, setPhoneNumber] = useState("+1234567890")
   const [loading, setLoading] = useState(true)
+  const [phoneNumber, setPhoneNumber] = useState("")
 
   useEffect(() => {
-    fetchProfile()
-    fetchDreams()
+    checkSession()
   }, [])
 
-  const fetchProfile = async () => {
+  const checkSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      navigate('/')
+      return
+    }
+    
+    // Get the phone number from localStorage as a fallback
+    const storedPhone = localStorage.getItem('userPhoneNumber')
+    if (storedPhone) {
+      setPhoneNumber(storedPhone)
+      fetchProfile(storedPhone)
+      fetchDreams(storedPhone)
+    }
+  }
+
+  const fetchProfile = async (phone: string) => {
     try {
-      // For development, we'll use a test profile
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('phone_number', phoneNumber)
-        .single()
+        .eq('phone_number', phone)
+        .maybeSingle()
 
       if (error) throw error
 
-      setProfile(data)
-      setFirstName(data?.first_name || 'Test')
+      if (data) {
+        setProfile(data)
+        setFirstName(data?.first_name || 'Test')
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
-      // Create a test profile if none exists
-      const { data, error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          phone_number: phoneNumber,
-          first_name: firstName,
-          login_code: 'TEST123', // Adding the required login_code
-          reality_check_start_time: '08:00:00',
-          reality_check_end_time: '20:00:00',
-          reality_check_interval: 120
-        })
-        .select()
-        .single()
-
-      if (!insertError) {
-        setProfile(data)
-      }
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchDreams = async () => {
+  const fetchDreams = async (phone: string) => {
     try {
       const { data, error } = await supabase
         .from('dreams')
         .select('*')
-        .eq('phone_number', phoneNumber)
+        .eq('phone_number', phone)
         .order('dream_date', { ascending: false })
 
       if (error) throw error

@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import PhoneInput from 'react-phone-number-input'
@@ -19,6 +19,17 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        navigate('/dashboard')
+      }
+    }
+    checkSession()
+  }, [navigate])
 
   const handleVerifyCode = async () => {
     if (!phoneNumber) {
@@ -60,28 +71,22 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
         return
       }
 
-      // Create a session using phone number authentication
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // Sign in the user
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         phone: phoneNumber,
-        password: verificationCode // Using the verification code as the password
+        password: verificationCode
       })
 
       if (signInError) {
-        // If sign in fails, try signing up the user
-        const { error: signUpError } = await supabase.auth.signUp({
-          phone: phoneNumber,
-          password: verificationCode,
-          options: {
-            data: {
-              phone_number: phoneNumber
-            }
-          }
-        })
-
-        if (signUpError) throw signUpError
+        console.error('Sign in error:', signInError)
+        throw signInError
       }
 
-      // Store the phone number in localStorage for dashboard access
+      if (!signInData.session) {
+        throw new Error('No session created')
+      }
+
+      // Store the session
       localStorage.setItem('userPhoneNumber', phoneNumber)
       
       toast({
