@@ -47,7 +47,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               },
             }}
             providers={['google']}
-            redirectTo={`${window.location.origin}/dashboard`}
+            redirectTo="https://motherly-fruit-guide.lovable.app/dashboard"
           />
         </div>
       </DialogContent>

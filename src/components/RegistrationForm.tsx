@@ -102,7 +102,7 @@ export function RegistrationForm() {
             }
           }}
           providers={['google']}
-          redirectTo={window.location.origin}
+          redirectTo="https://motherly-fruit-guide.lovable.app"
         />
       </div>
     );
