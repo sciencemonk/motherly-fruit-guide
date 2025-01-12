@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import { RegistrationForm } from "@/components/RegistrationForm"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
@@ -8,7 +8,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection"
 import { AboutSection } from "@/components/landing/AboutSection"
 import { ContactSection } from "@/components/landing/ContactSection"
 
-const Index = () => {
+const Index: React.FC = () => {
   const [showRegistration, setShowRegistration] = useState(false)
 
   return (
