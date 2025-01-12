@@ -53,7 +53,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         .from('profiles')
         .select('*')
         .eq('phone_number', phone)
-        .eq('login_code', loginCode);
+        .eq('login_code', loginCode)
+        .maybeSingle();
 
       console.log("Profile lookup result:", profiles);
 
@@ -62,7 +63,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         throw new Error("Failed to verify credentials");
       }
 
-      if (!profiles || profiles.length === 0) {
+      if (!profiles) {
         toast({
           variant: "destructive",
           title: "Invalid Credentials",
