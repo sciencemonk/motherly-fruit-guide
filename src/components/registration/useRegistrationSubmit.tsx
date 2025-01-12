@@ -56,9 +56,9 @@ export function useRegistrationSubmit() {
         .from('profiles')
         .select('*')
         .eq('phone_number', formattedPhone)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError) {
         console.error('Error checking profile:', profileError);
         throw profileError;
       }
