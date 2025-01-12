@@ -73,8 +73,9 @@ export function useRegistrationSubmit() {
       // Generate a 6-digit numeric code
       const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
       
-      // Format phone number by removing non-digit characters
-      const formattedPhone = phone.replace(/\D/g, '');
+      // Format phone number by removing non-digit characters and ensuring + prefix
+      const formattedPhone = phone.startsWith('+') ? phone : `+${phone.replace(/\D/g, '')}`;
+      console.log('Formatted phone number:', formattedPhone);
       
       // Check if profile exists
       const { data: existingProfile, error: profileError } = await supabase
@@ -90,7 +91,7 @@ export function useRegistrationSubmit() {
 
       // Create auth user with phone authentication
       const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
-        phone: phone,
+        phone: formattedPhone,
         options: {
           data: {
             first_name: firstName,
@@ -143,7 +144,7 @@ export function useRegistrationSubmit() {
       }
 
       // Send welcome message with login code
-      const welcomeResult = await sendWelcomeMessage(phone, firstName, loginCode);
+      const welcomeResult = await sendWelcomeMessage(formattedPhone, firstName, loginCode);
       if (!welcomeResult.success) {
         console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
       }
