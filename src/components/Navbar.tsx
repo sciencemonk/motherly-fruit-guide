@@ -57,11 +57,11 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2">
             <img 
               src="/lovable-uploads/063703bb-798d-46e2-a020-062b7e4eb22c.png" 
-              alt="Ducil Brain Icon" 
+              alt="Morpheus Brain Icon" 
               className="h-8 w-8"
             />
             <span className="text-xl font-medium text-sage-800" style={{ fontFamily: 'Futura, sans-serif' }}>
-              Ducil
+              Morpheus
             </span>
           </Link>
         </div>

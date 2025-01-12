@@ -49,8 +49,8 @@ export const FeaturesSection = () => {
           </p>
           <p className="text-lg text-sage-600 leading-relaxed">
             Whether you're seeking to overcome nightmares, enhance problem-solving abilities, or simply curious about the nature of 
-            consciousness itself, lucid dreaming provides a powerful platform for exploration. It's a natural, safe way to expand 
-            your awareness and understand the remarkable capabilities of your mind.
+            consciousness itself, lucid dreaming provides a powerful platform for exploration. Through Morpheus, you'll discover a natural, 
+            safe way to expand your awareness and understand the remarkable capabilities of your mind.
           </p>
         </div>
         

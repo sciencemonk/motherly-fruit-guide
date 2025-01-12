@@ -88,7 +88,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Log in to Mother Athena</DialogTitle>
+          <DialogTitle>Log in to Morpheus</DialogTitle>
           <p className="text-sm text-sage-600 mt-2">
             Don't have an account? <Link to="/" onClick={handleClose} className="text-sage-800 hover:underline">Click here</Link> to get started.
           </p>
