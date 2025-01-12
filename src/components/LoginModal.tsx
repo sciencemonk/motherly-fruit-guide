@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -21,18 +21,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session);
-      if (event === 'SIGNED_IN' && session) {
-        onClose();
-        navigate("/dashboard");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate, onClose]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -52,15 +40,15 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       const formattedPhone = phone.replace(/\D/g, '');
       console.log("Attempting login with formatted phone:", formattedPhone);
 
-      // First, verify if the phone and login code combination exists
-      const { data: profile, error: profileError, status } = await supabase
+      // Verify if the phone and login code combination exists
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('phone_number', formattedPhone)
         .eq('login_code', loginCode)
         .maybeSingle();
 
-      console.log("Profile lookup response:", { profile, error: profileError, status });
+      console.log("Profile lookup response:", { profile, error: profileError });
 
       if (profileError) {
         console.error('Profile lookup error:', profileError);
@@ -78,27 +66,16 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      // Sign in with formatted phone number as email
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${formattedPhone}@morpheus.app`,
-        password: loginCode,
+      // Store the phone number in localStorage for dashboard access
+      localStorage.setItem('userPhoneNumber', formattedPhone);
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome to Morpheus!",
       });
-
-      console.log("Sign in result:", signInData);
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw signInError;
-      }
-
-      if (signInData.session) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to Morpheus!",
-        });
-        onClose();
-        navigate("/dashboard");
-      }
+      
+      onClose();
+      navigate("/dashboard");
 
     } catch (error: any) {
       console.error("Login error:", error);
