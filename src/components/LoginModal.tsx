@@ -43,7 +43,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           title: "Missing Information",
           description: "Please enter both your phone number and login code.",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -65,7 +64,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           title: "Invalid Credentials",
           description: "The phone number or login code you entered is incorrect. Please try again.",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -126,6 +124,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <PhoneInput
+              id="phone"
               international
               defaultCountry="US"
               value={phone}
@@ -142,6 +141,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               onChange={(e) => setLoginCode(e.target.value)}
               placeholder="Enter your 6-digit code"
               maxLength={6}
+              autoComplete="one-time-code"
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
