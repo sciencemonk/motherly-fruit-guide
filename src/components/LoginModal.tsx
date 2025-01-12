@@ -70,31 +70,18 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      // Sign in with phone number as email (since Supabase requires email format)
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${phone.replace(/\+/g, '')}@morpheus.app`,
-        password: loginCode,
+      // Sign in with phone number authentication
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        phone,
+        options: {
+          data: {
+            phone_number: phone,
+          }
+        }
       });
 
       if (signInError) {
-        // If user doesn't exist in auth, create one
-        if (signInError.message.includes("Invalid login credentials")) {
-          const { error: signUpError } = await supabase.auth.signUp({
-            email: `${phone.replace(/\+/g, '')}@morpheus.app`,
-            password: loginCode,
-            options: {
-              data: {
-                phone_number: phone,
-              },
-            },
-          });
-
-          if (signUpError) {
-            throw signUpError;
-          }
-        } else {
-          throw signInError;
-        }
+        throw signInError;
       }
 
     } catch (error: any) {
