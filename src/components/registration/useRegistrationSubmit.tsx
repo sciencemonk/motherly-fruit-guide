@@ -89,24 +89,6 @@ export function useRegistrationSubmit() {
         throw profileError;
       }
 
-      // Create auth user with phone authentication
-      const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
-        phone: formattedPhone,
-        options: {
-          data: {
-            first_name: firstName,
-            phone_number: formattedPhone
-          }
-        }
-      });
-
-      if (authError) {
-        console.error('Auth error:', authError);
-        throw authError;
-      }
-
-      console.log('Auth user created:', authData);
-
       if (existingProfile) {
         // Update existing profile
         const { error: updateError } = await supabase
