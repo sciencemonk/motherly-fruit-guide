@@ -17,7 +17,7 @@ const Index = () => {
       
       <HeroSection onStartTrial={() => setShowRegistration(true)} />
       <FeaturesSection />
-      <AboutSection />
+      <AboutSection onStartTrial={() => setShowRegistration(true)} />
       <ContactSection />
 
       <Footer />
