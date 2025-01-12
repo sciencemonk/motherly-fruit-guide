@@ -70,9 +70,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      // If profile exists with matching login code, sign in with phone number
-      const { error: signInError } = await supabase.auth.signInWithOtp({
-        phone,
+      // If profile exists with matching login code, create a session
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        phone: phone,
+        password: loginCode, // Using login code as password for session creation
       });
 
       if (signInError) {
