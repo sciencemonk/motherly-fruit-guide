@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,17 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        onClose();
+        navigate("/dashboard");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, onClose]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,20 +55,21 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           title: "Invalid credentials",
           description: "The phone number or login code you entered is incorrect.",
         });
+        setIsLoading(false);
         return;
       }
 
-      // Create a session using phone number as the ID
+      // Sign in with phone number as email (since Supabase requires email format)
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${phone}@morpheus.app`,
+        email: `${phone.replace(/\+/g, '')}@morpheus.app`,
         password: loginCode,
       });
 
       if (signInError) {
-        // If the user doesn't exist, create one
+        // If user doesn't exist in auth, create one
         if (signInError.message.includes("Invalid login credentials")) {
           const { error: signUpError } = await supabase.auth.signUp({
-            email: `${phone}@morpheus.app`,
+            email: `${phone.replace(/\+/g, '')}@morpheus.app`,
             password: loginCode,
             options: {
               data: {
@@ -76,11 +88,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       toast({
         title: "Login successful",
-        description: "Welcome back to Morpheus!",
+        description: "Welcome to Morpheus!",
       });
 
-      onClose();
-      navigate("/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
