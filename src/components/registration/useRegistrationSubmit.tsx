@@ -14,7 +14,7 @@ interface RegistrationData {
 export function useRegistrationSubmit() {
   const { toast } = useToast();
 
-  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, loginCode: string) => {
+  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, loginCode: number) => {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
@@ -70,8 +70,8 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Generate a 6-digit numeric code
-      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
+      // Generate a 6-digit numeric code as a number
+      const loginCode = Math.floor(100000 + Math.random() * 900000);
 
       // First try to get the existing profile with proper headers
       const { data: existingProfile, error: profileError } = await supabase

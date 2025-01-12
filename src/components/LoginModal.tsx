@@ -37,12 +37,19 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setIsLoading(true);
 
     try {
+      // Convert loginCode to integer for database comparison
+      const loginCodeInt = parseInt(loginCode, 10);
+      
+      if (isNaN(loginCodeInt)) {
+        throw new Error("Invalid login code format");
+      }
+
       // First, verify if the phone and login code combination exists
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("phone_number", phone)
-        .eq("login_code", loginCode)
+        .eq("login_code", loginCodeInt)
         .maybeSingle();
 
       if (profileError) {
