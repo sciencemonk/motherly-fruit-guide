@@ -50,13 +50,15 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       // First, verify if the phone and login code combination exists
       const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("phone_number", phone)
-        .eq("login_code", loginCode);
+        .from('profiles')
+        .select('*')
+        .eq('phone_number', phone)
+        .eq('login_code', loginCode);
+
+      console.log("Profile lookup result:", profiles);
 
       if (profileError) {
-        console.error("Profile lookup error:", profileError);
+        console.error('Profile lookup error:', profileError);
         throw new Error("Failed to verify credentials");
       }
 
