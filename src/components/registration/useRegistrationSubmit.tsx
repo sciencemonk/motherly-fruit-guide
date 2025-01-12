@@ -51,21 +51,37 @@ export function useRegistrationSubmit() {
       const formattedPhone = phone.startsWith('+') ? phone : `+${phone.replace(/\D/g, '')}`;
       console.log('Formatted phone number:', formattedPhone);
 
-      // First try to update existing profile
-      const { data: updateResult, error: updateError } = await supabase
+      // Try to update existing profile first
+      const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
-        .update({
-          first_name: firstName,
-          login_code: loginCode,
-          reality_check_start_time: wakeTime,
-          reality_check_end_time: sleepTime,
-          trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        })
+        .select('*')
         .eq('phone_number', formattedPhone)
-        .select();
+        .single();
 
-      // If no profile was updated (i.e., doesn't exist), create a new one
-      if (!updateResult || updateResult.length === 0) {
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error checking profile:', profileError);
+        throw profileError;
+      }
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: firstName,
+            login_code: loginCode,
+            reality_check_start_time: wakeTime,
+            reality_check_end_time: sleepTime,
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          })
+          .eq('phone_number', formattedPhone);
+
+        if (updateError) {
+          console.error('Error updating profile:', updateError);
+          throw updateError;
+        }
+      } else {
+        // Create new profile
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
@@ -78,12 +94,9 @@ export function useRegistrationSubmit() {
           });
 
         if (insertError) {
-          console.error('Error storing profile:', insertError);
+          console.error('Error creating profile:', insertError);
           throw insertError;
         }
-      } else if (updateError) {
-        console.error('Error updating profile:', updateError);
-        throw updateError;
       }
 
       // Send first message using handle-sms endpoint
