@@ -35,7 +35,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-sage-800">Contact</h3>
             <p className="text-sage-600 text-sm">
-              Questions? Reach out to us at support@ducil.com
+              Questions? Reach out to us at support@trymorpheus.org
             </p>
           </div>
         </div>

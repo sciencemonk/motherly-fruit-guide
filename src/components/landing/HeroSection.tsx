@@ -25,11 +25,11 @@ export const HeroSection = ({ onStartTrial }: HeroSectionProps) => {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-white">
-            Master the Art of Lucid Dreaming
+            Learn to Lucid Dream
           </h1>
           
           <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto">
-            Unlock your mind's potential with Ducil's proven framework for conscious dreaming.
+            Free 7 day trial. No card required.
           </p>
           
           <Button 
