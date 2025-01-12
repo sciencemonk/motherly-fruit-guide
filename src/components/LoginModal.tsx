@@ -71,9 +71,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       // If profile exists with matching login code, create a session
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        phone: phone,
-        password: loginCode, // Using login code as password for session creation
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        phone,
+        options: {
+          shouldCreateUser: false // Don't create a new user, just sign in existing one
+        }
       });
 
       if (signInError) {
