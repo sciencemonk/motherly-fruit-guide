@@ -14,32 +14,6 @@ interface RegistrationData {
 export function useRegistrationSubmit() {
   const { toast } = useToast();
 
-  const sendWelcomeMessage = async (phoneNumber: string, firstName: string, loginCode: string) => {
-    try {
-      console.log('Sending welcome message to:', phoneNumber);
-      
-      const welcomeMessage = `Welcome to Morpheus, ${firstName}! Your login code is ${loginCode}. You can use this code to access your dashboard. Your free trial will last for 7 days. Text RESET to get a new code if needed.`;
-
-      const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
-        body: {
-          to: phoneNumber,
-          message: welcomeMessage
-        }
-      });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        return { success: false, error };
-      }
-
-      console.log('Welcome message response:', data);
-      return { success: true, data };
-    } catch (error) {
-      console.error("Error sending welcome message:", error);
-      return { success: false, error };
-    }
-  };
-
   const handleSubmit = async ({
     firstName,
     phone,
@@ -125,10 +99,26 @@ export function useRegistrationSubmit() {
         }
       }
 
-      // Send welcome message with login code
-      const welcomeResult = await sendWelcomeMessage(formattedPhone, firstName, loginCode);
-      if (!welcomeResult.success) {
-        console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
+      // Send first message using handle-sms endpoint
+      try {
+        const response = await fetch('https://tjeukbooftbxulkgqljg.supabase.co/functions/v1/handle-sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            From: formattedPhone,
+            Body: 'Hello'
+          }).toString()
+        });
+
+        if (!response.ok) {
+          console.error('Welcome message failed:', await response.text());
+        } else {
+          console.log('Welcome message sent successfully');
+        }
+      } catch (error) {
+        console.error('Error sending welcome message:', error);
       }
 
       toast({
