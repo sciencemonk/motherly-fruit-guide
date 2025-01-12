@@ -27,10 +27,17 @@ export function WelcomeMessage({ firstName }: WelcomeMessageProps) {
 
     setIsLoading(true);
     try {
+      // Convert loginCode to integer for database comparison
+      const loginCodeInt = parseInt(loginCode, 10);
+      
+      if (isNaN(loginCodeInt)) {
+        throw new Error("Invalid login code format");
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('phone_number')
-        .eq('login_code', loginCode)
+        .eq('login_code', loginCodeInt)
         .single();
 
       if (error) throw error;
