@@ -70,7 +70,10 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Check if profile exists using maybeSingle() instead of single()
+      // Generate a 6-digit numeric code
+      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // First try to get the existing profile with proper headers
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -82,12 +85,11 @@ export function useRegistrationSubmit() {
         throw profileError;
       }
 
-      // Generate a 6-digit numeric code
-      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
+      let profileResult;
 
       if (existingProfile) {
         // Update existing profile
-        const { error: updateError } = await supabase
+        profileResult = await supabase
           .from('profiles')
           .update({
             first_name: firstName,
@@ -96,15 +98,12 @@ export function useRegistrationSubmit() {
             reality_check_end_time: sleepTime,
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           })
-          .eq('phone_number', phone);
-
-        if (updateError) {
-          console.error('Error updating profile:', updateError);
-          throw updateError;
-        }
+          .eq('phone_number', phone)
+          .select()
+          .single();
       } else {
         // Create new profile
-        const { error: insertError } = await supabase
+        profileResult = await supabase
           .from('profiles')
           .insert({
             phone_number: phone,
@@ -113,12 +112,14 @@ export function useRegistrationSubmit() {
             reality_check_start_time: wakeTime,
             reality_check_end_time: sleepTime,
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-          });
+          })
+          .select()
+          .single();
+      }
 
-        if (insertError) {
-          console.error('Error storing profile:', insertError);
-          throw insertError;
-        }
+      if (profileResult.error) {
+        console.error('Error with profile operation:', profileResult.error);
+        throw profileResult.error;
       }
 
       // Send welcome message with login code

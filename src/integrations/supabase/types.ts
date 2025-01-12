@@ -136,7 +136,7 @@ export type Database = {
           last_sign_in: string | null
           lifestyle: string | null
           local_timezone: string | null
-          login_code: string
+          login_code: number
           lucid_dream_experience: string | null
           meditation_preference: string | null
           next_billing_date: string | null
@@ -163,7 +163,7 @@ export type Database = {
           last_sign_in?: string | null
           lifestyle?: string | null
           local_timezone?: string | null
-          login_code: string
+          login_code: number
           lucid_dream_experience?: string | null
           meditation_preference?: string | null
           next_billing_date?: string | null
@@ -190,7 +190,7 @@ export type Database = {
           last_sign_in?: string | null
           lifestyle?: string | null
           local_timezone?: string | null
-          login_code?: string
+          login_code?: number
           lucid_dream_experience?: string | null
           meditation_preference?: string | null
           next_billing_date?: string | null
