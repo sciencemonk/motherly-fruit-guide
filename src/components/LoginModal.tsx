@@ -22,7 +22,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session);
       if (event === 'SIGNED_IN' && session) {
         onClose();
         navigate("/dashboard");
@@ -43,6 +44,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           title: "Missing Information",
           description: "Please enter both your phone number and login code.",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -64,11 +66,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           title: "Invalid Credentials",
           description: "The phone number or login code you entered is incorrect. Please try again.",
         });
+        setIsLoading(false);
         return;
       }
 
       // Sign in with phone number as email
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: `${phone.replace(/\+/g, '')}@morpheus.app`,
         password: loginCode,
       });
@@ -76,7 +79,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       if (signInError) {
         // If user doesn't exist in auth, create one
         if (signInError.message.includes("Invalid login credentials")) {
-          const { error: signUpError } = await supabase.auth.signUp({
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: `${phone.replace(/\+/g, '')}@morpheus.app`,
             password: loginCode,
             options: {
@@ -89,9 +92,17 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           if (signUpError) {
             throw signUpError;
           }
+
+          if (signUpData.session) {
+            onClose();
+            navigate("/dashboard");
+          }
         } else {
           throw signInError;
         }
+      } else if (signInData.session) {
+        onClose();
+        navigate("/dashboard");
       }
 
       toast({
