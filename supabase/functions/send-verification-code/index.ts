@@ -48,17 +48,24 @@ serve(async (req) => {
       throw insertError
     }
 
-    // Initialize Twilio client
+    // Initialize Twilio client with A2P credentials
     const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
     
     if (!accountSid || !authToken || !messagingServiceSid) {
+      console.error('Missing Twilio configuration:', {
+        hasAccountSid: !!accountSid,
+        hasAuthToken: !!authToken,
+        hasMessagingServiceSid: !!messagingServiceSid
+      })
       throw new Error('Missing Twilio configuration')
     }
 
+    console.log('Initializing Twilio client with A2P account...')
     const client = twilio(accountSid, authToken)
 
+    console.log('Sending SMS to:', phone_number)
     // Send SMS
     const message = await client.messages.create({
       body: `Your Morpheus verification code is: ${code}`,
