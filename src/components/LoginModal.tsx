@@ -16,11 +16,10 @@ interface LoginModalProps {
 export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [phoneNumber, setPhoneNumber] = useState("")
   const [verificationCode, setVerificationCode] = useState("")
-  const [isVerifying, setIsVerifying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  const handleSendCode = async () => {
+  const handleVerifyCode = async () => {
     if (!phoneNumber) {
       toast({
         title: "Error",
@@ -30,32 +29,6 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       return
     }
 
-    setIsLoading(true)
-    try {
-      const { error } = await supabase.functions.invoke('send-verification-code', {
-        body: { phone_number: phoneNumber }
-      })
-
-      if (error) throw error
-
-      setIsVerifying(true)
-      toast({
-        title: "Success",
-        description: "Verification code sent to your phone"
-      })
-    } catch (error) {
-      console.error('Error sending code:', error)
-      toast({
-        title: "Error",
-        description: "Failed to send verification code. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleVerifyCode = async () => {
     if (!verificationCode || verificationCode.length !== 6 || !/^\d+$/.test(verificationCode)) {
       toast({
         title: "Error",
@@ -106,7 +79,6 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   }
 
   const handleClose = () => {
-    setIsVerifying(false)
     setVerificationCode("")
     setPhoneNumber("")
     onClose()
@@ -122,8 +94,11 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           </p>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {!isVerifying ? (
-            <div className="grid gap-2">
+          <div className="grid gap-4">
+            <div>
+              <label htmlFor="phone" className="text-sm font-medium mb-2 block text-sage-700">
+                Phone Number
+              </label>
               <PhoneInput
                 international
                 defaultCountry="US"
@@ -132,16 +107,13 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 className="flex h-10 w-full rounded-md border border-sage-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-sage-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isLoading}
               />
-              <Button 
-                onClick={handleSendCode} 
-                disabled={isLoading}
-              >
-                {isLoading ? "Sending..." : "Send Code"}
-              </Button>
             </div>
-          ) : (
-            <div className="grid gap-2">
+            <div>
+              <label htmlFor="code" className="text-sm font-medium mb-2 block text-sage-700">
+                6-Digit Code
+              </label>
               <Input
+                id="code"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -155,15 +127,17 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 }}
                 maxLength={6}
                 disabled={isLoading}
+                className="bg-white/80 backdrop-blur-sm"
               />
-              <Button 
-                onClick={handleVerifyCode}
-                disabled={isLoading}
-              >
-                {isLoading ? "Verifying..." : "Verify Code"}
-              </Button>
             </div>
-          )}
+            <Button 
+              onClick={handleVerifyCode}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Verifying..." : "Log In"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
