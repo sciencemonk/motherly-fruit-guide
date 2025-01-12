@@ -126,6 +126,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auth_id: string | null
           city: string | null
           created_at: string
           dream_goals: string[] | null
@@ -153,6 +154,7 @@ export type Database = {
           trial_ends_at: string | null
         }
         Insert: {
+          auth_id?: string | null
           city?: string | null
           created_at?: string
           dream_goals?: string[] | null
@@ -180,6 +182,7 @@ export type Database = {
           trial_ends_at?: string | null
         }
         Update: {
+          auth_id?: string | null
           city?: string | null
           created_at?: string
           dream_goals?: string[] | null
