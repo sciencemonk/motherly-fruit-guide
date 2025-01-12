@@ -26,7 +26,7 @@ export function useRegistrationSubmit() {
     try {
       console.log('Sending welcome message to:', phoneNumber);
       
-      const welcomeMessage = `Welcome to Ducil, ${firstName}! Your login code is ${loginCode}. You can use this code to access your dashboard. Your free trial will last for 7 days. Text RESET to get a new code if needed.`;
+      const welcomeMessage = `Welcome to Morpheus, ${firstName}! Your login code is ${loginCode}. You can use this code to access your dashboard. Your free trial will last for 7 days. Text RESET to get a new code if needed.`;
 
       const { data, error } = await supabase.functions.invoke('send-welcome-sms', {
         body: {
@@ -166,7 +166,7 @@ export function useRegistrationSubmit() {
       }
 
       toast({
-        title: "Welcome to Ducil!",
+        title: "Welcome to Morpheus!",
         description: "Check your phone for your login code.",
       });
       

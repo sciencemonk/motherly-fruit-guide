@@ -25,7 +25,7 @@ export function BasicInfoStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-sage-800 mb-2">Welcome to Ducil</h2>
+        <h2 className="text-2xl font-semibold text-sage-800 mb-2">Welcome to Morpheus</h2>
         <p className="text-sage-600 mb-6">Enter your details to begin your lucid dreaming journey.</p>
       </div>
 
