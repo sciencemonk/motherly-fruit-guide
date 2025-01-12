@@ -28,7 +28,7 @@ serve(async (req) => {
       throw new Error('Missing required fields: to and message')
     }
 
-    // Get Twilio credentials
+    // Get Twilio credentials - using A2P account for better deliverability
     const accountSid = Deno.env.get('TWILIO_A2P_ACCOUNT_SID')
     const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
     const messagingServiceSid = Deno.env.get('TWILIO_MESSAGING_SERVICE_SID')
@@ -40,6 +40,12 @@ serve(async (req) => {
         hasMessagingServiceSid: !!messagingServiceSid
       })
       throw new Error('Missing Twilio credentials')
+    }
+
+    // Validate Account SID format
+    if (!accountSid.startsWith('AC')) {
+      console.error('Invalid Account SID format:', accountSid)
+      throw new Error('Invalid Twilio Account SID format - must start with AC')
     }
 
     console.log('Initializing Twilio client...')
