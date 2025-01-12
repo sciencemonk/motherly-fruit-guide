@@ -4,17 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 interface RegistrationData {
   firstName: string;
   phone: string;
-  dueDate: Date;
-  lastPeriod?: Date;
-  city: string;
-  state: string;
-  interests: string;
-  lifestyle: string;
-  preferredTime: string;
-  smsConsent: boolean;
-  pregnancyStatus: string;
   wakeTime: string;
   sleepTime: string;
+  smsConsent: boolean;
   setIsLoading: (loading: boolean) => void;
   setIsSubmitted: (submitted: boolean) => void;
 }
@@ -51,21 +43,13 @@ export function useRegistrationSubmit() {
   const handleSubmit = async ({
     firstName,
     phone,
-    dueDate,
-    lastPeriod,
-    city,
-    state,
-    interests,
-    lifestyle,
-    preferredTime,
     smsConsent,
-    pregnancyStatus,
     wakeTime,
     sleepTime,
     setIsLoading,
     setIsSubmitted
   }: RegistrationData) => {
-    if (!firstName || !phone || !pregnancyStatus) {
+    if (!firstName || !phone) {
       toast({
         variant: "destructive",
         title: "Please fill in all fields",
@@ -107,15 +91,7 @@ export function useRegistrationSubmit() {
           .from('profiles')
           .update({
             first_name: firstName,
-            due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
-            last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
             login_code: loginCode,
-            city,
-            state,
-            interests,
-            lifestyle,
-            preferred_notification_time: preferredTime,
-            pregnancy_status: pregnancyStatus,
             reality_check_start_time: wakeTime,
             reality_check_end_time: sleepTime,
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -133,15 +109,7 @@ export function useRegistrationSubmit() {
           .insert({
             phone_number: phone,
             first_name: firstName,
-            due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
-            last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
             login_code: loginCode,
-            city,
-            state,
-            interests,
-            lifestyle,
-            preferred_notification_time: preferredTime,
-            pregnancy_status: pregnancyStatus,
             reality_check_start_time: wakeTime,
             reality_check_end_time: sleepTime,
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()

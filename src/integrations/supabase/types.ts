@@ -128,22 +128,20 @@ export type Database = {
         Row: {
           city: string | null
           created_at: string
-          due_date: string | null
-          fertility_report_type: string | null
+          dream_goals: string[] | null
           first_name: string | null
           id: string
           interests: string | null
           is_premium: boolean | null
-          last_period: string | null
           last_sign_in: string | null
           lifestyle: string | null
           local_timezone: string | null
           login_code: string
+          lucid_dream_experience: string | null
           meditation_preference: string | null
           next_billing_date: string | null
           phone_number: string
           preferred_notification_time: string | null
-          pregnancy_status: string | null
           reality_check_end_time: string | null
           reality_check_interval: number | null
           reality_check_start_time: string | null
@@ -157,22 +155,20 @@ export type Database = {
         Insert: {
           city?: string | null
           created_at?: string
-          due_date?: string | null
-          fertility_report_type?: string | null
+          dream_goals?: string[] | null
           first_name?: string | null
           id?: string
           interests?: string | null
           is_premium?: boolean | null
-          last_period?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
           local_timezone?: string | null
           login_code: string
+          lucid_dream_experience?: string | null
           meditation_preference?: string | null
           next_billing_date?: string | null
           phone_number: string
           preferred_notification_time?: string | null
-          pregnancy_status?: string | null
           reality_check_end_time?: string | null
           reality_check_interval?: number | null
           reality_check_start_time?: string | null
@@ -186,22 +182,20 @@ export type Database = {
         Update: {
           city?: string | null
           created_at?: string
-          due_date?: string | null
-          fertility_report_type?: string | null
+          dream_goals?: string[] | null
           first_name?: string | null
           id?: string
           interests?: string | null
           is_premium?: boolean | null
-          last_period?: string | null
           last_sign_in?: string | null
           lifestyle?: string | null
           local_timezone?: string | null
           login_code?: string
+          lucid_dream_experience?: string | null
           meditation_preference?: string | null
           next_billing_date?: string | null
           phone_number?: string
           preferred_notification_time?: string | null
-          pregnancy_status?: string | null
           reality_check_end_time?: string | null
           reality_check_interval?: number | null
           reality_check_start_time?: string | null
