@@ -70,7 +70,29 @@ export function useRegistrationSubmit() {
     setIsLoading(true);
 
     try {
-      // Check if profile exists using maybeSingle() instead of single()
+      // Generate a 6-digit numeric code
+      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Create auth user first
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: `${phone.replace(/\+/g, '')}@morpheus.app`,
+        password: loginCode,
+        options: {
+          data: {
+            phone_number: phone,
+            first_name: firstName
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+
+      console.log('Auth user created:', authData);
+
+      // Check if profile exists
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -81,9 +103,6 @@ export function useRegistrationSubmit() {
         console.error('Error checking profile:', profileError);
         throw profileError;
       }
-
-      // Generate a 6-digit numeric code
-      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
 
       if (existingProfile) {
         // Update existing profile
