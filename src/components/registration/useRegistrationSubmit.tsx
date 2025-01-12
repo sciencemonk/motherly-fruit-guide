@@ -98,14 +98,8 @@ export function useRegistrationSubmit() {
         throw profileError;
       }
 
-      // Generate a login code using the database function
-      const { data: loginCodeData, error: loginCodeError } = await supabase
-        .rpc('generate_alphanumeric_code', { length: 6 });
-
-      if (loginCodeError) {
-        console.error('Error generating login code:', loginCodeError);
-        throw loginCodeError;
-      }
+      // Generate a 6-digit numeric code
+      const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
 
       if (existingProfile) {
         // Update existing profile
@@ -115,7 +109,7 @@ export function useRegistrationSubmit() {
             first_name: firstName,
             due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
             last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
-            login_code: loginCodeData,
+            login_code: loginCode,
             city,
             state,
             interests,
@@ -141,7 +135,7 @@ export function useRegistrationSubmit() {
             first_name: firstName,
             due_date: pregnancyStatus === 'expecting' ? dueDate.toISOString().split('T')[0] : null,
             last_period: pregnancyStatus === 'trying' ? lastPeriod?.toISOString().split('T')[0] : null,
-            login_code: loginCodeData,
+            login_code: loginCode,
             city,
             state,
             interests,
@@ -160,7 +154,7 @@ export function useRegistrationSubmit() {
       }
 
       // Send welcome message with login code
-      const welcomeResult = await sendWelcomeMessage(phone, firstName, loginCodeData);
+      const welcomeResult = await sendWelcomeMessage(phone, firstName, loginCode);
       if (!welcomeResult.success) {
         console.error('Welcome message failed but continuing with registration:', welcomeResult.error);
       }
