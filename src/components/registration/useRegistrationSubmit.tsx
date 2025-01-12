@@ -73,14 +73,28 @@ export function useRegistrationSubmit() {
       // Generate a 6-digit numeric code
       const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
       
-      // Create auth user first
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${phone.replace(/\+/g, '')}@morpheus.app`,
-        password: loginCode,
+      // Format phone number by removing non-digit characters
+      const formattedPhone = phone.replace(/\D/g, '');
+      
+      // Check if profile exists
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('phone_number', formattedPhone)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error checking profile:', profileError);
+        throw profileError;
+      }
+
+      // Create auth user with phone authentication
+      const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
+        phone: phone,
         options: {
           data: {
-            phone_number: phone,
-            first_name: firstName
+            first_name: firstName,
+            phone_number: formattedPhone
           }
         }
       });
@@ -91,18 +105,6 @@ export function useRegistrationSubmit() {
       }
 
       console.log('Auth user created:', authData);
-
-      // Check if profile exists
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('phone_number', phone)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error('Error checking profile:', profileError);
-        throw profileError;
-      }
 
       if (existingProfile) {
         // Update existing profile
@@ -115,7 +117,7 @@ export function useRegistrationSubmit() {
             reality_check_end_time: sleepTime,
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
           })
-          .eq('phone_number', phone);
+          .eq('phone_number', formattedPhone);
 
         if (updateError) {
           console.error('Error updating profile:', updateError);
@@ -126,7 +128,7 @@ export function useRegistrationSubmit() {
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
-            phone_number: phone,
+            phone_number: formattedPhone,
             first_name: firstName,
             login_code: loginCode,
             reality_check_start_time: wakeTime,
@@ -152,12 +154,12 @@ export function useRegistrationSubmit() {
       });
       
       setIsSubmitted(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       toast({
         variant: "destructive",
         title: "Registration error",
-        description: "There was a problem with your registration. Please try again.",
+        description: error.message || "There was a problem with your registration. Please try again.",
       });
     } finally {
       setIsLoading(false);
