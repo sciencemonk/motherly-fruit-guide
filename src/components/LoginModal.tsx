@@ -48,15 +48,15 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
 
-      // Format phone number consistently by removing the '+' symbol
+      // Format phone number consistently by removing the '+' symbol for both auth and profile lookup
       const formattedPhone = phone.replace(/\+/g, '');
-      console.log("Formatted phone:", formattedPhone);
+      console.log("Attempting login with formatted phone:", formattedPhone);
 
       // First, verify if the phone and login code combination exists
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('phone_number', phone) // Keep original phone format for profile lookup
+        .eq('phone_number', formattedPhone) // Use formatted phone for consistency
         .eq('login_code', loginCode)
         .maybeSingle();
 
