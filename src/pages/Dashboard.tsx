@@ -1,187 +1,33 @@
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Calendar } from "@/components/ui/calendar"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import Navbar from "@/components/Navbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, Moon, Bell } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-const Dashboard = () => {
-  const { toast } = useToast()
-  const navigate = useNavigate()
-  const [profile, setProfile] = useState<any>(null)
-  const [dreams, setDreams] = useState<any[]>([])
-  const [firstName, setFirstName] = useState("Test")
-  const [loading, setLoading] = useState(true)
-  const [phoneNumber, setPhoneNumber] = useState("")
+export default function Dashboard() {
+  const navigate = useNavigate();
 
   useEffect(() => {
-    checkSession()
-  }, [])
-
-  const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      navigate('/')
-      return
-    }
-    
-    // Get the phone number from localStorage as a fallback
-    const storedPhone = localStorage.getItem('userPhoneNumber')
-    if (storedPhone) {
-      setPhoneNumber(storedPhone)
-      fetchProfile(storedPhone)
-      fetchDreams(storedPhone)
-    }
-  }
-
-  const fetchProfile = async (phone: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('phone_number', phone)
-        .maybeSingle()
-
-      if (error) throw error
-
-      if (data) {
-        setProfile(data)
-        setFirstName(data?.first_name || 'Test')
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/");
       }
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+    };
 
-  const fetchDreams = async (phone: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('dreams')
-        .select('*')
-        .eq('phone_number', phone)
-        .order('dream_date', { ascending: false })
+    checkAuth();
 
-      if (error) throw error
-      setDreams(data || [])
-    } catch (error) {
-      console.error('Error fetching dreams:', error)
-    }
-  }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        navigate("/");
+      }
+    });
 
-  const handleUpdate = async () => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: firstName,
-          reality_check_start_time: profile.reality_check_start_time,
-          reality_check_end_time: profile.reality_check_end_time,
-          reality_check_interval: profile.reality_check_interval
-        })
-        .eq('phone_number', phoneNumber)
-
-      if (error) throw error
-
-      toast({
-        title: "Success",
-        description: "Your profile has been updated"
-      })
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive"
-      })
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-sage-50 to-sage-100">
-        <Navbar />
-        <div className="container max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sage-50 to-sage-100">
-      <Navbar />
-      <div className="container max-w-4xl mx-auto px-4 py-8">
-        <div className="grid gap-6">
-          {/* Welcome Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                Welcome back, {firstName}
-              </CardTitle>
-              <CardDescription>Your lucid dreaming journey awaits</CardDescription>
-            </CardHeader>
-          </Card>
-
-          {/* Dreams Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Moon className="h-5 w-5" />
-                Dream Journal
-              </CardTitle>
-              <CardDescription>Your recent dreams and insights</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {dreams.length === 0 ? (
-                  <p className="text-muted-foreground">
-                    No dreams recorded yet. Text your dreams to our number to start your journal.
-                  </p>
-                ) : (
-                  dreams.map((dream) => (
-                    <div key={dream.id} className="border rounded-lg p-4">
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(dream.dream_date).toLocaleDateString()}
-                      </p>
-                      <p className="mt-2">{dream.content}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Reality Checks Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Reality Checks
-              </CardTitle>
-              <CardDescription>
-                You'll receive reality check prompts every {profile?.reality_check_interval} minutes
-                between {profile?.reality_check_start_time} and {profile?.reality_check_end_time}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <div className="flex gap-4">
-            <Button onClick={handleUpdate} className="flex-1">
-              Save Changes
-            </Button>
-          </div>
-        </div>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Welcome to Your Dashboard</h1>
+      {/* Add dashboard content here */}
     </div>
-  )
+  );
 }
-
-export default Dashboard
